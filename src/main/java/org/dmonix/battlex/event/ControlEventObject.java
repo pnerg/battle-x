@@ -15,7 +15,7 @@ import java.io.Serializable;
  * @version 1.0
  */
 public final class ControlEventObject implements Serializable {
- 
+
     private static final long serialVersionUID = 7526476784622776147L;
 
     /** Request a connection. */

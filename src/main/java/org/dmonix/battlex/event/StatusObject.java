@@ -4,8 +4,13 @@ import java.io.Serializable;
 
 /**
  * The class is used to send/receive status information to/from an other player.
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: dmonix.org</p>
+ * <p>
+ * Copyright: Copyright (c) 2003
+ * </p>
+ * <p>
+ * Company: dmonix.org
+ * </p>
+ * 
  * @author Peter Nerg
  * @version 1.0
  */

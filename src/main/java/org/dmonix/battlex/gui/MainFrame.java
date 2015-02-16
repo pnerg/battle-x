@@ -119,7 +119,7 @@ public class MainFrame extends JFrame {
             super.validate();
             super.repaint();
             super.setResizable(false);
-            super.setIconImage(ImageIO.read(MainFrame.class.getResource("/org/dmonix/battlex/images/battlex-bullet.gif")));
+            super.setIconImage(ImageIO.read(MainFrame.class.getResource("/images/battlex-bullet.gif")));
             gameStateObject.addStateChangeListener(gameEventListener);
             boardPanel.setOwner(this);
             piecesOnDisplayPanelPlayer1.setOwner(this);

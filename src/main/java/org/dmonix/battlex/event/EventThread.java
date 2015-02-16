@@ -9,8 +9,12 @@ import java.util.logging.Logger;
 
 /**
  * Thread that awaits for objects on a socket.
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: dmonix.org</p>
+ * <p>
+ * Copyright: Copyright (c) 2003
+ * </p>
+ * <p>
+ * Company: dmonix.org
+ * </p>
  * 
  * @author Peter Nerg
  * @version 1.0
@@ -24,8 +28,7 @@ public final class EventThread implements Runnable {
     private ObjectInputStream istream;
     private EventCommunicator eventCommunicator;
 
-    public EventThread(EventCommunicator eventCommunicator, Socket socket)
-            throws IOException {
+    public EventThread(EventCommunicator eventCommunicator, Socket socket) throws IOException {
         connectedTo = socket.toString();
         if (log.isLoggable(Level.FINER))
             log.log(Level.FINER, "Initiated connection to/from: " + connectedTo);
@@ -59,7 +62,7 @@ public final class EventThread implements Runnable {
             if (log.isLoggable(Level.FINE))
                 log.log(Level.FINE, "Disconnected from " + connectedTo);
 
-            eventCommunicator .fireEvent(ControlEventObject.EVENT_CONNECTION_LOST);
+            eventCommunicator.fireEvent(ControlEventObject.EVENT_CONNECTION_LOST);
         } catch (IOException ex) {
             ex.printStackTrace();
         }

@@ -6,8 +6,13 @@ import org.dmonix.battlex.resources.Resources;
 
 /**
  * An event object used with the GameEventListener.
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: dmonix.org</p>
+ * <p>
+ * Copyright: Copyright (c) 2003
+ * </p>
+ * <p>
+ * Company: dmonix.org
+ * </p>
+ * 
  * @author Peter Nerg
  * @version 1.0
  */
@@ -22,19 +27,11 @@ public final class GameEventObject implements Serializable {
     private final int type;
 
     public GameEventObject(int x_coord_old, int y_coord_old, int x_coord_new, int y_coord_new) {
-        this(-1, 
-             9 - x_coord_old, 
-             9 - y_coord_old,
-             9 - x_coord_new, 
-             9 - y_coord_new);
+        this(-1, 9 - x_coord_old, 9 - y_coord_old, 9 - x_coord_new, 9 - y_coord_new);
     }
 
     public GameEventObject(int type, int x_coord_new, int y_coord_new) {
-        this(type, 
-             -1, 
-             -1,
-             9 - x_coord_new, 
-             9 - y_coord_new);
+        this(type, -1, -1, 9 - x_coord_new, 9 - y_coord_new);
     }
 
     private GameEventObject(int type, int x_coord_old, int y_coord_old, int x_coord_new, int y_coord_new) {
@@ -43,10 +40,10 @@ public final class GameEventObject implements Serializable {
 
         this.x_coord_old = 9 - x_coord_old;
         this.y_coord_old = 9 - y_coord_old;
-        
-        this.type = type;        
+
+        this.type = type;
     }
-    
+
     public int getType() {
         return type;
     }

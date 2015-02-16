@@ -1,30 +1,20 @@
 package org.dmonix.battlex;
 
-import java.util.logging.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 
-import java.awt.*;
-import javax.swing.*;
+import javax.swing.UIManager;
 
-import org.dmonix.battlex.gui.*;
+import org.dmonix.battlex.gui.MainFrame;
 
 /**
- * <p>
- * Title: battlex
- * </p>
- * <p>
- * Description:
- * </p>
- * <p>
- * Copyright: Copyright (c) 2003
- * </p>
- * <p>
- * Company: DMoniX
- * </p>
+ * Copyright: Copyright (c)<br>
+ * 2003 Company: DMoniX
  * 
- * @author Tobias Jönsson
+ * @author Peter Nerg
  * @version 1.0
  */
-
 public class Battlex {
     public static final Color BACKGOUND_COLOR = new Color(141, 167, 118);
 
@@ -51,8 +41,7 @@ public class Battlex {
         if (frameSize.width > screenSize.width) {
             frameSize.width = screenSize.width;
         }
-        frame.setLocation((screenSize.width - frameSize.width) / 2,
-                (screenSize.height - frameSize.height) / 2);
+        frame.setLocation((screenSize.width - frameSize.width) / 2, (screenSize.height - frameSize.height) / 2);
         frame.repaint();
         frame.setVisible(true);
     }
@@ -60,8 +49,7 @@ public class Battlex {
     // Main method
     public static void main(String[] args) {
         try {
-            LogManager.getLogManager().readConfiguration(
-                    MainFrame.class.getResourceAsStream("/log.properties"));
+            // LogManager.getLogManager().readConfiguration(MainFrame.class.getResourceAsStream("/log.properties"));
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();

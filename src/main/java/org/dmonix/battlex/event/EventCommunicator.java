@@ -10,8 +10,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * <p>Copyright: Copyright (c) 2003</p>
- * <p>Company: dmonix.org</p>
+ * <p>
+ * Copyright: Copyright (c) 2003
+ * </p>
+ * <p>
+ * Company: dmonix.org
+ * </p>
  * 
  * @author Peter Nerg
  * @version 1.0
@@ -139,8 +143,7 @@ public class EventCommunicator implements Runnable {
      */
     public void fireEvent(ControlEventObject event) {
         for (int i = 0; i < this.ctrlEventListeners.size(); i++) {
-            ((ControlEventListener) this.ctrlEventListeners.elementAt(i))
-                    .controlEvent(event);
+            ((ControlEventListener) this.ctrlEventListeners.elementAt(i)).controlEvent(event);
         }
     }
 
@@ -152,8 +155,7 @@ public class EventCommunicator implements Runnable {
      */
     public void fireEvent(GameEventObject event) {
         for (int i = 0; i < this.gameEventListeners.size(); i++) {
-            ((GameEventListener) this.gameEventListeners.elementAt(i))
-                    .gameEvent(event);
+            ((GameEventListener) this.gameEventListeners.elementAt(i)).gameEvent(event);
         }
     }
 
@@ -168,8 +170,7 @@ public class EventCommunicator implements Runnable {
 
     public void run() {
         if (log.isLoggable(Level.FINE))
-            log.log(Level.FINE, "Started event communicator listener on port: "
-                    + serverSocket.getLocalPort());
+            log.log(Level.FINE, "Started event communicator listener on port: " + serverSocket.getLocalPort());
 
         while (thread != null && !thread.isInterrupted()) {
             try {
