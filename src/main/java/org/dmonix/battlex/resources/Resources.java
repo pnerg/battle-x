@@ -1,12 +1,12 @@
 package org.dmonix.battlex.resources;
 
+import java.awt.Image;
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.imageio.ImageIO;
 
-import java.awt.Image;
-import java.awt.image.BufferedImage;
+import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 /**
@@ -130,7 +130,6 @@ public final class Resources {
         } catch (IOException ex) {
             return null;
         }
-        // return (Image)Resources.class.getDeclaredField("IMG_PLAYER"+player+"_PIECE"+type).get(Resources.class);
     }
 
     public static Image getImage(int player, int type) {

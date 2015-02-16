@@ -2,6 +2,7 @@ package org.dmonix.battlex.gui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+
 import javax.swing.JMenuItem;
 
 import org.dmonix.battlex.resources.OpponentConfigurationObject;
@@ -23,7 +24,8 @@ import org.dmonix.battlex.resources.OpponentConfigurationObject;
  * @author Peter Nerg
  * @version 1.0
  */
-public class OpponentMenuItem extends JMenuItem implements ActionListener, Comparable {
+public class OpponentMenuItem extends JMenuItem implements ActionListener, Comparable<OpponentConfigurationObject> {
+    private static final long serialVersionUID = -2929589867007454937L;
     private MainFrame mainFrame = null;
     private OpponentConfigurationObject oc;
 
@@ -46,7 +48,7 @@ public class OpponentMenuItem extends JMenuItem implements ActionListener, Compa
         return this.oc.getName();
     }
 
-    public int compareTo(Object o) {
+    public int compareTo(OpponentConfigurationObject o) {
         return this.toString().compareTo(o.toString());
     }
 

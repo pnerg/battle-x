@@ -1,10 +1,18 @@
 package org.dmonix.battlex.gui;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
-import org.dmonix.battlex.resources.*;
-import org.dmonix.battlex.*;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
+import java.awt.event.ActionEvent;
+
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+
+import org.dmonix.battlex.Battlex;
+import org.dmonix.battlex.resources.Resources;
 
 /**
  * <p>
@@ -25,6 +33,7 @@ import org.dmonix.battlex.*;
  */
 
 public class ResolveStrikeDialog extends JDialog {
+    private static final long serialVersionUID = -6216921027576667223L;
     private JLabel lblText = new JLabel();
     private JLabel lblAttacker = new JLabel(new ImageIcon(ResolveStrikeDialog.class.getResource("/images/player1/battlex-piece-100.gif")));
     private JLabel lblVs = new JLabel();
@@ -40,7 +49,7 @@ public class ResolveStrikeDialog extends JDialog {
         }
 
         super.setSize(200, 150);
-        hide();
+        setVisible(false);
     }
 
     public static void showStrikeResult(JFrame owner, String text, int attacker, int attackerType, int defender, int defenderType) {
@@ -53,7 +62,7 @@ public class ResolveStrikeDialog extends JDialog {
         dialog.lblDefender.setIcon(Resources.getIcon(defender, defenderType, 40));
         dialog.lblText.setText(text);
         dialog.setTitle("Resolve strike");
-        dialog.show();
+        dialog.setVisible(true);
     }
 
     private void jbInit() throws Exception {
@@ -78,7 +87,7 @@ public class ResolveStrikeDialog extends JDialog {
     }
 
     void btnOk_actionPerformed(ActionEvent e) {
-        dialog.hide();
+        dialog.setVisible(false);
     }
 
 }

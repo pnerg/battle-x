@@ -22,7 +22,6 @@ public class Battlex {
 
     // Construct the application
     public Battlex() {
-        // StrategoFrame frame = new StrategoFrame();
         MainFrame frame = new MainFrame();
         // Validate frames that have preset sizes
         // Pack frames that have useful preferred size info, e.g. from their
@@ -49,7 +48,6 @@ public class Battlex {
     // Main method
     public static void main(String[] args) {
         try {
-            // LogManager.getLogManager().readConfiguration(MainFrame.class.getResourceAsStream("/log.properties"));
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         } catch (Exception e) {
             e.printStackTrace();

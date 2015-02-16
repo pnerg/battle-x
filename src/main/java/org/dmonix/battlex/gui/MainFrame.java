@@ -275,7 +275,7 @@ public class MainFrame extends JFrame {
     }
 
     void this_windowClosing(WindowEvent e) {
-        super.hide();
+        setVisible(false);
         super.dispose();
         System.gc();
         System.exit(0);
@@ -283,7 +283,7 @@ public class MainFrame extends JFrame {
 
     void newOpponent_actionPerformed(ActionEvent e) {
         OpponentOptionPane pane = new OpponentOptionPane(this, this.configuration);
-        pane.show();
+        pane.setVisible(true);
     }
 
     public void menuItemNewGame_actionPerformed(ActionEvent e) {
@@ -396,7 +396,7 @@ public class MainFrame extends JFrame {
 
     void menuItemPreferences_actionPerformed(ActionEvent e) {
         PreferencesOptionPane pane = new PreferencesOptionPane(this, this.configuration);
-        pane.show();
+        pane.setVisible(true);
     }
 
     void menuItemDisconnect_actionPerformed(ActionEvent e) {

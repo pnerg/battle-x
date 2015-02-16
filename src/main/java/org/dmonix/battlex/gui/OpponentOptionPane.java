@@ -45,6 +45,8 @@ import org.dmonix.gui.models.SortableComboBoxModel;
  */
 
 public class OpponentOptionPane extends JDialog {
+    private static final long serialVersionUID = -527788114327118747L;
+
     private OpponentConfigurationObject NEW_OPPONENT = new OpponentConfigurationObject("_new opponent", "", "", 6969);
 
     private MainFrame owner;
