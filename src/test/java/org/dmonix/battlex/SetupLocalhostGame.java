@@ -1,9 +1,9 @@
 package org.dmonix.battlex;
 
 import java.awt.Point;
-import java.util.logging.LogManager;
 
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 
 import org.dmonix.battlex.gui.MainFrame;
 
@@ -27,23 +27,16 @@ import org.dmonix.battlex.gui.MainFrame;
 
 public class SetupLocalhostGame {
 
-    public static void main(String[] args) {
-        try {
-            LogManager.getLogManager().readConfiguration(MainFrame.class.getResourceAsStream("/log.properties"));
-            UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+    public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {
+        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
 
-            MainFrame player1 = new MainFrame();
-            MainFrame player2 = new MainFrame();
+        MainFrame player1 = new MainFrame();
+        MainFrame player2 = new MainFrame();
 
-            Point p = player2.getLocation();
-            player2.setLocation(p.x + 500, p.y);
+        Point p = player2.getLocation();
+        player2.setLocation(p.x + 500, p.y);
 
-            player1.menuItemNewGame_actionPerformed(null);
-            player2.connectToOpponent("localhost", 6969, false, "", -1);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            System.exit(-1);
-        }
-
+        player1.menuItemNewGame_actionPerformed(null);
+        player2.connectToOpponent("localhost", 6969, false, "", -1);
     }
 }

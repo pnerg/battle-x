@@ -5,9 +5,11 @@ import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -21,7 +23,7 @@ import java.util.logging.Logger;
  * @version 1.0
  */
 public class EventCommunicator implements Runnable {
-    private static final Logger log = Logger.getLogger(EventCommunicator.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EventCommunicator.class);
 
     private Thread thread = null;
 
@@ -32,10 +34,10 @@ public class EventCommunicator implements Runnable {
     private ObjectOutputStream ostream = null;
 
     /** The control event listeners */
-    private Vector ctrlEventListeners = new Vector();
+    private final List<ControlEventListener> ctrlEventListeners = new ArrayList<>();
 
     /** The game event listeners */
-    private Vector gameEventListeners = new Vector();
+    private final List<GameEventListener> gameEventListeners = new ArrayList<>();
 
     /**
      * Sets up the communicator as a server
@@ -110,28 +112,22 @@ public class EventCommunicator implements Runnable {
             if (this.thread != null) {
                 this.thread.interrupt();
                 this.thread = null;
-                if (log.isLoggable(Level.FINE))
-                    log.log(Level.FINE, "Closed event thread");
             }
 
             if (serverSocket != null) {
                 this.serverSocket.close();
                 this.serverSocket = null;
-                if (log.isLoggable(Level.FINE))
-                    log.log(Level.FINE, "Closed serversocket");
             }
 
             if (socket != null) {
                 this.socket.close();
                 this.socket = null;
-                if (log.isLoggable(Level.FINE))
-                    log.log(Level.FINE, "Closed socket");
             }
 
             this.ctrlEventListeners.clear();
             this.gameEventListeners.clear();
         } catch (IOException ex) {
-            log.log(Level.WARNING, "Problems with closing listener", ex);
+            logger.warn("Problems with closing listener", ex);
         }
     }
 
@@ -142,8 +138,8 @@ public class EventCommunicator implements Runnable {
      *            the event
      */
     public void fireEvent(ControlEventObject event) {
-        for (int i = 0; i < this.ctrlEventListeners.size(); i++) {
-            ((ControlEventListener) this.ctrlEventListeners.elementAt(i)).controlEvent(event);
+        for (ControlEventListener listener : ctrlEventListeners) {
+            listener.controlEvent(event);
         }
     }
 
@@ -154,8 +150,8 @@ public class EventCommunicator implements Runnable {
      *            the event
      */
     public void fireEvent(GameEventObject event) {
-        for (int i = 0; i < this.gameEventListeners.size(); i++) {
-            ((GameEventListener) this.gameEventListeners.elementAt(i)).gameEvent(event);
+        for (GameEventListener listener : gameEventListeners) {
+            listener.gameEvent(event);
         }
     }
 
@@ -169,8 +165,7 @@ public class EventCommunicator implements Runnable {
     }
 
     public void run() {
-        if (log.isLoggable(Level.FINE))
-            log.log(Level.FINE, "Started event communicator listener on port: " + serverSocket.getLocalPort());
+        logger.debug("Started event communicator listener on port [{}]", serverSocket.getLocalPort());
 
         while (thread != null && !thread.isInterrupted()) {
             try {
@@ -179,9 +174,9 @@ public class EventCommunicator implements Runnable {
                 new EventThread(this, s);
             } catch (SocketException se) {
                 if (se.getMessage().indexOf("socket closed") < 0)
-                    log.log(Level.WARNING, "Exception occurred", se);
+                    logger.warn("Exception occurred", se);
             } catch (Exception ex) {
-                log.log(Level.WARNING, "Exception occurred", ex);
+                logger.warn("Exception occurred", ex);
             }
         }
     }
@@ -197,7 +192,7 @@ public class EventCommunicator implements Runnable {
         try {
             this.send(ceo);
         } catch (IOException ex) {
-            log.log(Level.WARNING, "Failed to control event", ex);
+            logger.warn("Failed to send control event", ex);
         }
     }
 
@@ -207,12 +202,11 @@ public class EventCommunicator implements Runnable {
      * @param geo
      * @throws IOException
      */
-    public void sendEvent(GameEventObject geo)// throws IOException
-    {
+    public void sendEvent(GameEventObject geo) {
         try {
             this.send(geo);
         } catch (IOException ex) {
-            log.log(Level.WARNING, "Failed to send game event", ex);
+            logger.warn("Failed to send game event", ex);
         }
     }
 
@@ -239,9 +233,7 @@ public class EventCommunicator implements Runnable {
      * @throws IOException
      */
     private void send(Object obj) throws IOException {
-        if (log.isLoggable(Level.FINE))
-            log.log(Level.FINE, "Sending object:\n" + obj.toString());
-
+        logger.debug("Sending object [{}]", obj);
         this.ostream.writeObject(obj);
         this.ostream.flush();
     }

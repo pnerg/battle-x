@@ -1,7 +1,9 @@
 package org.dmonix.battlex.gui;
 
-import java.awt.*;
-import org.dmonix.battlex.resources.*;
+import java.awt.Image;
+import java.awt.Point;
+
+import org.dmonix.battlex.resources.Resources;
 
 /**
  * <p>
@@ -26,11 +28,10 @@ public class Piece {
     public static int RESULT_LOOSE = -1;
     public static int RESULT_WIN_GAME = 69;
 
-    private int moveDistance = -1;
-    private Image image = null;
-    // private Image emptyImage = null;
-    private int player, type;
-    private Point coord = null;
+    private final int moveDistance;
+    private final Image image;
+    private final int player, type;
+    private final Point coord;
 
     public Piece(int player, int type, int x_coord, int y_coord) {
         this.player = player;
@@ -44,12 +45,7 @@ public class Piece {
         else
             moveDistance = 1;
 
-        try {
-            image = Resources.getImage(player, type);
-            // emptyImage = Resources.getImage(player, Resources.PIECE_EMPTY_TYPE);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+        image = Resources.getImage(player, type);
     }
 
     /**
@@ -127,11 +123,6 @@ public class Piece {
         return this.type;
     }
 
-    // public Image getImage(int height)
-    // {
-    // return image.getScaledInstance(-1, height, Image.SCALE_SMOOTH);
-    // }
-
     /**
      * Resolve the outcome of the strike.
      * 
@@ -165,15 +156,8 @@ public class Piece {
             return RESULT_LOOSE;
     }
 
-    // private static Image getImage(String name)
-    // {
-    // Image image = Toolkit.getDefaultToolkit().getImage(ClassLoader.getSystemResource("org/dmonix/battlex/images/"+name));
-    // return image.getScaledInstance(-1, 40, Image.SCALE_SMOOTH);
-    // }
-
+    @Deprecated
     public void destroy() {
-        this.image = null;
-        this.coord = null;
     }
 
     public String toString() {

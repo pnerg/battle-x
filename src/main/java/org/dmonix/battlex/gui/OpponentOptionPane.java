@@ -7,7 +7,6 @@ import java.awt.GridBagLayout;
 import java.awt.HeadlessException;
 import java.awt.Insets;
 import java.awt.event.ActionEvent;
-import java.util.Enumeration;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -173,9 +172,8 @@ public class OpponentOptionPane extends JDialog {
     }
 
     private void init() {
-        Enumeration enumeration = configuration.getOpponents();
-        while (enumeration.hasMoreElements()) {
-            this.comboModel.addElement((OpponentConfigurationObject) enumeration.nextElement());
+        for (OpponentConfigurationObject oco : configuration.getOpponents()) {
+            this.comboModel.addElement(oco);
         }
 
         this.setSize(400, 300);

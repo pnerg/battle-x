@@ -14,10 +14,6 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.net.ConnectException;
-import java.util.Enumeration;
-import java.util.logging.Level;
-import java.util.logging.LogManager;
-import java.util.logging.Logger;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
@@ -29,7 +25,6 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
-import javax.swing.UIManager;
 
 import org.dmonix.battlex.Battlex;
 import org.dmonix.battlex.event.ControlEventListener;
@@ -37,6 +32,7 @@ import org.dmonix.battlex.event.ControlEventObject;
 import org.dmonix.battlex.event.EventCommunicator;
 import org.dmonix.battlex.event.GameStateChangeListener;
 import org.dmonix.battlex.event.GameStateController;
+import org.dmonix.battlex.event.GameStates;
 import org.dmonix.battlex.resources.Configuration;
 import org.dmonix.battlex.resources.OpponentConfigurationObject;
 import org.dmonix.cipher.CipherInputStreamPBE;
@@ -48,6 +44,8 @@ import org.dmonix.net.NetUtil;
 import org.dmonix.xml.XMLDocument;
 import org.dmonix.xml.XMLElement;
 import org.dmonix.xml.XMLElementList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -68,7 +66,7 @@ import org.dmonix.xml.XMLElementList;
  */
 public class MainFrame extends JFrame {
     /** The logger instance for this class */
-    private static final Logger log = Logger.getLogger(MainFrame.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(MainFrame.class);
     private static final int majorVersion = 1;
     private static final int minorVersion = 2;
 
@@ -108,6 +106,7 @@ public class MainFrame extends JFrame {
 
     public MainFrame() throws HeadlessException {
         try {
+            logger.info("STARTING");
             SplashPanel.showSplash("BattleX", majorVersion, minorVersion);
 
             jbInit();
@@ -129,7 +128,7 @@ public class MainFrame extends JFrame {
             setOpponentMenuItems();
             this.setVisible(true);
         } catch (Exception e) {
-            log.log(Level.SEVERE, "Error in initialization", e);
+            logger.error("Error in initialization", e);
         }
     }
 
@@ -144,9 +143,8 @@ public class MainFrame extends JFrame {
 
     public void setOpponentMenuItems() {
         this.menuConnectTo.removeAll();
-        Enumeration enumeration = configuration.getOpponents();
-        while (enumeration.hasMoreElements()) {
-            this.menuConnectTo.add(new OpponentMenuItem(this, (OpponentConfigurationObject) enumeration.nextElement()));
+        for (OpponentConfigurationObject oco : configuration.getOpponents()) {
+            this.menuConnectTo.add(new OpponentMenuItem(this, oco));
         }
 
     }
@@ -201,15 +199,8 @@ public class MainFrame extends JFrame {
         } catch (ConnectException cex) {
             JOptionPane.showMessageDialog(this, cex.getMessage(), "Failed to connect", JOptionPane.WARNING_MESSAGE);
         } catch (Exception ex) {
-            log.log(Level.WARNING, "Failed create a new game", ex);
+            logger.warn("Failed create a new game", ex);
         }
-    }
-
-    public static void main(String[] args) throws Exception {
-        LogManager.getLogManager().readConfiguration(MainFrame.class.getResourceAsStream("/log.properties"));
-        // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-        new MainFrame();
     }
 
     private void jbInit() throws Exception {
@@ -291,7 +282,7 @@ public class MainFrame extends JFrame {
             this.player = 1;
             eventCommunicator = new EventCommunicator(Integer.parseInt(configuration.getPreference(Configuration.PREF_SERVERPORT)));
             eventCommunicator.addEventListener(controlListener);
-            gameStateObject.setState(GameStateController.STATE_CONNECTING);
+            gameStateObject.setState(GameStates.STATE_CONNECTING);
             progressBar.startRolling();
             this.lblStatus.setText("Waiting for connection");
             super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -299,7 +290,7 @@ public class MainFrame extends JFrame {
             menuItemNewGame.setEnabled(false);
             menuItemDisconnect.setEnabled(true);
         } catch (Exception ex) {
-            log.log(Level.WARNING, "Could not start new game", ex);
+            logger.warn("Could not start new game", ex);
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Could not start new game", JOptionPane.ERROR_MESSAGE);
         }
     }
@@ -365,14 +356,13 @@ public class MainFrame extends JFrame {
             return;
 
         File f = fc.getSelectedFile();
-        if (log.isLoggable(Level.FINE))
-            log.log(Level.FINE, "Loading piece setup from " + f.getAbsolutePath());
+        logger.debug("Loading piece setup from [{}]", f.getAbsolutePath());
 
         XMLDocument doc = null;
         try {
             doc = new XMLDocument(new CipherInputStreamPBE(new FileInputStream(f), "srC42T#mbT6&tY7".toCharArray()));
         } catch (Exception ex) {
-            log.log(Level.WARNING, "Failed to load piece setup from\n" + f.getAbsolutePath(), ex);
+            logger.warn("Failed to load piece setup from [" + f.getAbsolutePath() + "]", ex);
             JOptionPane.showMessageDialog(this, "The file is not a valid piece setup file\n" + f.getAbsolutePath(), "Failed to load piece setup",
                     JOptionPane.ERROR_MESSAGE);
             return;
@@ -437,14 +427,13 @@ public class MainFrame extends JFrame {
          */
         public void controlEvent(ControlEventObject ceo) {
             try {
-                if (log.isLoggable(Level.FINER))
-                    log.log(Level.FINER, "Received control event\n" + ceo.toString());
+                logger.debug("Received control event [{}]", ceo);
 
                 /**
                  * CONNECT RECEIVED
                  */
                 if (ceo.getCommand() == ControlEventObject.CMD_CONNECT) {
-                    gameStateObject.setState(GameStateController.STATE_GAME_SETUP);
+                    gameStateObject.setState(GameStates.STATE_GAME_SETUP);
                     eventCommunicator.sendEvent(ControlEventObject.EVENT_ACK_CONNECT);
                 }
 
@@ -452,7 +441,7 @@ public class MainFrame extends JFrame {
                  * ACK CONNECT RECEIVED
                  */
                 else if (ceo.getCommand() == ControlEventObject.CMD_ACK_CONNECT) {
-                    gameStateObject.setState(GameStateController.STATE_GAME_SETUP);
+                    gameStateObject.setState(GameStates.STATE_GAME_SETUP);
                 }
 
                 /**
@@ -460,10 +449,10 @@ public class MainFrame extends JFrame {
                  */
                 else if (ceo.getCommand() == ControlEventObject.CMD_SETUP_SENT) {
                     boardPanel.repaint();
-                    if (gameStateObject.inState(GameStateController.STATE_GAME_SETUP))
-                        gameStateObject.setState(GameStateController.STATE_GAME_SETUP_RECEIVED_SETUP);
-                    else if (gameStateObject.inState(GameStateController.STATE_SETUP_WAIT_OPPONENT_SETUP))
-                        gameStateObject.setState(GameStateController.STATE_IN_GAME);
+                    if (gameStateObject.inState(GameStates.STATE_GAME_SETUP))
+                        gameStateObject.setState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP);
+                    else if (gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP))
+                        gameStateObject.setState(GameStates.STATE_IN_GAME);
                     else
                         throw new IllegalStateException("The state " + gameStateObject.getState() + " is not allowed here");
                 }
@@ -484,11 +473,12 @@ public class MainFrame extends JFrame {
                     eventCommunicator = null;
                 }
 
-                else
-                    log.log(Level.WARNING, "Unrecognized command " + ceo);
+                else {
+                    logger.warn("Unrecognized command [{}]", ceo);
+                }
 
             } catch (Exception ex) {
-                log.log(Level.WARNING, "Failed create a new game", ex);
+                logger.warn("Failed create a new game", ex);
             }
         }
     }
@@ -513,13 +503,11 @@ public class MainFrame extends JFrame {
          * @param newState
          */
         public void stateChanged(int oldState, int newState) {
-            if (log.isLoggable(Level.FINER))
-                log.log(Level.FINER, "Changed state from " + oldState + " to " + newState);
-
+            logger.debug("Changed state from [{}] to [{}]", oldState, newState);
             /**
              * STATE_GAME_SETUP
              */
-            if (gameStateObject.inState(GameStateController.STATE_GAME_SETUP)) {
+            if (gameStateObject.inState(GameStates.STATE_GAME_SETUP)) {
                 progressBar.stopRolling();
                 lblStatus.setText("Connected");
                 setBoardCursor(Cursor.getDefaultCursor());
@@ -539,14 +527,14 @@ public class MainFrame extends JFrame {
             /**
              * STATE_GAME_SETUP_RECEIVED_SETUP
              */
-            else if (gameStateObject.inState(GameStateController.STATE_GAME_SETUP_RECEIVED_SETUP)) {
+            else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP)) {
                 lblStatus.setText("Received opponent setup");
             }
 
             /**
              * STATE_SETUP_WAIT_OPPONENT_SETUP
              */
-            else if (gameStateObject.inState(GameStateController.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
+            else if (gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
                 progressBar.startRolling();
                 lblStatus.setText("Waiting for opponent");
                 setBoardCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -555,7 +543,7 @@ public class MainFrame extends JFrame {
             /**
              * STATE_IN_GAME
              */
-            else if (gameStateObject.inState(GameStateController.STATE_IN_GAME)) {
+            else if (gameStateObject.inState(GameStates.STATE_IN_GAME)) {
                 progressBar.stopRolling();
                 lblStatus.setText("Connected");
                 setBoardCursor(Cursor.getDefaultCursor());
@@ -568,15 +556,15 @@ public class MainFrame extends JFrame {
                 validate();
 
                 if (player == 1)
-                    gameStateObject.setState(GameStateController.STATE_IN_GAME_PLAYER_TURN);
+                    gameStateObject.setState(GameStates.STATE_IN_GAME_PLAYER_TURN);
                 else
-                    gameStateObject.setState(GameStateController.STATE_IN_GAME_OPPONENT_TURN);
+                    gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);
             }
 
             /**
              * STATE_IN_GAME_PLAYER_TURN
              */
-            else if (gameStateObject.inState(GameStateController.STATE_IN_GAME_PLAYER_TURN)) {
+            else if (gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN)) {
                 progressBar.stopRolling();
                 lblStatus.setText("Your turn");
                 setBoardCursor(Cursor.getDefaultCursor());
@@ -585,7 +573,7 @@ public class MainFrame extends JFrame {
             /**
              * STATE_IN_GAME_OPPONENT_TURN
              */
-            else if (gameStateObject.inState(GameStateController.STATE_IN_GAME_OPPONENT_TURN)) {
+            else if (gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN)) {
                 progressBar.startRolling();
                 lblStatus.setText("Waiting for opponent move");
                 setBoardCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -594,8 +582,9 @@ public class MainFrame extends JFrame {
             /**
              * Unhandled event type
              */
-            else
-                log.log(Level.WARNING, "Unhandled state : " + newState);
+            else {
+                logger.warn("Unhandled state [{}]", newState);
+            }
         }
     }
 

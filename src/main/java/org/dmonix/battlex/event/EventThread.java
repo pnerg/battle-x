@@ -4,8 +4,9 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.Socket;
 import java.net.SocketException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Thread that awaits for objects on a socket.
@@ -21,17 +22,17 @@ import java.util.logging.Logger;
  */
 public final class EventThread implements Runnable {
     /** The logger instance for this class */
-    private static final Logger log = Logger.getLogger(EventThread.class.getName());
+    private static final Logger logger = LoggerFactory.getLogger(EventThread.class);
 
     private Thread thread;
-    private String connectedTo;
     private ObjectInputStream istream;
     private EventCommunicator eventCommunicator;
 
+    private final Socket socket;
+
     public EventThread(EventCommunicator eventCommunicator, Socket socket) throws IOException {
-        connectedTo = socket.toString();
-        if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, "Initiated connection to/from: " + connectedTo);
+        this.socket = socket;
+        logger.debug("Initiated connection to/from [{}]", socket);
 
         this.eventCommunicator = eventCommunicator;
         this.istream = new ObjectInputStream(socket.getInputStream());
@@ -43,8 +44,7 @@ public final class EventThread implements Runnable {
         try {
             while (true) {
                 Object event = istream.readObject();
-                if (log.isLoggable(Level.FINE))
-                    log.log(Level.FINE, "Received event from " + connectedTo + "\n" + event.toString());
+                logger.debug("Received event [{}] from [{}]", event, socket);
 
                 if (event instanceof GameEventObject) {
                     // fire event to all listeners
@@ -53,18 +53,15 @@ public final class EventThread implements Runnable {
                     // fire event to all listeners
                     eventCommunicator.fireEvent((ControlEventObject) event);
                 } else {
-                    log.log(Level.WARNING, "Class type not recognized : " + event.getClass().getName() + "\n" + event.toString());
+                    logger.warn("Class type not recognized [{}]", event.getClass());
                 }
             }
-        } catch (ClassNotFoundException ex) {
-            ex.printStackTrace();
         } catch (SocketException ex) {
-            if (log.isLoggable(Level.FINE))
-                log.log(Level.FINE, "Disconnected from " + connectedTo);
-
+            logger.debug("Disconnected from [{}]", socket);
             eventCommunicator.fireEvent(ControlEventObject.EVENT_CONNECTION_LOST);
-        } catch (IOException ex) {
             ex.printStackTrace();
+        } catch (ClassNotFoundException | IOException ex) {
+            logger.error(ex.getMessage(), ex);
         }
 
     }

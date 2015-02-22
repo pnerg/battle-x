@@ -1,16 +1,28 @@
 package org.dmonix.battlex.gui;
 
+import java.awt.AlphaComposite;
+import java.awt.Color;
+import java.awt.Composite;
+import java.awt.Dimension;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Image;
+import java.awt.Point;
+import java.awt.Rectangle;
+import java.awt.event.MouseEvent;
+import java.awt.image.BufferedImage;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.awt.*;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.dmonix.battlex.Battlex;
-import org.dmonix.battlex.event.*;
+import org.dmonix.battlex.event.EventCommunicator;
+import org.dmonix.battlex.event.GameEventListener;
+import org.dmonix.battlex.event.GameEventObject;
+import org.dmonix.battlex.event.GameStateController;
+import org.dmonix.battlex.event.GameStates;
 import org.dmonix.battlex.resources.Resources;
 
 /**
@@ -97,14 +109,14 @@ public class BoardPanel extends JPanel implements GameEventListener {
         /**
          * The game is on
          */
-        if (gameStateObject.inState(GameStateController.STATE_IN_GAME_OPPONENT_TURN)) {
-            gameStateObject.setState(GameStateController.STATE_IN_GAME_PLAYER_TURN);
+        if (gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN)) {
+            gameStateObject.setState(GameStates.STATE_IN_GAME_PLAYER_TURN);
             movePiece(pieces[geo.getOldXCoord()][geo.getOldYCoord()], geo.getNewXCoord(), geo.getNewYCoord());
         }
         /**
-         * The game is beeing setup
+         * The game is being setup
          */
-        else if (gameStateObject.inState(GameStateController.STATE_GAME_SETUP) || gameStateObject.inState(GameStateController.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
+        else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
             if (geo.getType() != Resources.PIECE_NO_PIECE)
                 this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord());
             else
@@ -229,9 +241,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
         /**
          * ======================================== paint the marked squares ========================================
          */
-        if ((currentPiece != null && gameStateObject.inState(GameStateController.STATE_IN_GAME_PLAYER_TURN))
-                || (currentPiece == null && gameStateObject.inState(GameStateController.STATE_GAME_SETUP))
-                || (currentPiece == null && gameStateObject.inState(GameStateController.STATE_GAME_SETUP_RECEIVED_SETUP))) {
+        if ((currentPiece != null && gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN))
+                || (currentPiece == null && gameStateObject.inState(GameStates.STATE_GAME_SETUP))
+                || (currentPiece == null && gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP))) {
             g2.setComposite(alphaComposite);
 
             Color fill;
@@ -337,7 +349,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
         eventCommunicator.sendEvent(new GameEventObject(currentPiece.getLocation().x, currentPiece.getLocation().y, point.x, point.y));
 
         movePiece(currentPiece, point.x, point.y);
-        gameStateObject.setState(GameStateController.STATE_IN_GAME_OPPONENT_TURN);
+        gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);
         currentPiece = null;
 
     }
@@ -483,7 +495,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
             else {
                 ResolveStrikeDialog.showStrikeResult(owner, "Game over! Player" + attacker.getPlayer() + " wins", attacker.getPlayer(), attacker.getType(),
                         defender.getPlayer(), defender.getType());
-                gameStateObject.setState(GameStateController.STATE_IDLE);
+                gameStateObject.setState(GameStates.STATE_IDLE);
             }
 
             // remove the old position for the piece that moved
@@ -506,17 +518,17 @@ public class BoardPanel extends JPanel implements GameEventListener {
         // neither player can move
         if (!player1Move && !player2Move) {
             JOptionPane.showMessageDialog(owner, "It's a draw\nNeither player can move", "Game over!", JOptionPane.INFORMATION_MESSAGE);
-            gameStateObject.setState(GameStateController.STATE_IDLE);
+            gameStateObject.setState(GameStates.STATE_IDLE);
         }
         // player 1 cannot move
         else if (!player1Move && player2Move) {
             JOptionPane.showMessageDialog(owner, "Player 2 wins\nPlayer 1 cannot move", "Game over!", JOptionPane.INFORMATION_MESSAGE);
-            gameStateObject.setState(GameStateController.STATE_IDLE);
+            gameStateObject.setState(GameStates.STATE_IDLE);
         }
         // player 2 cannot move
         else if (player1Move && !player2Move) {
             JOptionPane.showMessageDialog(owner, "Player 1 wins\nPlayer 2 cannot move", "Game over!", JOptionPane.INFORMATION_MESSAGE);
-            gameStateObject.setState(GameStateController.STATE_IDLE);
+            gameStateObject.setState(GameStates.STATE_IDLE);
         }
 
     }
@@ -647,9 +659,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
                 repaint();
             }
 
-            if (gameStateObject.inState(GameStateController.STATE_GAME_SETUP) || gameStateObject.inState(GameStateController.STATE_GAME_SETUP_RECEIVED_SETUP))
+            if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP))
                 adaptee.gameSetupClick(e);
-            else if (gameStateObject.inState(GameStateController.STATE_IN_GAME_PLAYER_TURN))
+            else if (gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN))
                 adaptee.inGameClick(e);
         }
     }

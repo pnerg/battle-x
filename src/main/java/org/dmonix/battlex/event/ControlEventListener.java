@@ -15,6 +15,6 @@ import java.util.EventListener;
  */
 public interface ControlEventListener extends EventListener {
 
-    public void controlEvent(ControlEventObject ceo);
+    void controlEvent(ControlEventObject ceo);
 
 }

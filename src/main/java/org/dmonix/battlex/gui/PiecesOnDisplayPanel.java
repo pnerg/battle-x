@@ -1,17 +1,26 @@
 package org.dmonix.battlex.gui;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Cursor;
+import java.awt.Dimension;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.Hashtable;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import org.dmonix.battlex.Battlex;
 import org.dmonix.battlex.event.ControlEventObject;
 import org.dmonix.battlex.event.GameStateController;
+import org.dmonix.battlex.event.GameStates;
 import org.dmonix.battlex.resources.Resources;
 import org.dmonix.util.ImageLoaderUtil;
 
@@ -60,7 +69,7 @@ public class PiecesOnDisplayPanel extends JPanel {
     private LabelTypeIcon lblType11Icon;
     private JLabel lblType11Counter = new JLabel();
 
-    private Hashtable pieces = new Hashtable();
+    private Hashtable<String, JLabel> pieces = new Hashtable<>();
     private JButton btnOk = new JButton(ImageLoaderUtil.getImageIcon(ImageLoaderUtil.PATH_TOOLBARBUTTONGRAPHICS_GENERAL, "SendMail24.gif"));
     private PiecesOnDisplayPanel_lblTypeIcon_mouseAdapter mouseAdapter;
     private JButton btnSave = new JButton(ImageLoaderUtil.getImageIcon(ImageLoaderUtil.PATH_TOOLBARBUTTONGRAPHICS_GENERAL, "Save24.gif"));
@@ -269,7 +278,7 @@ public class PiecesOnDisplayPanel extends JPanel {
     }
 
     public void addPiece(int type) {
-        JLabel label = (JLabel) pieces.get("lblType" + type + "Counter");
+        JLabel label = pieces.get("lblType" + type + "Counter");
         int newValue = Integer.parseInt(label.getText()) + 1;
         label.setText("" + newValue);
         pieceCount++;
@@ -282,7 +291,7 @@ public class PiecesOnDisplayPanel extends JPanel {
         if (pieceCount == 0)
             btnOk.setEnabled(true);
 
-        JLabel label = (JLabel) pieces.get("lblType" + type + "Counter");
+        JLabel label = pieces.get("lblType" + type + "Counter");
         int newValue = Integer.parseInt(label.getText()) - 1;
         if (newValue <= 0) {
             enableLabel(type, false);
@@ -327,8 +336,8 @@ public class PiecesOnDisplayPanel extends JPanel {
         private Border border = BorderFactory.createRaisedBevelBorder();
 
         public void mouseClicked(MouseEvent e) {
-            if (gameStateObject.inState(GameStateController.STATE_IN_GAME) || gameStateObject.inState(GameStateController.STATE_IN_GAME_PLAYER_TURN)
-                    || gameStateObject.inState(GameStateController.STATE_IN_GAME_OPPONENT_TURN))
+            if (gameStateObject.inState(GameStates.STATE_IN_GAME) || gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN)
+                    || gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN))
                 return;
 
             if (e.getButton() != 1) {
@@ -353,16 +362,16 @@ public class PiecesOnDisplayPanel extends JPanel {
         }
 
         public void mouseEntered(MouseEvent e) {
-            if (itemSelected || gameStateObject.inState(GameStateController.STATE_IN_GAME_OPPONENT_TURN)
-                    || gameStateObject.inState(GameStateController.STATE_IN_GAME_OPPONENT_TURN))
+            if (itemSelected || gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN)
+                    || gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN))
                 return;
 
             owner.setBoardCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         }
 
         public void mouseExited(MouseEvent e) {
-            if (itemSelected || gameStateObject.inState(GameStateController.STATE_IN_GAME_OPPONENT_TURN)
-                    || gameStateObject.inState(GameStateController.STATE_IN_GAME_OPPONENT_TURN))
+            if (itemSelected || gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN)
+                    || gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN))
                 return;
 
             owner.setBoardCursor(Cursor.getPredefinedCursor(Cursor.DEFAULT_CURSOR));
@@ -376,10 +385,10 @@ public class PiecesOnDisplayPanel extends JPanel {
 
         owner.sendEvent(ControlEventObject.EVENT_SETUP_SENT);
 
-        if (gameStateObject.inState(GameStateController.STATE_GAME_SETUP))
-            gameStateObject.setState(GameStateController.STATE_SETUP_WAIT_OPPONENT_SETUP);
-        else if (gameStateObject.inState(GameStateController.STATE_GAME_SETUP_RECEIVED_SETUP))
-            gameStateObject.setState(gameStateObject.STATE_IN_GAME);
+        if (gameStateObject.inState(GameStates.STATE_GAME_SETUP))
+            gameStateObject.setState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP);
+        else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP))
+            gameStateObject.setState(GameStates.STATE_IN_GAME);
         else
             throw new IllegalStateException("The state " + gameStateObject.getState() + " is not allowed here");
 
