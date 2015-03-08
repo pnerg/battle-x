@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dmonix.battlex.gui;
 
 import java.awt.Color;
@@ -29,12 +46,14 @@ import javax.swing.JPanel;
 import org.dmonix.battlex.Battlex;
 import org.dmonix.battlex.event.ControlEventListener;
 import org.dmonix.battlex.event.ControlEventObject;
+import org.dmonix.battlex.event.ControlEvents;
 import org.dmonix.battlex.event.EventCommunicator;
 import org.dmonix.battlex.event.GameStateChangeListener;
 import org.dmonix.battlex.event.GameStateController;
 import org.dmonix.battlex.event.GameStates;
 import org.dmonix.battlex.resources.Configuration;
 import org.dmonix.battlex.resources.OpponentConfigurationObject;
+import org.dmonix.battlex.resources.OpponentsConfigurer;
 import org.dmonix.cipher.CipherInputStreamPBE;
 import org.dmonix.gui.DMoniXLogoLabel;
 import org.dmonix.gui.RollingProgressBar;
@@ -48,23 +67,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>
- * Title:
- * </p>
- * <p>
- * Description:
- * </p>
- * <p>
- * Copyright: Copyright (c) 2003-2005
- * </p>
- * <p>
- * Company: dmonix.org
- * </p>
- * 
  * @author Peter Nerg
  * @version 1.0
  */
 public class MainFrame extends JFrame {
+    private static final long serialVersionUID = 1078453078430886435L;
     /** The logger instance for this class */
     private static final Logger logger = LoggerFactory.getLogger(MainFrame.class);
     private static final int majorVersion = 1;
@@ -143,7 +150,7 @@ public class MainFrame extends JFrame {
 
     public void setOpponentMenuItems() {
         this.menuConnectTo.removeAll();
-        for (OpponentConfigurationObject oco : configuration.getOpponents()) {
+        for (OpponentConfigurationObject oco : OpponentsConfigurer.getOpponents()) {
             this.menuConnectTo.add(new OpponentMenuItem(this, oco));
         }
 
@@ -156,7 +163,7 @@ public class MainFrame extends JFrame {
         this.piecesOnDisplayPanelPlayer2.setCursor(cursor);
     }
 
-    public int getSelectedSetupPiece(int player) {
+    public String getSelectedSetupPiece(int player) {
         if (player == 1)
             return piecesOnDisplayPanelPlayer1.getSelectedPieceType();
         else
@@ -167,14 +174,14 @@ public class MainFrame extends JFrame {
         this.eventCommunicator.sendEvent(ceo);
     }
 
-    public void addPiece(int player, int type) {
+    public void addPiece(int player, String type) {
         if (player == 1)
             piecesOnDisplayPanelPlayer1.addPiece(type);
         else
             piecesOnDisplayPanelPlayer2.addPiece(type);
     }
 
-    public void subtractPiece(int player, int type) {
+    public void subtractPiece(int player, String type) {
         if (player == 1)
             piecesOnDisplayPanelPlayer1.subtractPiece(type);
         else
@@ -189,7 +196,7 @@ public class MainFrame extends JFrame {
 
             this.eventCommunicator = new EventCommunicator(host, port);
             this.eventCommunicator.addEventListener(controlListener);
-            this.eventCommunicator.sendEvent(ControlEventObject.EVENT_CONNECT);
+            this.eventCommunicator.sendEvent(ControlEvents.EVENT_CONNECT);
             this.lblStatus.setText("Connecting");
             this.progressBar.startRolling();
             super.setCursor(Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR));
@@ -207,13 +214,13 @@ public class MainFrame extends JFrame {
         setBackground(Battlex.BACKGOUND_COLOR);
         this.getContentPane().setBackground(SystemColor.control);
         this.setJMenuBar(menuBar);
-        this.addWindowListener(new MainFrame_this_windowAdapter(this));
+        this.addWindowListener(new MainFrame_this_windowAdapter());
         this.getContentPane().setLayout(gridBagLayoutFrame);
         menuFile.setEnabled(true);
         menuFile.setText("File");
         menuGame.setText("Game");
         menuItemNewOpponent.setText("Manage opponents");
-        menuItemNewOpponent.addActionListener(new MainFrame_menuItemNewOpponent_actionAdapter(this));
+        menuItemNewOpponent.addActionListener(new MainFrame_menuItemNewOpponent_actionAdapter());
         panelStatus.setBackground(Color.white);
         panelStatus.setBorder(BorderFactory.createLoweredBevelBorder());
         panelStatus.setLayout(gridBagLayoutStatus);
@@ -223,9 +230,9 @@ public class MainFrame extends JFrame {
         menuItemHelp.setEnabled(false);
         menuItemHelp.setText("Help");
         menuItemAbout.setText("About");
-        menuItemAbout.addActionListener(new MainFrame_menuItemAbout_actionAdapter(this));
+        menuItemAbout.addActionListener(new MainFrame_menuItemAbout_actionAdapter());
         menuItemNewGame.setText("New game");
-        menuItemNewGame.addActionListener(new MainFrame_menuItemNewGame_actionAdapter(this));
+        menuItemNewGame.addActionListener(new MainFrame_menuItemNewGame_actionAdapter());
         menuConnectTo.setText("Connect to");
         piecesOnDisplayPanelPlayer1.setMinimumSize(new Dimension(90, 75));
         piecesOnDisplayPanelPlayer1.setPreferredSize(new Dimension(90, 75));
@@ -233,9 +240,9 @@ public class MainFrame extends JFrame {
         piecesOnDisplayPanelPlayer2.setPreferredSize(new Dimension(90, 75));
         piecesOnDisplayPanelPlayer1.setRequestFocusEnabled(true);
         menuItemPreferences.setText("Preferences");
-        menuItemPreferences.addActionListener(new MainFrame_menuItemPreferences_actionAdapter(this));
+        menuItemPreferences.addActionListener(new MainFrame_menuItemPreferences_actionAdapter());
         menuItemDisconnect.setText("Disconnect");
-        menuItemDisconnect.addActionListener(new MainFrame_menuItemDisconnect_actionAdapter(this));
+        menuItemDisconnect.addActionListener(new MainFrame_menuItemDisconnect_actionAdapter());
         menuBar.add(menuFile);
         menuBar.add(menuGame);
         menuBar.add(menuHelp);
@@ -263,18 +270,6 @@ public class MainFrame extends JFrame {
                 new GridBagConstraints(0, 1, 3, 1, 1.0, 0.0, GridBagConstraints.CENTER, GridBagConstraints.HORIZONTAL, new Insets(0, 6, 0, 0), 0, 0));
         menuFile.add(menuItemPreferences);
 
-    }
-
-    void this_windowClosing(WindowEvent e) {
-        setVisible(false);
-        super.dispose();
-        System.gc();
-        System.exit(0);
-    }
-
-    void newOpponent_actionPerformed(ActionEvent e) {
-        OpponentOptionPane pane = new OpponentOptionPane(this, this.configuration);
-        pane.setVisible(true);
     }
 
     public void menuItemNewGame_actionPerformed(ActionEvent e) {
@@ -371,9 +366,9 @@ public class MainFrame extends JFrame {
         boardPanel.clearAllPlayerPieces();
 
         XMLElementList pieceList = doc.getElementsByTagName("piece");
-        int type;
+        String type;
         for (XMLElement piece : pieceList) {
-            type = Integer.parseInt(piece.getAttribute("type"));
+            type = piece.getAttribute("type");
             this.subtractPiece(player, type);
             Point point = new Point(Integer.parseInt(piece.getAttribute("x")), Integer.parseInt(piece.getAttribute("y")));
             this.boardPanel.setPieceAtPoint(point, type);
@@ -391,7 +386,7 @@ public class MainFrame extends JFrame {
 
     void menuItemDisconnect_actionPerformed(ActionEvent e) {
         if (eventCommunicator != null && eventCommunicator.isConnected())
-            eventCommunicator.sendEvent(ControlEventObject.EVENT_DISCONNECT);
+            eventCommunicator.sendEvent(ControlEvents.EVENT_DISCONNECT);
 
         super.setCursor(Cursor.getDefaultCursor());
         this.setBoardCursor(Cursor.getDefaultCursor());
@@ -432,22 +427,22 @@ public class MainFrame extends JFrame {
                 /**
                  * CONNECT RECEIVED
                  */
-                if (ceo.getCommand() == ControlEventObject.CMD_CONNECT) {
+                if (ControlEvents.EVENT_CONNECT.equals(ceo)) {
                     gameStateObject.setState(GameStates.STATE_GAME_SETUP);
-                    eventCommunicator.sendEvent(ControlEventObject.EVENT_ACK_CONNECT);
+                    eventCommunicator.sendEvent(ControlEvents.EVENT_ACK_CONNECT);
                 }
 
                 /**
                  * ACK CONNECT RECEIVED
                  */
-                else if (ceo.getCommand() == ControlEventObject.CMD_ACK_CONNECT) {
+                else if (ControlEvents.EVENT_ACK_CONNECT.equals(ceo)) {
                     gameStateObject.setState(GameStates.STATE_GAME_SETUP);
                 }
 
                 /**
                  * SETUP RECEIVED
                  */
-                else if (ceo.getCommand() == ControlEventObject.CMD_SETUP_SENT) {
+                else if (ControlEvents.EVENT_SETUP_SENT.equals(ceo)) {
                     boardPanel.repaint();
                     if (gameStateObject.inState(GameStates.STATE_GAME_SETUP))
                         gameStateObject.setState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP);
@@ -460,7 +455,7 @@ public class MainFrame extends JFrame {
                 /**
                  * DISCONNECT RECEIVED
                  */
-                else if (ceo.getCommand() == ControlEventObject.CMD_DISCONNECT) {
+                else if (ControlEvents.EVENT_DISCONNECT.equals(ceo)) {
                     setBoardCursor(Cursor.getDefaultCursor());
                     progressBar.stopRolling();
                     lblStatus.setText("Disconnected");
@@ -588,82 +583,48 @@ public class MainFrame extends JFrame {
         }
     }
 
-}
+    // /////////////////////////////
+    //
+    // Internal event adapters
+    //
+    // /////////////////////////////
 
-// /////////////////////////////
-//
-// Internal event adapters
-//
-// /////////////////////////////
-
-class MainFrame_this_windowAdapter extends java.awt.event.WindowAdapter {
-    MainFrame adaptee;
-
-    MainFrame_this_windowAdapter(MainFrame adaptee) {
-        this.adaptee = adaptee;
+    class MainFrame_this_windowAdapter extends java.awt.event.WindowAdapter {
+        public void windowClosing(WindowEvent e) {
+            setVisible(false);
+            dispose();
+            System.exit(0);
+        }
     }
 
-    public void windowClosing(WindowEvent e) {
-        adaptee.this_windowClosing(e);
-    }
-}
-
-class MainFrame_menuItemNewOpponent_actionAdapter implements java.awt.event.ActionListener {
-    MainFrame adaptee;
-
-    MainFrame_menuItemNewOpponent_actionAdapter(MainFrame adaptee) {
-        this.adaptee = adaptee;
+    class MainFrame_menuItemNewOpponent_actionAdapter implements java.awt.event.ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            OpponentOptionPane pane = new OpponentOptionPane(MainFrame.this, configuration);
+            pane.setVisible(true);
+        }
     }
 
-    public void actionPerformed(ActionEvent e) {
-        adaptee.newOpponent_actionPerformed(e);
-    }
-}
-
-class MainFrame_menuItemNewGame_actionAdapter implements java.awt.event.ActionListener {
-    private MainFrame adaptee;
-
-    MainFrame_menuItemNewGame_actionAdapter(MainFrame adaptee) {
-        this.adaptee = adaptee;
+    class MainFrame_menuItemNewGame_actionAdapter implements java.awt.event.ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            menuItemNewGame_actionPerformed(e);
+        }
     }
 
-    public void actionPerformed(ActionEvent e) {
-        adaptee.menuItemNewGame_actionPerformed(e);
-    }
-}
-
-class MainFrame_menuItemAbout_actionAdapter implements java.awt.event.ActionListener {
-    private MainFrame adaptee;
-
-    MainFrame_menuItemAbout_actionAdapter(MainFrame adaptee) {
-        this.adaptee = adaptee;
+    class MainFrame_menuItemAbout_actionAdapter implements java.awt.event.ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            menuItemAbout_actionPerformed(e);
+        }
     }
 
-    public void actionPerformed(ActionEvent e) {
-        adaptee.menuItemAbout_actionPerformed(e);
-    }
-}
-
-class MainFrame_menuItemPreferences_actionAdapter implements java.awt.event.ActionListener {
-    private MainFrame adaptee;
-
-    MainFrame_menuItemPreferences_actionAdapter(MainFrame adaptee) {
-        this.adaptee = adaptee;
+    class MainFrame_menuItemPreferences_actionAdapter implements java.awt.event.ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            menuItemPreferences_actionPerformed(e);
+        }
     }
 
-    public void actionPerformed(ActionEvent e) {
-        adaptee.menuItemPreferences_actionPerformed(e);
-    }
-}
-
-class MainFrame_menuItemDisconnect_actionAdapter implements java.awt.event.ActionListener {
-    private MainFrame adaptee;
-
-    MainFrame_menuItemDisconnect_actionAdapter(MainFrame adaptee) {
-        this.adaptee = adaptee;
-    }
-
-    public void actionPerformed(ActionEvent e) {
-        adaptee.menuItemDisconnect_actionPerformed(e);
+    class MainFrame_menuItemDisconnect_actionAdapter implements java.awt.event.ActionListener {
+        public void actionPerformed(ActionEvent e) {
+            menuItemDisconnect_actionPerformed(e);
+        }
     }
 }

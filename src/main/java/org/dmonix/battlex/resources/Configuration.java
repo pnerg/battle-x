@@ -19,9 +19,6 @@
 package org.dmonix.battlex.resources;
 
 import java.io.File;
-import java.util.Collections;
-import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.dmonix.io.IOUtil;
@@ -29,19 +26,6 @@ import org.dmonix.xml.XMLDocument;
 import org.dmonix.xml.XMLElement;
 
 /**
- * <p>
- * Title:
- * </p>
- * <p>
- * Description:
- * </p>
- * <p>
- * Copyright: Copyright (c) 2004-2005
- * </p>
- * <p>
- * Company: dmonix.org
- * </p>
- * 
  * @author Peter Nerg
  * @version 1.0
  */
@@ -95,81 +79,81 @@ public class Configuration {
         return "";
     }
 
-    public void addOpponent(OpponentConfigurationObject oc) {
-        // /*
-        // * <opponent> <name>localhost</name> <description>Local host, act as your own opponent</description> <url>localhost</url> <port>6969</port> <proxy
-        // * useProxy="false"> <proxyHost/> <proxyPort/> </proxy> </opponent>
-        // */
-        //
-        // Element eopponent = this.configuration.appendChildElement(this.elementOpponents, OPPONENT);
-        //
-        // this.configuration.appendChildElement(eopponent, NAME, oc.getName());
-        // this.configuration.appendChildElement(eopponent, DESC, oc.getDescription());
-        // this.configuration.appendChildElement(eopponent, URL, oc.getUrl());
-        // this.configuration.appendChildElement(eopponent, PORT, "" + oc.getPort());
-        //
-        // Element eproxy = this.configuration.appendChildElement(eopponent, PROXY);
-        // eproxy.setAttribute("useProxy", "" + oc.useProxy());
-        //
-        // this.configuration.appendChildElement(eproxy, PROXYHOST, oc.getProxy());
-        // this.configuration.appendChildElement(eproxy, PROXYPORT, "" + oc.getProxyPort());
-        //
-        // save();
-    }
+    // public void addOpponent(OpponentConfigurationObject oc) {
+    // // /*
+    // // * <opponent> <name>localhost</name> <description>Local host, act as your own opponent</description> <url>localhost</url> <port>6969</port> <proxy
+    // // * useProxy="false"> <proxyHost/> <proxyPort/> </proxy> </opponent>
+    // // */
+    // //
+    // // Element eopponent = this.configuration.appendChildElement(this.elementOpponents, OPPONENT);
+    // //
+    // // this.configuration.appendChildElement(eopponent, NAME, oc.getName());
+    // // this.configuration.appendChildElement(eopponent, DESC, oc.getDescription());
+    // // this.configuration.appendChildElement(eopponent, URL, oc.getUrl());
+    // // this.configuration.appendChildElement(eopponent, PORT, "" + oc.getPort());
+    // //
+    // // Element eproxy = this.configuration.appendChildElement(eopponent, PROXY);
+    // // eproxy.setAttribute("useProxy", "" + oc.useProxy());
+    // //
+    // // this.configuration.appendChildElement(eproxy, PROXYHOST, oc.getProxy());
+    // // this.configuration.appendChildElement(eproxy, PROXYPORT, "" + oc.getProxyPort());
+    // //
+    // // save();
+    // }
+    //
+    // public void removeOpponent(String name) {
+    // // NodeList list = this.configuration.getElementsByTagName(OPPONENT);
+    // // Element e;
+    // // for (int i = 0; i < list.getLength(); i++) {
+    // // e = (Element) list.item(i);
+    // // if (this.configuration.getElementValue(e.getElementsByTagName(NAME)).equals(name)) {
+    // // this.elementOpponents.removeChild(e);
+    // // break;
+    // // }
+    // // }
+    // // save();
+    // }
+    //
+    // public List<OpponentConfigurationObject> getOpponents() {
+    // // Vector data = new Vector();
+    // // NodeList list = this.configuration.getElementsByTagName(OPPONENT);
+    // //
+    // // Element e, eproxy;
+    // // OpponentConfigurationObject oc;
+    // // for (int i = 0; i < list.getLength(); i++) {
+    // // e = (Element) list.item(i);
+    // // eproxy = this.configuration.getElement(e.getElementsByTagName(PROXY));
+    // // if (eproxy.getAttribute("useProxy").equalsIgnoreCase("true"))
+    // // oc = new OpponentConfigurationObject(this.configuration.getElementValue(e.getElementsByTagName(NAME), ""), this.configuration.getElementValue(
+    // // e.getElementsByTagName(DESC), ""), this.configuration.getElementValue(e.getElementsByTagName(URL), ""),
+    // // Integer.parseInt(this.configuration.getElementValue(e.getElementsByTagName(PORT), "6969")), true, this.configuration.getElementValue(
+    // // eproxy.getElementsByTagName(PROXYHOST), ""), Integer.parseInt(this.configuration.getElementValue(
+    // // eproxy.getElementsByTagName(PROXYPORT), "-1")));
+    // // else
+    // // oc = new OpponentConfigurationObject(this.configuration.getElementValue(e.getElementsByTagName(NAME), ""), this.configuration.getElementValue(
+    // // e.getElementsByTagName(DESC), ""), this.configuration.getElementValue(e.getElementsByTagName(URL), ""),
+    // // Integer.parseInt(this.configuration.getElementValue(e.getElementsByTagName(PORT), "6969")), false, this.configuration.getElementValue(
+    // // eproxy.getElementsByTagName(PROXYHOST), ""), Integer.parseInt(this.configuration.getElementValue(
+    // // eproxy.getElementsByTagName(PROXYPORT), "-1")));
+    // //
+    // // if (log.isLoggable(Level.FINE))
+    // // log.log(Level.FINE, oc.toString2());
+    // //
+    // // data.addElement(oc);
+    // // }
+    // // Collections.sort(data);
+    // //
+    // // return data.elements();
+    // return Collections.emptyList();
+    // }
 
-    public void removeOpponent(String name) {
-        // NodeList list = this.configuration.getElementsByTagName(OPPONENT);
-        // Element e;
-        // for (int i = 0; i < list.getLength(); i++) {
-        // e = (Element) list.item(i);
-        // if (this.configuration.getElementValue(e.getElementsByTagName(NAME)).equals(name)) {
-        // this.elementOpponents.removeChild(e);
-        // break;
-        // }
-        // }
-        // save();
-    }
-
-    public List<OpponentConfigurationObject> getOpponents() {
-        // Vector data = new Vector();
-        // NodeList list = this.configuration.getElementsByTagName(OPPONENT);
-        //
-        // Element e, eproxy;
-        // OpponentConfigurationObject oc;
-        // for (int i = 0; i < list.getLength(); i++) {
-        // e = (Element) list.item(i);
-        // eproxy = this.configuration.getElement(e.getElementsByTagName(PROXY));
-        // if (eproxy.getAttribute("useProxy").equalsIgnoreCase("true"))
-        // oc = new OpponentConfigurationObject(this.configuration.getElementValue(e.getElementsByTagName(NAME), ""), this.configuration.getElementValue(
-        // e.getElementsByTagName(DESC), ""), this.configuration.getElementValue(e.getElementsByTagName(URL), ""),
-        // Integer.parseInt(this.configuration.getElementValue(e.getElementsByTagName(PORT), "6969")), true, this.configuration.getElementValue(
-        // eproxy.getElementsByTagName(PROXYHOST), ""), Integer.parseInt(this.configuration.getElementValue(
-        // eproxy.getElementsByTagName(PROXYPORT), "-1")));
-        // else
-        // oc = new OpponentConfigurationObject(this.configuration.getElementValue(e.getElementsByTagName(NAME), ""), this.configuration.getElementValue(
-        // e.getElementsByTagName(DESC), ""), this.configuration.getElementValue(e.getElementsByTagName(URL), ""),
-        // Integer.parseInt(this.configuration.getElementValue(e.getElementsByTagName(PORT), "6969")), false, this.configuration.getElementValue(
-        // eproxy.getElementsByTagName(PROXYHOST), ""), Integer.parseInt(this.configuration.getElementValue(
-        // eproxy.getElementsByTagName(PROXYPORT), "-1")));
-        //
-        // if (log.isLoggable(Level.FINE))
-        // log.log(Level.FINE, oc.toString2());
-        //
-        // data.addElement(oc);
-        // }
-        // Collections.sort(data);
-        //
-        // return data.elements();
-        return Collections.emptyList();
-    }
-
-    public void save() {
-        try {
-            this.configuration.toFile(this.CONF_FILE);
-        } catch (Exception ex) {
-            log.log(Level.WARNING, "Could not save configuration", ex);
-        }
-    }
+    // public void save() {
+    // try {
+    // this.configuration.toFile(this.CONF_FILE);
+    // } catch (Exception ex) {
+    // log.log(Level.WARNING, "Could not save configuration", ex);
+    // }
+    // }
 
     private void createNewConfig() {
         if (!this.CONF_FILE.exists()) {

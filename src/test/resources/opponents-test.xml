@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
 <opponents xmlns="http://dmonix.org/battlex/1.0">
-	<opponent name="localhost">
+	<opponent name="peter">
 		<description>Local host, act as your own opponent</description>
 		<host>localhost</host>
 		<port>6969</port>

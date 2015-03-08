@@ -1,15 +1,26 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dmonix.battlex.event;
 
 import java.io.Serializable;
 
 /**
- * An event object used with the ControlEventListener<br>
- * <p>
- * Copyright: Copyright (c) 2003
- * </p>
- * <p>
- * Company: dmonix.org
- * </p>
+ * An event object used with the ControlEventListener.
  * 
  * @author Peter Nerg
  * @version 1.0
@@ -18,38 +29,20 @@ public final class ControlEventObject implements Serializable {
 
     private static final long serialVersionUID = 7526476784622776147L;
 
-    /** Request a connection. */
-    public static final int CMD_CONNECT = 1;
-
-    /** Acknowledge a connection. */
-    public static final int CMD_ACK_CONNECT = 2;
-
-    /** Disconnect a connection. */
-    public static final int CMD_DISCONNECT = 10;
-
-    /** Sends a message. */
-    public static final int CMD_MESSAGE = 100;
-
-    public static final int CMD_SETUP_SENT = 200;
-    public static final int CONNECTION_LOST = 300;
-    public static final ControlEventObject EVENT_CONNECT = new ControlEventObject(CMD_CONNECT);
-    public static final ControlEventObject EVENT_ACK_CONNECT = new ControlEventObject(CMD_ACK_CONNECT);
-    public static final ControlEventObject EVENT_DISCONNECT = new ControlEventObject(CMD_DISCONNECT);
-    public static final ControlEventObject EVENT_SETUP_SENT = new ControlEventObject(CMD_SETUP_SENT);
-    public static final ControlEventObject EVENT_CONNECTION_LOST = new ControlEventObject(CONNECTION_LOST);
-
     private final int command;
 
     public ControlEventObject(int command) {
         this.command = command;
     }
 
-    public int getCommand() {
-        return this.command;
-    }
-
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#toString()
+     */
+    @Override
     public String toString() {
-        StringBuffer sb = new StringBuffer();
+        StringBuilder sb = new StringBuilder();
         sb.append(this.getClass().getName());
         sb.append("\n");
 
@@ -57,4 +50,41 @@ public final class ControlEventObject implements Serializable {
         sb.append(command);
         return sb.toString();
     }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#hashCode()
+     */
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + command;
+        return result;
+    }
+
+    /*
+     * (non-Javadoc)
+     * 
+     * @see java.lang.Object#equals(java.lang.Object)
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) {
+            return true;
+        }
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        ControlEventObject other = (ControlEventObject) obj;
+        if (command != other.command) {
+            return false;
+        }
+        return true;
+    }
+
 }

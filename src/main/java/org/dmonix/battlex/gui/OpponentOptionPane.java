@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dmonix.battlex.gui;
 
 import java.awt.Color;
@@ -23,30 +40,17 @@ import javax.swing.border.TitledBorder;
 
 import org.dmonix.battlex.resources.Configuration;
 import org.dmonix.battlex.resources.OpponentConfigurationObject;
+import org.dmonix.battlex.resources.OpponentsConfigurer;
 import org.dmonix.gui.models.SortableComboBoxModel;
 
 /**
- * <p>
- * Title:
- * </p>
- * <p>
- * Description:
- * </p>
- * <p>
- * Copyright: Copyright (c) 2003
- * </p>
- * <p>
- * Company: dmonix.org
- * </p>
- * 
  * @author Peter Nerg
- * @version 1.0
  */
 
 public class OpponentOptionPane extends JDialog {
     private static final long serialVersionUID = -527788114327118747L;
 
-    private OpponentConfigurationObject NEW_OPPONENT = new OpponentConfigurationObject("_new opponent", "", "", 6969);
+    private final OpponentConfigurationObject NEW_OPPONENT = new OpponentConfigurationObject("_new opponent", "", "", 6969);
 
     private MainFrame owner;
     private Configuration configuration = null;
@@ -66,7 +70,7 @@ public class OpponentOptionPane extends JDialog {
     private JPanel panel1 = new JPanel();
     private JPanel panel2 = new JPanel();
     private JLabel lblOpponent = new JLabel();
-    private JComboBox comboBoxOpponents = new JComboBox();
+    private JComboBox<OpponentConfigurationObject> comboBoxOpponents = new JComboBox<>();
     private TitledBorder titledBorder1;
     private JPanel panel3 = new JPanel();
     private JButton btnDelete = new JButton();
@@ -76,6 +80,7 @@ public class OpponentOptionPane extends JDialog {
     private JTextField txtFieldProxyPort = new JTextField();
     private SortableComboBoxModel comboModel = new SortableComboBoxModel();
 
+    // TODO Get rid of the reference to Mainframe, ugly entanglement
     public OpponentOptionPane(MainFrame owner, Configuration configuration) throws HeadlessException {
         super(owner);
         this.owner = owner;
@@ -172,7 +177,7 @@ public class OpponentOptionPane extends JDialog {
     }
 
     private void init() {
-        for (OpponentConfigurationObject oco : configuration.getOpponents()) {
+        for (OpponentConfigurationObject oco : OpponentsConfigurer.getOpponents()) {
             this.comboModel.addElement(oco);
         }
 
@@ -202,7 +207,7 @@ public class OpponentOptionPane extends JDialog {
 
             this.comboModel.addElement(oc);
             this.comboBoxOpponents.setSelectedItem(oc);
-            this.configuration.addOpponent(oc);
+            OpponentsConfigurer.addOpponent(oc);
             this.owner.setOpponentMenuItems();
         } else {
             oc = (OpponentConfigurationObject) this.comboBoxOpponents.getSelectedItem();
@@ -225,7 +230,7 @@ public class OpponentOptionPane extends JDialog {
 
         OpponentConfigurationObject oc = (OpponentConfigurationObject) o;
         this.comboModel.removeElement(o);
-        this.configuration.removeOpponent(oc.getName());
+        OpponentsConfigurer.removeOpponent(oc.getName());
         this.comboBoxOpponents.setSelectedItem(NEW_OPPONENT);
         this.owner.setOpponentMenuItems();
     }

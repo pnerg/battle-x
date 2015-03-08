@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dmonix.battlex.gui;
 
 import java.awt.AlphaComposite;
@@ -11,8 +28,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -24,29 +39,24 @@ import org.dmonix.battlex.event.GameEventObject;
 import org.dmonix.battlex.event.GameStateController;
 import org.dmonix.battlex.event.GameStates;
 import org.dmonix.battlex.resources.Resources;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
- * <p>
- * Copyright: Copyright (c) 2004-2005
- * </p>
- * <p>
- * Company: dmonix.org
- * </p>
- * 
  * @author Peter Nerg
- * @version 1.0
  */
 public class BoardPanel extends JPanel implements GameEventListener {
+    private static final long serialVersionUID = -8329675578149123690L;
     /** The logger instance for this class */
-    private static final Logger log = Logger.getLogger(BoardPanel.class.getName());
+    private static final Logger log = LoggerFactory.getLogger(BoardPanel.class);
     private GameStateController gameStateObject = GameStateController.getInstance();
     private MainFrame owner;
     private boolean firstPaint = true;
     private static boolean revealOpponent = false;
 
     // composite used to draw translucent graphics
-    private Composite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
-    private Composite alphaComposite2 = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f);
+    private final Composite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
+    private final Composite alphaComposite2 = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f);
 
     private BufferedImage boardBackgroundImage = null;
     private float squareWidth = -1;
@@ -103,8 +113,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param geo
      */
     public void gameEvent(GameEventObject geo) {
-        if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, "Received game event: " + geo.toString());
+        log.debug("Received game event [{}] ", geo);
 
         /**
          * The game is on
@@ -311,8 +320,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
             return;
         }
 
-        if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, "Clicked in: " + e.getPoint() + " x_coord=" + point.x + " y_coord=" + point.y);
+        log.debug("Clicked in: " + e.getPoint() + " x_coord=" + point.x + " y_coord=" + point.y);
 
         Piece selectedPiece = pieces[point.x][point.y];
 
@@ -329,16 +337,14 @@ public class BoardPanel extends JPanel implements GameEventListener {
                 return;
 
             currentPiece = selectedPiece;
-            if (log.isLoggable(Level.FINER))
-                log.log(Level.FINER, "Selected: " + currentPiece.toString());
+            log.debug("Selected [{}]", currentPiece);
 
             markSquares(selectedPiece);
             super.repaint();
             return;
         }
 
-        if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, "Current object in position: " + selectedPiece);
+        log.debug("Current object in position [{}] ", selectedPiece);
 
         /**
          * If a piece has been selected it's only valid to move to highlighted squares
@@ -373,7 +379,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param pieceType
      *            The type of piece
      */
-    public void setPieceAtPoint(Point point, int pieceType) {
+    public void setPieceAtPoint(Point point, String pieceType) {
         // if there is a piece in the square, remove it
         if (pieces[point.x][point.y] != null) {
             // remove the piece from the opponents board
@@ -388,7 +394,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (this.markedSquares[point.x][point.y] == null)
             return;
 
-        if (pieceType == -1)
+        if (pieceType == Resources.PIECE_NO_PIECE)
             return;
 
         this.pieces[point.x][point.y] = new Piece(this.player, pieceType, point.x, point.y);
@@ -403,7 +409,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
         Point point = getClickedPoint(e);
 
         // get the selected setup piece
-        int pieceType = owner.getSelectedSetupPiece(this.player);
+        String pieceType = owner.getSelectedSetupPiece(this.player);
 
         // can only click on own squares
         if (point.y < 6)
@@ -436,9 +442,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
         int x_coord_attacker = attacker.getLocation().x;
         int y_coord_attacker = attacker.getLocation().y;
 
-        if (log.isLoggable(Level.FINER))
-            log.log(Level.FINER, "Resolve movement : \nattacker=" + x_coord_attacker + ":" + y_coord_attacker + "\ndefender=" + x_coord_defender + ":"
-                    + y_coord_defender);
+        log.debug("Resolve movement : \nattacker=" + x_coord_attacker + ":" + y_coord_attacker + "\ndefender=" + x_coord_defender + ":" + y_coord_defender);
 
         Piece defender = pieces[x_coord_defender][y_coord_defender];
 
@@ -446,8 +450,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
          * empty space, go ahead and move the piece to that location
          */
         if (defender == null && attacker != null) {
-            if (log.isLoggable(Level.FINER))
-                log.log(Level.FINER, "Moved: " + attacker.toString() + "\nto " + x_coord_defender + ":" + y_coord_defender);
+            log.debug("Moved: " + attacker.toString() + "\nto " + x_coord_defender + ":" + y_coord_defender);
 
             pieces[x_coord_attacker][y_coord_attacker] = null;
             pieces[x_coord_defender][y_coord_defender] = attacker;
@@ -459,9 +462,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
          */
         else if (defender != null && attacker != null && defender.getPlayer() != attacker.getPlayer()) {
             int result = attacker.resolveStrike(defender);
-
-            if (log.isLoggable(Level.FINER))
-                log.log(Level.FINER, "Battle result = " + result);
 
             // attacker wins
             if (result == Piece.RESULT_WIN) {
@@ -546,9 +546,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
                 // ignore empty squares, non-checkPlayer pieces and pieces that cannot move
                 if (pieces[x][y] == null || pieces[x][y].getPlayer() != checkPlayer || pieces[x][y].getMoveDistance() < 1)
                     continue;
-
-                if (log.isLoggable(Level.FINER))
-                    log.log(Level.FINER, "checking if piece can move\n" + pieces[x][y].toString());
 
                 // check up
                 if (y > 0 && (pieces[x][y - 1] == null || pieces[x][y - 1].getPlayer() != checkPlayer))
@@ -655,7 +652,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
         public void mouseClicked(MouseEvent e) {
             if (e.isAltDown() && e.isShiftDown() && e.isControlDown()) {
                 revealOpponent = !revealOpponent;
-                log.log(Level.FINE, "Reveal mode is " + revealOpponent);
                 repaint();
             }
 

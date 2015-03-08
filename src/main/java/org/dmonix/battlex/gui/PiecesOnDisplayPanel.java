@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dmonix.battlex.gui;
 
 import java.awt.Color;
@@ -9,6 +26,7 @@ import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseEvent;
 import java.util.Hashtable;
+import java.util.Map;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -18,7 +36,7 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import org.dmonix.battlex.Battlex;
-import org.dmonix.battlex.event.ControlEventObject;
+import org.dmonix.battlex.event.ControlEvents;
 import org.dmonix.battlex.event.GameStateController;
 import org.dmonix.battlex.event.GameStates;
 import org.dmonix.battlex.resources.Resources;
@@ -26,17 +44,11 @@ import org.dmonix.util.ImageLoaderUtil;
 
 /**
  * The panel for displaying one players available/captured pieces.
- * <p>
- * Copyright: Copyright (c) 2004
- * </p>
- * <p>
- * Company: dmonix.org
- * </p>
  * 
  * @author Peter Nerg
- * @version 1.0
  */
 public class PiecesOnDisplayPanel extends JPanel {
+    private static final long serialVersionUID = -1615792225365427489L;
     private MainFrame owner;
     private LabelTypeIcon currentLabel;
     private int pieceCount = Resources.TOTAL_PIECES;
@@ -69,15 +81,16 @@ public class PiecesOnDisplayPanel extends JPanel {
     private LabelTypeIcon lblType11Icon;
     private JLabel lblType11Counter = new JLabel();
 
-    private Hashtable<String, JLabel> pieces = new Hashtable<>();
+    private Map<String, LabelTypeIcon> pieceImageLabels = new Hashtable<>();
+    private Map<String, JLabel> pieceCounterLabels = new Hashtable<>();
+
     private JButton btnOk = new JButton(ImageLoaderUtil.getImageIcon(ImageLoaderUtil.PATH_TOOLBARBUTTONGRAPHICS_GENERAL, "SendMail24.gif"));
-    private PiecesOnDisplayPanel_lblTypeIcon_mouseAdapter mouseAdapter;
+    private final PiecesOnDisplayPanel_lblTypeIcon_mouseAdapter mouseAdapter = new PiecesOnDisplayPanel_lblTypeIcon_mouseAdapter();
     private JButton btnSave = new JButton(ImageLoaderUtil.getImageIcon(ImageLoaderUtil.PATH_TOOLBARBUTTONGRAPHICS_GENERAL, "Save24.gif"));
     private JButton btnLoad = new JButton(ImageLoaderUtil.getImageIcon(ImageLoaderUtil.PATH_TOOLBARBUTTONGRAPHICS_GENERAL, "Open24.gif"));
 
     public PiecesOnDisplayPanel(int player) {
         try {
-            mouseAdapter = new PiecesOnDisplayPanel_lblTypeIcon_mouseAdapter();
             btnOk.setEnabled(false);
             lblType0Icon = new LabelTypeIcon(player, Resources.PIECE_BOMB_TYPE);
             lblType1Icon = new LabelTypeIcon(player, Resources.PIECE_MARSHAL_TYPE);
@@ -95,18 +108,31 @@ public class PiecesOnDisplayPanel extends JPanel {
             jbInit();
 
             titledBorder.setTitle("Player " + player);
-            pieces.put("lblType0Counter", lblType0Counter);
-            pieces.put("lblType1Counter", lblType1Counter);
-            pieces.put("lblType2Counter", lblType2Counter);
-            pieces.put("lblType3Counter", lblType3Counter);
-            pieces.put("lblType4Counter", lblType4Counter);
-            pieces.put("lblType5Counter", lblType5Counter);
-            pieces.put("lblType6Counter", lblType6Counter);
-            pieces.put("lblType7Counter", lblType7Counter);
-            pieces.put("lblType8Counter", lblType8Counter);
-            pieces.put("lblType9Counter", lblType9Counter);
-            pieces.put("lblType10Counter", lblType10Counter);
-            pieces.put("lblType11Counter", lblType11Counter);
+            pieceImageLabels.put(Resources.PIECE_BOMB_TYPE, lblType0Icon);
+            pieceImageLabels.put(Resources.PIECE_MARSHAL_TYPE, lblType1Icon);
+            pieceImageLabels.put(Resources.PIECE_GENERAL_TYPE, lblType2Icon);
+            pieceImageLabels.put(Resources.PIECE_COLONEL_TYPE, lblType3Icon);
+            pieceImageLabels.put(Resources.PIECE_MAJOR_TYPE, lblType4Icon);
+            pieceImageLabels.put(Resources.PIECE_CAPTAIN_TYPE, lblType5Icon);
+            pieceImageLabels.put(Resources.PIECE_LIEUTENANT_TYPE, lblType6Icon);
+            pieceImageLabels.put(Resources.PIECE_SERGEANT_TYPE, lblType7Icon);
+            pieceImageLabels.put(Resources.PIECE_MINER_TYPE, lblType8Icon);
+            pieceImageLabels.put(Resources.PIECE_SCOUT_TYPE, lblType9Icon);
+            pieceImageLabels.put(Resources.PIECE_SPY_TYPE, lblType10Icon);
+            pieceImageLabels.put(Resources.PIECE_FLAG_TYPE, lblType11Icon);
+
+            pieceCounterLabels.put(Resources.PIECE_BOMB_TYPE, lblType0Counter);
+            pieceCounterLabels.put(Resources.PIECE_MARSHAL_TYPE, lblType1Counter);
+            pieceCounterLabels.put(Resources.PIECE_GENERAL_TYPE, lblType2Counter);
+            pieceCounterLabels.put(Resources.PIECE_COLONEL_TYPE, lblType3Counter);
+            pieceCounterLabels.put(Resources.PIECE_MAJOR_TYPE, lblType4Counter);
+            pieceCounterLabels.put(Resources.PIECE_CAPTAIN_TYPE, lblType5Counter);
+            pieceCounterLabels.put(Resources.PIECE_LIEUTENANT_TYPE, lblType6Counter);
+            pieceCounterLabels.put(Resources.PIECE_SERGEANT_TYPE, lblType7Counter);
+            pieceCounterLabels.put(Resources.PIECE_MINER_TYPE, lblType8Counter);
+            pieceCounterLabels.put(Resources.PIECE_SCOUT_TYPE, lblType9Counter);
+            pieceCounterLabels.put(Resources.PIECE_SPY_TYPE, lblType10Counter);
+            pieceCounterLabels.put(Resources.PIECE_FLAG_TYPE, lblType11Counter);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -219,11 +245,11 @@ public class PiecesOnDisplayPanel extends JPanel {
         this.add(btnLoad, new GridBagConstraints(0, 12, 1, 1, 1.0, 1.0, GridBagConstraints.NORTHEAST, GridBagConstraints.NONE, new Insets(0, 10, 6, 6), 0, 0));
     }
 
-    public int getSelectedPieceType() {
+    public String getSelectedPieceType() {
         if (currentLabel == null)
-            return -1;
+            return Resources.PIECE_NO_PIECE;
 
-        int pieceType = currentLabel.type;
+        String pieceType = currentLabel.type;
         subtractPiece(pieceType);
         currentLabel.setBorder(null);
         currentLabel = null;
@@ -277,8 +303,8 @@ public class PiecesOnDisplayPanel extends JPanel {
         lblType11Counter.setText("" + Resources.PIECE_FLAG_COUNT);
     }
 
-    public void addPiece(int type) {
-        JLabel label = pieces.get("lblType" + type + "Counter");
+    public void addPiece(String type) {
+        JLabel label = pieceCounterLabels.get(type);
         int newValue = Integer.parseInt(label.getText()) + 1;
         label.setText("" + newValue);
         pieceCount++;
@@ -286,12 +312,12 @@ public class PiecesOnDisplayPanel extends JPanel {
         enableLabel(type, true);
     }
 
-    public void subtractPiece(int type) {
+    public void subtractPiece(String type) {
         pieceCount--;
         if (pieceCount == 0)
             btnOk.setEnabled(true);
 
-        JLabel label = pieces.get("lblType" + type + "Counter");
+        JLabel label = pieceCounterLabels.get(type);
         int newValue = Integer.parseInt(label.getText()) - 1;
         if (newValue <= 0) {
             enableLabel(type, false);
@@ -301,13 +327,15 @@ public class PiecesOnDisplayPanel extends JPanel {
         label.setText("" + newValue);
     }
 
-    private void enableLabel(int type, boolean enabled) {
-        try {
-            ((JLabel) PiecesOnDisplayPanel.class.getDeclaredField("lblType" + type + "Counter").get(this)).setEnabled(enabled);
-            ((JLabel) PiecesOnDisplayPanel.class.getDeclaredField("lblType" + type + "Icon").get(this)).setEnabled(enabled);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
+    private void enableLabel(String type, boolean enabled) {
+        pieceImageLabels.get(type).setEnabled(enabled);
+        pieceCounterLabels.get(type).setEnabled(enabled);
+        // try {
+        // ((JLabel) PiecesOnDisplayPanel.class.getDeclaredField("lblType" + type + "Icon").get(this)).setEnabled(enabled);
+        // ((JLabel) PiecesOnDisplayPanel.class.getDeclaredField("lblType" + type + "Counter").get(this)).setEnabled(enabled);
+        // } catch (Exception ex) {
+        // ex.printStackTrace();
+        // }
     }
 
     /**
@@ -322,9 +350,10 @@ public class PiecesOnDisplayPanel extends JPanel {
      * @version 1.0
      */
     private class LabelTypeIcon extends JLabel {
-        private int type;
+        private static final long serialVersionUID = 1292383031384135798L;
+        private String type;
 
-        private LabelTypeIcon(int player, int type) {
+        private LabelTypeIcon(int player, String type) {
             super(Resources.getIcon(player, type, 35));
             this.type = type;
             super.addMouseListener(mouseAdapter);
@@ -383,7 +412,7 @@ public class PiecesOnDisplayPanel extends JPanel {
         btnSave.setVisible(false);
         btnLoad.setVisible(false);
 
-        owner.sendEvent(ControlEventObject.EVENT_SETUP_SENT);
+        owner.sendEvent(ControlEvents.EVENT_SETUP_SENT);
 
         if (gameStateObject.inState(GameStates.STATE_GAME_SETUP))
             gameStateObject.setState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP);

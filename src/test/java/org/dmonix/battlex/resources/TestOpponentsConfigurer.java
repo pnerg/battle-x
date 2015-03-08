@@ -21,6 +21,7 @@ package org.dmonix.battlex.resources;
 import java.io.File;
 import java.io.IOException;
 import java.math.BigInteger;
+import java.util.List;
 
 import javax.xml.bind.JAXBException;
 
@@ -55,9 +56,32 @@ public class TestOpponentsConfigurer extends BaseAssert {
     }
 
     @Test
-    public void read() throws JAXBException {
-        Opponents opponents = OpponentsConfigurer.read();
+    public void getOpponents() throws JAXBException {
+        List<OpponentConfigurationObject> opponents = OpponentsConfigurer.getOpponents();
         assertNotNull(opponents);
+        assertEquals(1, opponents.size());
+        OpponentConfigurationObject oco = opponents.get(0);
+        assertEquals("peter", oco.getName());
+        assertEquals("localhost", oco.getUrl());
+        assertEquals(6969, oco.getPort());
+    }
+
+    @Test
+    public void addOpponent() {
+        OpponentConfigurationObject oco = new OpponentConfigurationObject("sockerconny", "elak fan", "127.0.0.1", 666);
+        OpponentsConfigurer.addOpponent(oco);
+
+        List<OpponentConfigurationObject> opponents = OpponentsConfigurer.getOpponents();
+        assertNotNull(opponents);
+        assertEquals(2, opponents.size());
+    }
+
+    @Test
+    public void removeOpponent() {
+        OpponentsConfigurer.removeOpponent("peter");
+        List<OpponentConfigurationObject> opponents = OpponentsConfigurer.getOpponents();
+        assertNotNull(opponents);
+        assertEquals(0, opponents.size());
     }
 
     @Test
@@ -70,6 +94,6 @@ public class TestOpponentsConfigurer extends BaseAssert {
         opponent.setPort(BigInteger.valueOf(6969));
         opponents.getOpponent().add(opponent);
 
-        OpponentsConfigurer.store(opponents);
+        // OpponentsConfigurer.store(opponents);
     }
 }

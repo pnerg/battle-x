@@ -1,3 +1,20 @@
+/**
+ * Licensed to the Apache Software Foundation (ASF) under one
+ * or more contributor license agreements.  See the NOTICE file
+ * distributed with this work for additional information
+ * regarding copyright ownership.  The ASF licenses this file
+ * to you under the Apache License, Version 2.0 (the
+ * "License"); you may not use this file except in compliance
+ * with the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package org.dmonix.battlex.gui;
 
 import java.awt.Image;
@@ -6,34 +23,22 @@ import java.awt.Point;
 import org.dmonix.battlex.resources.Resources;
 
 /**
- * <p>
- * Title:
- * </p>
- * <p>
- * Description:
- * </p>
- * <p>
- * Copyright: Copyright (c) 2003
- * </p>
- * <p>
- * Company: dmonix.org
- * </p>
- * 
  * @author Peter Nerg
  * @version 1.0
  */
 public class Piece {
-    public static int RESULT_WIN = 1;
-    public static int RESULT_DRAW = 0;
-    public static int RESULT_LOOSE = -1;
-    public static int RESULT_WIN_GAME = 69;
+    public static final int RESULT_WIN = 1;
+    public static final int RESULT_DRAW = 0;
+    public static final int RESULT_LOOSE = -1;
+    public static final int RESULT_WIN_GAME = 69;
 
     private final int moveDistance;
     private final Image image;
-    private final int player, type;
+    private final int player;
+    private final String type;
     private final Point coord;
 
-    public Piece(int player, int type, int x_coord, int y_coord) {
+    public Piece(int player, String type, int x_coord, int y_coord) {
         this.player = player;
         this.type = type;
         coord = new Point(x_coord, y_coord);
@@ -88,16 +93,6 @@ public class Piece {
     }
 
     /**
-     * Returns the empty (backside) image for the piece.
-     * 
-     * @return the image
-     */
-    // public Image getEmptyImage()
-    // {
-    // return emptyImage;
-    // }
-
-    /**
      * Returns the image for the piece.
      * 
      * @return the image
@@ -119,7 +114,7 @@ public class Piece {
             return Resources.getImage(this.player, Resources.PIECE_EMPTY_TYPE);
     }
 
-    public int getType() {
+    public String getType() {
         return this.type;
     }
 
@@ -131,29 +126,7 @@ public class Piece {
      * @return -1 defender wins, 0 draw, 1 attacker wins
      */
     public int resolveStrike(Piece defender) {
-        int defenderType = defender.getType();
-
-        // equal pieces is a draw
-        if (this.type == defenderType)
-            return RESULT_DRAW;
-
-        // the flag always looses
-        if (defenderType == Resources.PIECE_FLAG_TYPE)
-            return RESULT_WIN_GAME;
-
-        // the bomb wins over everything except the miner
-        if (this.type == Resources.PIECE_MINER_TYPE && defenderType == Resources.PIECE_BOMB_TYPE)
-            return RESULT_WIN;
-
-        // the spy wins over the marshal only if the spy strikes
-        if (this.type == Resources.PIECE_SPY_TYPE && defenderType == Resources.PIECE_MARSHAL_TYPE)
-            return RESULT_WIN;
-
-        // determine the winner based on the value of the type
-        if (this.type < defenderType)
-            return RESULT_WIN;
-        else
-            return RESULT_LOOSE;
+        return Resources.resolveStrike(this, defender);
     }
 
     @Deprecated
@@ -164,7 +137,7 @@ public class Piece {
         StringBuffer sb = new StringBuffer();
         sb.append("Player = " + player + "\n");
         sb.append("Position = " + coord.x + ":" + coord.y + "\n");
-        sb.append("Type = " + Resources.getPieceName(type));
+        sb.append("Type = " + type);
         return sb.toString();
     }
 

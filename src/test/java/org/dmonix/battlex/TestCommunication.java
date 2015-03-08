@@ -1,6 +1,6 @@
 package org.dmonix.battlex;
 
-import org.dmonix.battlex.event.ControlEventObject;
+import org.dmonix.battlex.event.ControlEvents;
 import org.dmonix.battlex.event.EventCommunicator;
 import org.dmonix.battlex.event.GameEventObject;
 
@@ -30,18 +30,13 @@ public class TestCommunication {
         sender = new EventCommunicator("localhost", 6969);
         // sender2 = new EventCommunicator("localhost", 6969);
 
-        sendControlEvent(ControlEventObject.CMD_CONNECT);
+        sender.sendEvent(ControlEvents.EVENT_CONNECT);
         // System.out.println(sender.requestStatus("136.225.5.218", 6969));
         // System.out.println(sender.requestStatus("136.434.534.3243", 6969));
         sendGameEvent(2, 1, 2, 2);
         sendGameEvent(3, 1, 3, 2);
         // sendGameEvent();
         // sendGameEvent();
-    }
-
-    private void sendControlEvent(int command) throws Exception {
-        ControlEventObject ceo = new ControlEventObject(command);
-        sender.sendEvent(ceo);
     }
 
     private void sendGameEvent(int x_coord_old, int y_coord_old, int x_coord_new, int y_coord_new) throws Exception {
