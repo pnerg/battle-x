@@ -29,6 +29,7 @@ import org.dmonix.xml.XMLElement;
  * @author Peter Nerg
  * @version 1.0
  */
+@Deprecated
 public class Configuration {
     public static final File CONF_PATH = new File(System.getProperty("user.home") + File.separator + "dmonix" + File.separator + "battlex");
 

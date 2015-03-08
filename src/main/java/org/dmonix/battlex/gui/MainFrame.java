@@ -24,17 +24,14 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.HeadlessException;
 import java.awt.Insets;
-import java.awt.Point;
 import java.awt.SystemColor;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowEvent;
 import java.io.File;
-import java.io.FileInputStream;
 import java.net.ConnectException;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
-import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JMenu;
@@ -54,15 +51,10 @@ import org.dmonix.battlex.event.GameStates;
 import org.dmonix.battlex.resources.Configuration;
 import org.dmonix.battlex.resources.OpponentConfigurationObject;
 import org.dmonix.battlex.resources.OpponentsConfigurer;
-import org.dmonix.cipher.CipherInputStreamPBE;
 import org.dmonix.gui.DMoniXLogoLabel;
 import org.dmonix.gui.RollingProgressBar;
 import org.dmonix.gui.SplashPanel;
-import org.dmonix.io.filters.FileExtensionFilter;
 import org.dmonix.net.NetUtil;
-import org.dmonix.xml.XMLDocument;
-import org.dmonix.xml.XMLElement;
-import org.dmonix.xml.XMLElementList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -114,7 +106,9 @@ public class MainFrame extends JFrame {
     public MainFrame() throws HeadlessException {
         try {
             logger.info("STARTING");
-            SplashPanel.showSplash("BattleX", majorVersion, minorVersion);
+            if (System.getProperty("battlex.nosplash") == null) {
+                SplashPanel.showSplash("BattleX", majorVersion, minorVersion);
+            }
 
             jbInit();
 
@@ -340,39 +334,40 @@ public class MainFrame extends JFrame {
      * @param e
      */
     void btnLoad_actionPerformed(ActionEvent e) {
-        JFileChooser fc = new JFileChooser();
-        fc.setCurrentDirectory(new File(Configuration.CONF_PATH, "setups"));
-        fc.setFileFilter(new FileExtensionFilter("stp", "Saved setups (*.stp)"));
-        fc.setMultiSelectionEnabled(false);
-
-        int returnVal = fc.showOpenDialog(this);
-
-        if (returnVal != JFileChooser.APPROVE_OPTION)
-            return;
-
-        File f = fc.getSelectedFile();
-        logger.debug("Loading piece setup from [{}]", f.getAbsolutePath());
-
-        XMLDocument doc = null;
-        try {
-            doc = new XMLDocument(new CipherInputStreamPBE(new FileInputStream(f), "srC42T#mbT6&tY7".toCharArray()));
-        } catch (Exception ex) {
-            logger.warn("Failed to load piece setup from [" + f.getAbsolutePath() + "]", ex);
-            JOptionPane.showMessageDialog(this, "The file is not a valid piece setup file\n" + f.getAbsolutePath(), "Failed to load piece setup",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        boardPanel.clearAllPlayerPieces();
-
-        XMLElementList pieceList = doc.getElementsByTagName("piece");
-        String type;
-        for (XMLElement piece : pieceList) {
-            type = piece.getAttribute("type");
-            this.subtractPiece(player, type);
-            Point point = new Point(Integer.parseInt(piece.getAttribute("x")), Integer.parseInt(piece.getAttribute("y")));
-            this.boardPanel.setPieceAtPoint(point, type);
-        }
+        // TODO implement in the future
+        // JFileChooser fc = new JFileChooser();
+        // fc.setCurrentDirectory(new File(Configuration.CONF_PATH, "setups"));
+        // fc.setFileFilter(new FileExtensionFilter("stp", "Saved setups (*.stp)"));
+        // fc.setMultiSelectionEnabled(false);
+        //
+        // int returnVal = fc.showOpenDialog(this);
+        //
+        // if (returnVal != JFileChooser.APPROVE_OPTION)
+        // return;
+        //
+        // File f = fc.getSelectedFile();
+        // logger.debug("Loading piece setup from [{}]", f.getAbsolutePath());
+        //
+        // XMLDocument doc = null;
+        // try {
+        // doc = new XMLDocument(new CipherInputStreamPBE(new FileInputStream(f), "srC42T#mbT6&tY7".toCharArray()));
+        // } catch (Exception ex) {
+        // logger.warn("Failed to load piece setup from [" + f.getAbsolutePath() + "]", ex);
+        // JOptionPane.showMessageDialog(this, "The file is not a valid piece setup file\n" + f.getAbsolutePath(), "Failed to load piece setup",
+        // JOptionPane.ERROR_MESSAGE);
+        // return;
+        // }
+        //
+        // boardPanel.clearAllPlayerPieces();
+        //
+        // XMLElementList pieceList = doc.getElementsByTagName("piece");
+        // String type;
+        // for (XMLElement piece : pieceList) {
+        // type = piece.getAttribute("type");
+        // this.subtractPiece(player, type);
+        // Point point = new Point(Integer.parseInt(piece.getAttribute("x")), Integer.parseInt(piece.getAttribute("y")));
+        // this.boardPanel.setPieceAtPoint(point, type);
+        // }
     }
 
     void menuItemAbout_actionPerformed(ActionEvent e) {

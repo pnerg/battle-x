@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<opponents xmlns="http://dmonix.org/battlex/1.0">
+	<opponent name="p2">
+		<description>Player 2</description>
+		<host>localhost</host>
+		<port>9696</port>
+		<proxy useProxy="false">
+			<proxyHost />
+			<proxyPort />
+		</proxy>
+	</opponent>
+</opponents>

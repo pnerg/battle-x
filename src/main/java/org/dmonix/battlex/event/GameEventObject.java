@@ -89,12 +89,7 @@ public final class GameEventObject implements Serializable {
             sb.append(y_coord_old);
             sb.append("\n");
         } else {
-            sb.append("type=");
-            sb.append(type);
-            sb.append("\n");
-            sb.append("name=");
-            sb.append(type);
-            sb.append("\n");
+            sb.append("type=").append(type).append("\n");
         }
 
         sb.append("x-coord-new=");

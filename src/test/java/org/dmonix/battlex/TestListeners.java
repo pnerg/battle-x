@@ -1,7 +1,5 @@
 package org.dmonix.battlex;
 
-import java.util.logging.LogManager;
-
 import org.dmonix.battlex.event.ControlEventListener;
 import org.dmonix.battlex.event.ControlEventObject;
 import org.dmonix.battlex.event.GameEventListener;
@@ -40,11 +38,8 @@ public class TestListeners implements ControlEventListener, GameEventListener {
     }
 
     public static void main(String[] args) {
-        try {
-            LogManager.getLogManager().readConfiguration(TestListeners.class.getClassLoader().getResourceAsStream("log.properties"));
-            TestListeners testListeners1 = new TestListeners();
-        } catch (Exception ex) {
-            ex.printStackTrace();
+        for (int i = 0; i < 3; i++) {
+            System.out.println(i);
         }
     }
 

@@ -33,6 +33,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.dmonix.battlex.Battlex;
+import org.dmonix.battlex.datamodel.Board;
 import org.dmonix.battlex.event.EventCommunicator;
 import org.dmonix.battlex.event.GameEventListener;
 import org.dmonix.battlex.event.GameEventObject;
@@ -62,7 +63,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
     private float squareWidth = -1;
     private float squareHeight = -1;
 
-    private Piece[][] pieces = new Piece[10][10];
+    private final Board board = new Board();
     private Object[][] markedSquares = new Object[10][10];
     private int player = -1;
     private int otherPlayer = -1;
@@ -72,11 +73,8 @@ public class BoardPanel extends JPanel implements GameEventListener {
 
     public BoardPanel() {
         boardBackgroundImage = Resources.getBackgroundImage(1);
-        try {
-            jbInit();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        this.setBackground(Battlex.BACKGOUND_COLOR);
+        this.addMouseListener(new BoardPanel_this_mouseAdapter());
         repaint();
     }
 
@@ -94,17 +92,18 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * It will also notify the other player of these changes This is only used during setup when a player loads a setup from file
      */
     public void clearAllPlayerPieces() {
-        for (int y = 6; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                if (pieces[x][y] != null && pieces[x][y].getPlayer() == player) {
-                    owner.addPiece(player, pieces[x][y].getType());
-                    pieces[x][y] = null;
-                    markedSquares[x][y] = new Object();
-                    eventCommunicator.sendEvent(new GameEventObject(Resources.PIECE_NO_PIECE, x, y));
-                }
-            }
-        }
-        repaint();
+        // TODO implement when loading of setup is implemented
+        // for (int y = 6; y < 10; y++) {
+        // for (int x = 0; x < 10; x++) {
+        // if (pieces[x][y] != null && pieces[x][y].getPlayer() == player) {
+        // owner.addPiece(player, pieces[x][y].getType());
+        // pieces[x][y] = null;
+        // markedSquares[x][y] = new Object();
+        // eventCommunicator.sendEvent(new GameEventObject(Resources.PIECE_NO_PIECE, x, y));
+        // }
+        // }
+        // }
+        // repaint();
     }
 
     /**
@@ -113,23 +112,25 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param geo
      */
     public void gameEvent(GameEventObject geo) {
-        log.debug("Received game event [{}] ", geo);
+        log.debug("Received game event [{}] in state [{}] ", geo, gameStateObject.getState());
 
         /**
          * The game is on
          */
         if (gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN)) {
             gameStateObject.setState(GameStates.STATE_IN_GAME_PLAYER_TURN);
-            movePiece(pieces[geo.getOldXCoord()][geo.getOldYCoord()], geo.getNewXCoord(), geo.getNewYCoord());
+            movePiece(board.getPiece(geo.getOldXCoord(), geo.getOldYCoord()), geo.getNewXCoord(), geo.getNewYCoord());
         }
         /**
          * The game is being setup
          */
         else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
-            if (geo.getType() != Resources.PIECE_NO_PIECE)
-                this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord());
-            else
-                this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = null;
+            if (geo.getType() != Resources.PIECE_NO_PIECE) {
+                // this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord());
+                board.addPiece(new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord()));
+            } else {
+                board.removePiece(geo.getNewXCoord(), geo.getNewYCoord());
+            }
 
             repaint();
         }
@@ -149,19 +150,20 @@ public class BoardPanel extends JPanel implements GameEventListener {
         super.setSize(super.getSize());
 
         this.player = player;
-        this.otherPlayer = 2;
         this.eventCommunicator = eventCommunicator;
         this.eventCommunicator.addEventListener(this);
 
-        if (player != 1)
+        if (player == 1) {
+            otherPlayer = 2;
+        } else {
             otherPlayer = 1;
+        }
 
         for (int y = 6; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 markedSquares[x][y] = new Object();
             }
         }
-
         repaint();
     }
 
@@ -175,7 +177,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
         Graphics2D g2 = (Graphics2D) g;
 
         /**
-         * pre-load all images (for both players) the first time, otherwise it might sometimes result in strange behaviour where the image isn't rendered until
+         * pre-load all images (for both players) the first time, otherwise it might sometimes result in strange behavior where the image isn't rendered until
          * after a few repaints
          */
         if (firstPaint) {
@@ -264,6 +266,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
             for (int y = 0; y < 10; y++) {
                 for (int x = 0; x < 10; x++) {
                     if (markedSquares[x][y] != null) {
+                        // log.debug("Marking/painting square x[{}] y[{}]", x, y);
                         g2.setColor(fill);
                         g2.fill(new Rectangle((int) (squareWidth * x), (int) (squareHeight * y), (int) squareWidth, (int) squareHeight));
                     }
@@ -277,29 +280,34 @@ public class BoardPanel extends JPanel implements GameEventListener {
          */
         Image scaledImage;
 
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                if (pieces[x][y] == null)
-                    continue;
+        for (Piece piece : board.getPieces()) {
+            Point point = translatePieceLocationToLocalLayout(piece);
+            int x = point.x;
+            int y = point.y;
+            if (!revealOpponent)
+                scaledImage = piece.getImage(this.player);
+            else
+                scaledImage = piece.getImage();
 
-                if (!revealOpponent)
-                    scaledImage = pieces[x][y].getImage(this.player);
-                else
-                    scaledImage = pieces[x][y].getImage();
-
-                if (currentPiece != null && pieces[x][y] != currentPiece)
-                    g2.setComposite(alphaComposite2);
-
-                g2.drawImage(scaledImage, (int) squareWidth * x + scaledImage.getWidth(null) / 2, (int) squareHeight * y + scaledImage.getHeight(null) / 8,
-                        null);
-                g2.setComposite(originalComposite);
-            }
+            if (currentPiece != null && piece != currentPiece)
+                g2.setComposite(alphaComposite2);
+            log.debug("Painting [{}] at x[{}] y[{}]", piece, x, y);
+            g2.drawImage(scaledImage, (int) squareWidth * x + scaledImage.getWidth(null) / 2, (int) squareHeight * y + scaledImage.getHeight(null) / 8, null);
+            g2.setComposite(originalComposite);
         }
     }
 
-    private void jbInit() throws Exception {
-        this.setBackground(Battlex.BACKGOUND_COLOR);
-        this.addMouseListener(new BoardPanel_this_mouseAdapter(this));
+    private Point translatePieceLocationToLocalLayout(Piece piece) {
+        int x = piece.getXCoord();
+        int y = piece.getYCoord();
+        Point point;
+        if (player == 1) {
+            point = new Point(x, 9 - y);
+        } else {
+            point = new Point(x - 9, y);
+        }
+
+        return point;
     }
 
     /**
@@ -308,7 +316,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param e
      */
     void inGameClick(MouseEvent e) {
-        Point point = getClickedPoint(e);
+        Point point = getClickedSquare(e);
 
         /**
          * If the user has pressed any other mouse button than button 1 then clear the selection
@@ -322,7 +330,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
 
         log.debug("Clicked in: " + e.getPoint() + " x_coord=" + point.x + " y_coord=" + point.y);
 
-        Piece selectedPiece = pieces[point.x][point.y];
+        Piece selectedPiece = getPieceAtPoint(point);
 
         // not selected any piece and clicked in an empty space
         if (selectedPiece == null && currentPiece == null)
@@ -352,7 +360,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (currentPiece != null && markedSquares[point.x][point.y] == null)
             return;
 
-        eventCommunicator.sendEvent(new GameEventObject(currentPiece.getLocation().x, currentPiece.getLocation().y, point.x, point.y));
+        eventCommunicator.sendEvent(new GameEventObject(currentPiece.getXCoord(), currentPiece.getYCoord(), point.x, point.y));
 
         movePiece(currentPiece, point.x, point.y);
         gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);
@@ -368,7 +376,18 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @return
      */
     public Piece getPieceAtPoint(int x, int y) {
-        return pieces[x][y];
+        return board.getPiece(x, y);
+    }
+
+    /**
+     * Get the piece at a specific point on the board
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    private Piece getPieceAtPoint(Point point) {
+        return board.getPiece(point.x, point.y);
     }
 
     /**
@@ -379,13 +398,14 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param pieceType
      *            The type of piece
      */
-    public void setPieceAtPoint(Point point, String pieceType) {
+    private void setPieceAtPoint(Point point, String pieceType) {
         // if there is a piece in the square, remove it
-        if (pieces[point.x][point.y] != null) {
+        Piece piece = board.getPiece(point.x, point.y);
+        if (piece != null && piece.getPlayer() == player) {
             // remove the piece from the opponents board
             eventCommunicator.sendEvent(new GameEventObject(Resources.PIECE_NO_PIECE, point.x, point.y));
-            owner.addPiece(player, pieces[point.x][point.y].getType());
-            pieces[point.x][point.y] = null;
+            owner.addPiece(player, piece.getType());
+            board.removePiece(point.x, point.y);
             this.markedSquares[point.x][point.y] = new Object();
             repaint();
         }
@@ -397,39 +417,61 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (pieceType == Resources.PIECE_NO_PIECE)
             return;
 
-        this.pieces[point.x][point.y] = new Piece(this.player, pieceType, point.x, point.y);
+        board.addPiece(new Piece(this.player, pieceType, point.x, point.y));
         this.markedSquares[point.x][point.y] = null;
         eventCommunicator.sendEvent(new GameEventObject(pieceType, point.x, point.y));
 
         repaint();
     }
 
-    void gameSetupClick(MouseEvent e) {
+    private void gameSetupClick(MouseEvent e) {
         // find the point for the click
-        Point point = getClickedPoint(e);
-
+        Point point = getClickedSquare(e);
+        // can only click on own squares
+        if ((player == 1 && point.y > 3) || (player == 2 && point.y < 6))
+            return;
         // get the selected setup piece
         String pieceType = owner.getSelectedSetupPiece(this.player);
-
-        // can only click on own squares
-        if (point.y < 6)
-            return;
-
         setPieceAtPoint(point, pieceType);
     }
 
     /**
-     * Finds out which square has been selected
+     * Finds out which square has been selected.<br>
+     * The coordinate system goes from 0/0 - 9/9. <br>
+     * The coordinate system is absolute for both players, i.e. player 1 plays from y=0 and player 2 plays from y=9. Where 0/0 is the left down corner and 9/9
+     * is right upper corner for player 1.
+     * 
+     * <pre>
+     *    Player2
+     * 0/9 .... 9/9
+     * .
+     * .
+     * .
+     * 0/0 .... 9/0
+     *    Player1
+     * </pre>
      * 
      * @param e
      * @return
      */
-    private Point getClickedPoint(MouseEvent e) {
+    private Point getClickedSquare(MouseEvent e) {
         Dimension d = super.getSize();
         squareWidth = d.width / 10;
         squareHeight = d.height / 10;
 
-        return new Point(e.getPoint().x / (int) squareWidth, e.getPoint().y / (int) squareHeight);
+        final int x = e.getPoint().x / (int) squareWidth;
+        final int y = e.getPoint().y / (int) squareHeight;
+        int x_transposed, y_transposed;
+        if (player == 1) {
+            x_transposed = x;
+            y_transposed = 9 - y;
+        } else {
+            x_transposed = 9 - x;
+            y_transposed = y;
+        }
+        Point point = new Point(x_transposed, y_transposed);
+        log.debug("Player [{}] clicked in square x[{}] y[{}]", player, point.x, point.y);
+        return point;
     }
 
     /**
@@ -439,72 +481,49 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param defender
      */
     private void movePiece(Piece attacker, int x_coord_defender, int y_coord_defender) {
-        int x_coord_attacker = attacker.getLocation().x;
-        int y_coord_attacker = attacker.getLocation().y;
+        int result = board.movePiece(attacker, x_coord_defender, y_coord_defender);
 
-        log.debug("Resolve movement : \nattacker=" + x_coord_attacker + ":" + y_coord_attacker + "\ndefender=" + x_coord_defender + ":" + y_coord_defender);
-
-        Piece defender = pieces[x_coord_defender][y_coord_defender];
+        Piece defender = board.getPiece(x_coord_defender, y_coord_defender);
 
         /**
          * empty space, go ahead and move the piece to that location
          */
-        if (defender == null && attacker != null) {
-            log.debug("Moved: " + attacker.toString() + "\nto " + x_coord_defender + ":" + y_coord_defender);
-
-            pieces[x_coord_attacker][y_coord_attacker] = null;
-            pieces[x_coord_defender][y_coord_defender] = attacker;
-            pieces[x_coord_defender][y_coord_defender].setLocation(x_coord_defender, y_coord_defender);
+        if (result == Board.RESULT_MOVE_NO_BATTLE) {
+            return;
         }
 
-        /**
-         * Exists piece for the opponent player in the new position.
-         */
-        else if (defender != null && attacker != null && defender.getPlayer() != attacker.getPlayer()) {
-            int result = attacker.resolveStrike(defender);
+        // attacker wins
+        if (result == Board.RESULT_WIN) {
+            owner.subtractPiece(defender.getPlayer(), defender.getType());
 
-            // attacker wins
-            if (result == Piece.RESULT_WIN) {
-                pieces[x_coord_defender][y_coord_defender].destroy();
-                pieces[x_coord_defender][y_coord_defender] = null;
-                pieces[x_coord_defender][y_coord_defender] = pieces[x_coord_attacker][y_coord_attacker];
-                pieces[x_coord_defender][y_coord_defender].setLocation(x_coord_defender, y_coord_defender);
-                owner.subtractPiece(defender.getPlayer(), defender.getType());
-
-                ResolveStrikeDialog.showStrikeResult(owner, "Player " + attacker.getPlayer() + " wins", attacker.getPlayer(), attacker.getType(),
-                        defender.getPlayer(), defender.getType());
-            }
-            // draw
-            else if (result == Piece.RESULT_DRAW) {
-                pieces[x_coord_defender][y_coord_defender].destroy();
-                pieces[x_coord_defender][y_coord_defender] = null;
-                owner.subtractPiece(attacker.getPlayer(), attacker.getType());
-                owner.subtractPiece(defender.getPlayer(), defender.getType());
-
-                ResolveStrikeDialog.showStrikeResult(owner, "Draw", attacker.getPlayer(), attacker.getType(), defender.getPlayer(), defender.getType());
-            }
-            // defender wins
-            else if (result == Piece.RESULT_LOOSE) {
-                owner.subtractPiece(attacker.getPlayer(), attacker.getType());
-
-                ResolveStrikeDialog.showStrikeResult(owner, "Player " + defender.getPlayer() + " wins", attacker.getPlayer(), attacker.getType(),
-                        defender.getPlayer(), defender.getType());
-
-            }
-            // The flag was found, attacker wins, game ends
-            else {
-                ResolveStrikeDialog.showStrikeResult(owner, "Game over! Player" + attacker.getPlayer() + " wins", attacker.getPlayer(), attacker.getType(),
-                        defender.getPlayer(), defender.getType());
-                gameStateObject.setState(GameStates.STATE_IDLE);
-            }
-
-            // remove the old position for the piece that moved
-            pieces[x_coord_attacker][y_coord_attacker] = null;
-            checkIfAnyPlayerCanMove();
+            ResolveStrikeDialog.showStrikeResult(owner, "Player " + attacker.getPlayer() + " wins", attacker.getPlayer(), attacker.getType(),
+                    defender.getPlayer(), defender.getType());
         }
+        // draw
+        else if (result == Board.RESULT_DRAW) {
+            owner.subtractPiece(attacker.getPlayer(), attacker.getType());
+            owner.subtractPiece(defender.getPlayer(), defender.getType());
+
+            ResolveStrikeDialog.showStrikeResult(owner, "Draw", attacker.getPlayer(), attacker.getType(), defender.getPlayer(), defender.getType());
+        }
+        // defender wins
+        else if (result == Board.RESULT_LOOSE) {
+            owner.subtractPiece(attacker.getPlayer(), attacker.getType());
+
+            ResolveStrikeDialog.showStrikeResult(owner, "Player " + defender.getPlayer() + " wins", attacker.getPlayer(), attacker.getType(),
+                    defender.getPlayer(), defender.getType());
+
+        }
+        // The flag was found, attacker wins, game ends
+        else {
+            ResolveStrikeDialog.showStrikeResult(owner, "Game over! Player" + attacker.getPlayer() + " wins", attacker.getPlayer(), attacker.getType(),
+                    defender.getPlayer(), defender.getType());
+            gameStateObject.setState(GameStates.STATE_IDLE);
+        }
+
+        checkIfAnyPlayerCanMove();
 
         clearMarkedSquares();
-        System.gc();
         repaint();
     }
 
@@ -512,8 +531,8 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * Checks if any of the players can move a piece. If not a message it displayed stating the victory of one of the players
      */
     private void checkIfAnyPlayerCanMove() {
-        boolean player1Move = checkIfPlayerCanMove(1);
-        boolean player2Move = checkIfPlayerCanMove(2);
+        boolean player1Move = board.checkIfPlayerCanMove(1);
+        boolean player2Move = board.checkIfPlayerCanMove(2);
 
         // neither player can move
         if (!player1Move && !player2Move) {
@@ -534,42 +553,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
     }
 
     /**
-     * Checks all pieces for a player to see if the player can move any of them
-     * 
-     * @param checkPlayer
-     *            the player to check
-     * @return
-     */
-    private boolean checkIfPlayerCanMove(int checkPlayer) {
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                // ignore empty squares, non-checkPlayer pieces and pieces that cannot move
-                if (pieces[x][y] == null || pieces[x][y].getPlayer() != checkPlayer || pieces[x][y].getMoveDistance() < 1)
-                    continue;
-
-                // check up
-                if (y > 0 && (pieces[x][y - 1] == null || pieces[x][y - 1].getPlayer() != checkPlayer))
-                    return true;
-
-                // check down
-                if (y < 9 && (pieces[x][y + 1] == null || pieces[x][y + 1].getPlayer() != checkPlayer))
-                    return true;
-
-                // check left
-                if (x > 0 && (pieces[x - 1][y] == null || pieces[x - 1][y].getPlayer() != checkPlayer))
-                    return true;
-
-                // check right
-                if (x < 9 && (pieces[x + 1][y] == null || pieces[x + 1][y].getPlayer() != checkPlayer))
-                    return true;
-
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Highlights the squares that the currently selected piece can move to
      * 
      * @param piece
@@ -581,56 +564,60 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (moveDistance == 0)
             return;
 
-        int x_coord = piece.getLocation().x;
-        int y_coord = piece.getLocation().y;
-
-        // check up
-        for (int i = 1; i <= moveDistance; i++) {
-            if (y_coord - i < 0 || ((x_coord == 2 || x_coord == 3 || x_coord == 6 || x_coord == 7) && (y_coord - i == 4 || y_coord - i == 5))
-                    || (pieces[x_coord][y_coord - i] != null && pieces[x_coord][y_coord - i].getPlayer() == piece.getPlayer()))
-                break;
-
-            markedSquares[x_coord][y_coord - i] = new Object();
-
-            if (pieces[x_coord][y_coord - i] != null && pieces[x_coord][y_coord - i].getPlayer() != piece.getPlayer())
-                break;
+        boolean[][] allowedMoves = board.getAllowedMoves(piece);
+        for (int y = 0; y < 9; y++) {
+            for (int x = 0; x < 9; x++) {
+                markedSquares[x][y] = allowedMoves[x][y] ? new Object() : null;
+            }
         }
-
-        // check down
-        for (int i = 1; i <= moveDistance; i++) {
-            if (y_coord + i > 9 || ((x_coord == 2 || x_coord == 3 || x_coord == 6 || x_coord == 7) && (y_coord + i == 4 || y_coord + i == 5))
-                    || (pieces[x_coord][y_coord + i] != null && pieces[x_coord][y_coord + i].getPlayer() == piece.getPlayer()))
-                break;
-
-            markedSquares[x_coord][y_coord + i] = new Object();
-
-            if (pieces[x_coord][y_coord + i] != null && pieces[x_coord][y_coord + i].getPlayer() != piece.getPlayer())
-                break;
-        }
-
-        // check right
-        for (int i = 1; i <= moveDistance; i++) {
-            if (x_coord + i > 9 || ((x_coord + i == 2 || x_coord + i == 3 || x_coord + i == 6 || x_coord + i == 7) && (y_coord == 4 || y_coord == 5))
-                    || (pieces[x_coord + i][y_coord] != null && pieces[x_coord + i][y_coord].getPlayer() == piece.getPlayer()))
-                break;
-
-            markedSquares[x_coord + i][y_coord] = new Object();
-
-            if (pieces[x_coord + i][y_coord] != null && pieces[x_coord + i][y_coord].getPlayer() != piece.getPlayer())
-                break;
-        }
-
-        // check left
-        for (int i = 1; i <= moveDistance; i++) {
-            if (x_coord - i < 0 || ((x_coord - i == 2 || x_coord - i == 3 || x_coord - i == 6 || x_coord - i == 7) && (y_coord == 4 || y_coord == 5))
-                    || (pieces[x_coord - i][y_coord] != null && pieces[x_coord - i][y_coord].getPlayer() == piece.getPlayer()))
-                break;
-
-            markedSquares[x_coord - i][y_coord] = new Object();
-
-            if (pieces[x_coord - i][y_coord] != null && pieces[x_coord - i][y_coord].getPlayer() != piece.getPlayer())
-                break;
-        }
+        // // check up
+        // for (int i = 1; i <= moveDistance; i++) {
+        // if (y_coord - i < 0 || ((x_coord == 2 || x_coord == 3 || x_coord == 6 || x_coord == 7) && (y_coord - i == 4 || y_coord - i == 5))
+        // || board.isPlayerPiece(player, x_coord, y_coord-i)(pieces[x_coord][y_coord - i] != null && pieces[x_coord][y_coord - i].getPlayer() ==
+        // piece.getPlayer()))
+        // break;
+        //
+        // markedSquares[x_coord][y_coord - i] = new Object();
+        //
+        // if (pieces[x_coord][y_coord - i] != null && pieces[x_coord][y_coord - i].getPlayer() != piece.getPlayer())
+        // break;
+        // }
+        //
+        // // check down
+        // for (int i = 1; i <= moveDistance; i++) {
+        // if (y_coord + i > 9 || ((x_coord == 2 || x_coord == 3 || x_coord == 6 || x_coord == 7) && (y_coord + i == 4 || y_coord + i == 5))
+        // || (pieces[x_coord][y_coord + i] != null && pieces[x_coord][y_coord + i].getPlayer() == piece.getPlayer()))
+        // break;
+        //
+        // markedSquares[x_coord][y_coord + i] = new Object();
+        //
+        // if (pieces[x_coord][y_coord + i] != null && pieces[x_coord][y_coord + i].getPlayer() != piece.getPlayer())
+        // break;
+        // }
+        //
+        // // check right
+        // for (int i = 1; i <= moveDistance; i++) {
+        // if (x_coord + i > 9 || ((x_coord + i == 2 || x_coord + i == 3 || x_coord + i == 6 || x_coord + i == 7) && (y_coord == 4 || y_coord == 5))
+        // || (pieces[x_coord + i][y_coord] != null && pieces[x_coord + i][y_coord].getPlayer() == piece.getPlayer()))
+        // break;
+        //
+        // markedSquares[x_coord + i][y_coord] = new Object();
+        //
+        // if (pieces[x_coord + i][y_coord] != null && pieces[x_coord + i][y_coord].getPlayer() != piece.getPlayer())
+        // break;
+        // }
+        //
+        // // check left
+        // for (int i = 1; i <= moveDistance; i++) {
+        // if (x_coord - i < 0 || ((x_coord - i == 2 || x_coord - i == 3 || x_coord - i == 6 || x_coord - i == 7) && (y_coord == 4 || y_coord == 5))
+        // || (pieces[x_coord - i][y_coord] != null && pieces[x_coord - i][y_coord].getPlayer() == piece.getPlayer()))
+        // break;
+        //
+        // markedSquares[x_coord - i][y_coord] = new Object();
+        //
+        // if (pieces[x_coord - i][y_coord] != null && pieces[x_coord - i][y_coord].getPlayer() != piece.getPlayer())
+        // break;
+        // }
     }
 
     /**
@@ -642,12 +629,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
     }
 
     private class BoardPanel_this_mouseAdapter extends java.awt.event.MouseAdapter {
-        private BoardPanel adaptee;
         private GameStateController gameStateObject = GameStateController.getInstance();
-
-        private BoardPanel_this_mouseAdapter(BoardPanel adaptee) {
-            this.adaptee = adaptee;
-        }
 
         public void mouseClicked(MouseEvent e) {
             if (e.isAltDown() && e.isShiftDown() && e.isControlDown()) {
@@ -656,9 +638,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
             }
 
             if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP))
-                adaptee.gameSetupClick(e);
+                gameSetupClick(e);
             else if (gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN))
-                adaptee.inGameClick(e);
+                inGameClick(e);
         }
     }
 

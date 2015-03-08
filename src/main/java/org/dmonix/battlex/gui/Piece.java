@@ -18,7 +18,6 @@
 package org.dmonix.battlex.gui;
 
 import java.awt.Image;
-import java.awt.Point;
 
 import org.dmonix.battlex.resources.Resources;
 
@@ -36,12 +35,13 @@ public class Piece {
     private final Image image;
     private final int player;
     private final String type;
-    private final Point coord;
+    private int x_coord, y_coord;
 
     public Piece(int player, String type, int x_coord, int y_coord) {
         this.player = player;
         this.type = type;
-        coord = new Point(x_coord, y_coord);
+        this.x_coord = x_coord;
+        this.y_coord = y_coord;
 
         if (type == Resources.PIECE_BOMB_TYPE || type == Resources.PIECE_FLAG_TYPE)
             moveDistance = 0;
@@ -62,13 +62,12 @@ public class Piece {
         return moveDistance;
     }
 
-    /**
-     * Get the location of the piece.
-     * 
-     * @return
-     */
-    public Point getLocation() {
-        return coord;
+    public int getXCoord() {
+        return x_coord;
+    }
+
+    public int getYCoord() {
+        return y_coord;
     }
 
     /**
@@ -80,7 +79,8 @@ public class Piece {
      *            new y-coord
      */
     public void setLocation(int x_coord, int y_coord) {
-        this.coord.setLocation(x_coord, y_coord);
+        this.x_coord = x_coord;
+        this.y_coord = y_coord;
     }
 
     /**
@@ -118,17 +118,6 @@ public class Piece {
         return this.type;
     }
 
-    /**
-     * Resolve the outcome of the strike.
-     * 
-     * @param defender
-     *            defending piece
-     * @return -1 defender wins, 0 draw, 1 attacker wins
-     */
-    public int resolveStrike(Piece defender) {
-        return Resources.resolveStrike(this, defender);
-    }
-
     @Deprecated
     public void destroy() {
     }
@@ -136,7 +125,7 @@ public class Piece {
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Player = " + player + "\n");
-        sb.append("Position = " + coord.x + ":" + coord.y + "\n");
+        sb.append("Position = " + x_coord + ":" + y_coord + "\n");
         sb.append("Type = " + type);
         return sb.toString();
     }

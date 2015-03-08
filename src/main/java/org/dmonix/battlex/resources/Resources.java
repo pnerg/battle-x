@@ -27,16 +27,14 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
-import org.dmonix.battlex.gui.Piece;
-
 /**
  * @author Peter Nerg
  */
 public final class Resources {
-    public static final int RESULT_WIN = 1;
-    public static final int RESULT_DRAW = 0;
-    public static final int RESULT_LOOSE = -1;
-    public static final int RESULT_WIN_GAME = 69;
+    // public static final int RESULT_WIN = 1;
+    // public static final int RESULT_DRAW = 0;
+    // public static final int RESULT_LOOSE = -1;
+    // public static final int RESULT_WIN_GAME = 69;
 
     public static final String PIECE_NO_PIECE = "NO_PIECE";// ????
     public static final String PIECE_EMPTY_TYPE = "empty";
@@ -117,24 +115,9 @@ public final class Resources {
 
     private static final Map<String, Image> player1Images = new HashMap<>();
     private static final Map<String, Image> player2Images = new HashMap<>();
-    private static final Map<String, Integer> pieceStrength = new HashMap<>();
     static {
         preLoadPlayerImages(1, player1Images);
         preLoadPlayerImages(2, player2Images);
-
-        // pre-load type to strength values
-        // lower value -> lower strength
-        pieceStrength.put(PIECE_SPY_TYPE, 1);
-        pieceStrength.put(PIECE_SCOUT_TYPE, 2);
-        pieceStrength.put(PIECE_MINER_TYPE, 3);
-        pieceStrength.put(PIECE_SERGEANT_TYPE, 4);
-        pieceStrength.put(PIECE_LIEUTENANT_TYPE, 5);
-        pieceStrength.put(PIECE_CAPTAIN_TYPE, 6);
-        pieceStrength.put(PIECE_MAJOR_TYPE, 7);
-        pieceStrength.put(PIECE_COLONEL_TYPE, 8);
-        pieceStrength.put(PIECE_GENERAL_TYPE, 9);
-        pieceStrength.put(PIECE_MARSHAL_TYPE, 10);
-        pieceStrength.put(PIECE_BOMB_TYPE, 100);
     }
 
     /**
@@ -149,7 +132,7 @@ public final class Resources {
 
     public static BufferedImage getBackgroundImage(int player) {
         try {
-            return ImageIO.read(Resources.class.getResource("/images/player" + player + "/battlexmap_large.jpg"));
+            return ImageIO.read(Resources.class.getResource("/images/player" + player + "/map_large.jpg"));
         } catch (IOException ex) {
             return null;
         }
@@ -161,34 +144,6 @@ public final class Resources {
         } else {
             return player2Images.get(type);
         }
-    }
-
-    public static int resolveStrike(Piece attacker, Piece defender) {
-        String atkType = attacker.getType();
-        String defType = defender.getType();
-        int atkStrength = pieceStrength.get(atkType);
-        int defStrength = pieceStrength.get(defType);
-
-        // the flag always looses
-        if (defType == PIECE_FLAG_TYPE)
-            return RESULT_WIN_GAME;
-
-        // the bomb wins over everything except the miner
-        if (atkType == PIECE_MINER_TYPE && defType == PIECE_BOMB_TYPE)
-            return RESULT_WIN;
-
-        // the spy wins over the marshal only if the spy strikes
-        if (atkType == PIECE_SPY_TYPE && defType == PIECE_MARSHAL_TYPE)
-            return RESULT_WIN;
-
-        // determine the winner based on the value of the type
-        if (atkStrength > defStrength)
-            return RESULT_WIN;
-        // equal pieces is a draw
-        else if (atkStrength == defStrength)
-            return RESULT_DRAW;
-        else
-            return RESULT_LOOSE;
     }
 
     private static void preLoadPlayerImages(int player, Map<String, Image> images) {
