@@ -36,12 +36,30 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.dmonix.battlex.gui.Piece;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * The actual board and all the pieces on it.
+ * The actual board and all the pieces on it.<br>
+ * This contains all pieces placed on the board according to an absolute coordinate system.<br>
+ * Player one is always on row 0 (Y) and player 2 is always on row 9 (Y).<br>
+ * So in practice the lower left corner (when facing the board) for player 1 is 0/0 and for player 2 it is 9/9.
+ * 
+ * <pre>
+ * <i>X/Y</i>
+ *            <i>Player2</i>
+ * 0/9 1/9 2/9 3/9 4/9 5/9 6/9 7/9 8/9 9/9
+ * 0/8 1/8 2/8 3/8 4/8 5/8 6/8 7/8 8/8 9/8
+ * 0/7 1/7 2/7 3/7 4/7 5/7 6/7 7/7 8/7 9/7
+ * 0/6 1/6 2/6 3/6 4/6 5/6 6/6 7/6 8/6 9/6
+ * 0/5 1/5 2/5 3/5 4/5 5/5 6/5 7/5 8/5 9/5
+ * 0/4 1/4 2/4 3/4 4/4 5/4 6/4 7/4 8/4 9/4
+ * 0/3 1/3 2/3 3/3 4/3 5/3 6/3 7/3 8/3 9/3
+ * 0/2 1/2 2/2 3/2 4/2 5/2 6/2 7/2 8/2 9/2
+ * 0/1 1/1 2/1 3/1 4/1 5/1 6/1 7/1 8/1 9/1
+ * 0/0 1/0 2/0 3/0 4/0 5/0 6/0 7/0 8/0 9/0
+ *            <i>Player1</i>
+ * </pre>
  * 
  * @author Peter Nerg
  * 
@@ -55,9 +73,9 @@ public class Board {
 
     private static final Logger logger = LoggerFactory.getLogger(Board.class);
     private final Piece[][] pieces = new Piece[10][10];
-    private final Map<String, Integer> pieceStrength = new HashMap<>();
+    private static final Map<String, Integer> pieceStrength = new HashMap<>();
 
-    public Board() {
+    static {
         // pre-load type to strength values
         // lower value -> lower strength
         pieceStrength.put(PIECE_SPY_TYPE, 1);
@@ -86,26 +104,30 @@ public class Board {
         // }
     }
 
-    public Piece getPiece(int x, int y) {
-        return pieces[x][y];
+    public Piece getPiece(Square square) {
+        Square absolute = square.getAbsolute();
+        return pieces[absolute.getX()][absolute.getY()];
     }
 
     public void addPiece(Piece piece) {
         logger.debug("Adding piece to board [{}]", piece);
-        pieces[piece.getXCoord()][piece.getYCoord()] = piece;
+        Square square = piece.getSquare().getAbsolute();
+        pieces[square.getX()][square.getY()] = piece;
     }
 
-    public void removePiece(int x, int y) {
+    public void removePiece(Square square) {
+        int x = square.getAbsolute().getX();
+        int y = square.getAbsolute().getY();
         logger.debug("Removing piece piece from board x[{}] y[{}]", x, y);
         pieces[x][y] = null;
     }
 
     public boolean isEmpty(int x, int y) {
-        return pieces[x][y] != null;
+        return pieces[x][y] == null;
     }
 
-    public boolean isPlayerPiece(int player, int x, int y) {
-        Piece piece = pieces[x][y];
+    public boolean isPlayerPiece(int player, Square square) {
+        Piece piece = getPiece(square);
         return piece != null ? piece.getPlayer() == player : false;
     }
 
@@ -122,9 +144,9 @@ public class Board {
      * @param attacker
      * @param defender
      */
-    public int movePiece(final Piece attacker, final int x_coord_defender, final int y_coord_defender) {
-        final int x_coord_attacker = attacker.getXCoord();
-        final int y_coord_attacker = attacker.getYCoord();
+    public int movePiece(final Piece attacker, Square target) {
+        final int x_coord_defender = target.getAbsolute().getX();
+        final int y_coord_defender = target.getAbsolute().getY();
 
         logger.debug("Resolve movement [{}] to x[{}] y[{}]", attacker, x_coord_defender, y_coord_defender);
 
@@ -137,17 +159,17 @@ public class Board {
         if (result == RESULT_MOVE_NO_BATTLE || result == RESULT_WIN) {
             logger.debug("Piece [{}] won against [{}]", attacker, defender);
             pieces[x_coord_defender][y_coord_defender] = attacker; // move attacker to defender square
-            pieces[x_coord_defender][y_coord_defender].setLocation(x_coord_defender, y_coord_defender); // set new location to attacker piece
+            pieces[x_coord_defender][y_coord_defender].setLocation(SquareFactory.createAbsolute(x_coord_defender, y_coord_defender)); // set new location to
         }
 
         // draw
         else if (result == RESULT_DRAW) {
             logger.debug("Piece [{}] draw against [{}]", attacker, defender);
-            removePiece(x_coord_defender, y_coord_defender); // remove the defender as it lost/tied
+            removePiece(target); // remove the defender as it lost/tied
         }
 
         // remove the old position for the piece that moved
-        removePiece(x_coord_attacker, y_coord_attacker); // empty space where attacker moved from
+        removePiece(attacker.getSquare()); // empty space where attacker moved from
 
         return result;
     }
@@ -200,7 +222,7 @@ public class Board {
         return false;
     }
 
-    private int resolveStrike(Piece attacker, Piece defender) {
+    private static int resolveStrike(Piece attacker, Piece defender) {
         int result = 0;
         // moving to empty square
         if (defender == null) {

@@ -19,6 +19,8 @@ package org.dmonix.battlex.event;
 
 import java.io.Serializable;
 
+import org.dmonix.battlex.datamodel.Square;
+import org.dmonix.battlex.datamodel.SquareFactory;
 import org.dmonix.battlex.resources.Resources;
 
 /**
@@ -28,50 +30,37 @@ import org.dmonix.battlex.resources.Resources;
 public final class GameEventObject implements Serializable {
     private static final long serialVersionUID = 3562476784622776147L;
 
-    private final int x_coord_new;
-    private final int y_coord_new;
-    private final int x_coord_old;
-    private final int y_coord_old;
-
     private final String type;
 
-    public GameEventObject(int x_coord_old, int y_coord_old, int x_coord_new, int y_coord_new) {
+    private final Square oldCoord;
+    private final Square newCoord;
+
+    public GameEventObject(Square oldCoord, Square newCoord) {
         // TODO is this used? null as type is bad.
-        this(Resources.PIECE_NO_PIECE, 9 - x_coord_old, 9 - y_coord_old, 9 - x_coord_new, 9 - y_coord_new);
+        this(Resources.PIECE_NO_PIECE, oldCoord, newCoord);
     }
 
-    public GameEventObject(String type, int x_coord_new, int y_coord_new) {
-        this(type, -1, -1, 9 - x_coord_new, 9 - y_coord_new);
+    public GameEventObject(String type, Square newCoord) {
+        // TODO is this used? Kind of ugly with -1 coord values? Create non-valid square type?
+        this(type, SquareFactory.createAbsolute(-1, -1), newCoord);
     }
 
-    private GameEventObject(String type, int x_coord_old, int y_coord_old, int x_coord_new, int y_coord_new) {
-        this.x_coord_new = 9 - x_coord_new;
-        this.y_coord_new = 9 - y_coord_new;
-
-        this.x_coord_old = 9 - x_coord_old;
-        this.y_coord_old = 9 - y_coord_old;
-
+    private GameEventObject(String type, Square oldCoord, Square newCoord) {
         this.type = type;
+        this.oldCoord = oldCoord;
+        this.newCoord = newCoord;
     }
 
     public String getType() {
         return type;
     }
 
-    public int getNewXCoord() {
-        return this.x_coord_new;
+    public Square getNewCoord() {
+        return newCoord;
     }
 
-    public int getOldXCoord() {
-        return this.x_coord_old;
-    }
-
-    public int getNewYCoord() {
-        return this.y_coord_new;
-    }
-
-    public int getOldYCoord() {
-        return this.y_coord_old;
+    public Square getOldCoord() {
+        return oldCoord;
     }
 
     public String toString() {
@@ -81,24 +70,13 @@ public final class GameEventObject implements Serializable {
 
         // TODO when does this happen
         if (Resources.PIECE_NO_PIECE.equals(type)) {
-            sb.append("x-coord-old=");
-            sb.append(x_coord_old);
-            sb.append("\n");
 
-            sb.append("y-coord-old=");
-            sb.append(y_coord_old);
-            sb.append("\n");
+            sb.append("oldCoord=").append(oldCoord).append("\n");
         } else {
             sb.append("type=").append(type).append("\n");
         }
 
-        sb.append("x-coord-new=");
-        sb.append(x_coord_new);
-        sb.append("\n");
-
-        sb.append("y-coord-new=");
-        sb.append(y_coord_new);
-        sb.append("\n");
+        sb.append("newCoord=").append(newCoord).append("\n");
 
         return sb.toString();
     }

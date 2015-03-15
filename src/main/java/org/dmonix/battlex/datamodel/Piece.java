@@ -15,7 +15,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.dmonix.battlex.gui;
+package org.dmonix.battlex.datamodel;
 
 import java.awt.Image;
 
@@ -25,7 +25,7 @@ import org.dmonix.battlex.resources.Resources;
  * @author Peter Nerg
  * @version 1.0
  */
-public class Piece {
+public final class Piece {
     public static final int RESULT_WIN = 1;
     public static final int RESULT_DRAW = 0;
     public static final int RESULT_LOOSE = -1;
@@ -35,13 +35,14 @@ public class Piece {
     private final Image image;
     private final int player;
     private final String type;
-    private int x_coord, y_coord;
 
-    public Piece(int player, String type, int x_coord, int y_coord) {
+    /** The location of the piece on the board */
+    private Square square;
+
+    public Piece(int player, String type, Square square) {
         this.player = player;
         this.type = type;
-        this.x_coord = x_coord;
-        this.y_coord = y_coord;
+        this.square = square.getAbsolute();
 
         if (type == Resources.PIECE_BOMB_TYPE || type == Resources.PIECE_FLAG_TYPE)
             moveDistance = 0;
@@ -62,25 +63,20 @@ public class Piece {
         return moveDistance;
     }
 
-    public int getXCoord() {
-        return x_coord;
-    }
-
-    public int getYCoord() {
-        return y_coord;
+    public Square getSquare() {
+        return square;
     }
 
     /**
-     * Set th elcoation of the piece
+     * Set the location of the piece
      * 
      * @param x_coord
      *            new x-coord
      * @param y_coord
      *            new y-coord
      */
-    public void setLocation(int x_coord, int y_coord) {
-        this.x_coord = x_coord;
-        this.y_coord = y_coord;
+    public void setLocation(Square square) {
+        this.square = square.getAbsolute();
     }
 
     /**
@@ -96,6 +92,7 @@ public class Piece {
      * Returns the image for the piece.
      * 
      * @return the image
+     * @deprecated Doesn't belong in the data model
      */
     public Image getImage() {
         return image;
@@ -106,6 +103,7 @@ public class Piece {
      * 
      * @param currentPlayer
      * @return
+     * @deprecated Doesn't belong in the data model
      */
     public Image getImage(int currentPlayer) {
         if (currentPlayer == this.player)
@@ -118,14 +116,10 @@ public class Piece {
         return this.type;
     }
 
-    @Deprecated
-    public void destroy() {
-    }
-
     public String toString() {
         StringBuffer sb = new StringBuffer();
         sb.append("Player = " + player + "\n");
-        sb.append("Position = " + x_coord + ":" + y_coord + "\n");
+        sb.append("Position = " + square.getX() + ":" + square.getY() + "\n");
         sb.append("Type = " + type);
         return sb.toString();
     }

@@ -34,6 +34,9 @@ import javax.swing.JPanel;
 
 import org.dmonix.battlex.Battlex;
 import org.dmonix.battlex.datamodel.Board;
+import org.dmonix.battlex.datamodel.Piece;
+import org.dmonix.battlex.datamodel.Square;
+import org.dmonix.battlex.datamodel.SquareFactory;
 import org.dmonix.battlex.event.EventCommunicator;
 import org.dmonix.battlex.event.GameEventListener;
 import org.dmonix.battlex.event.GameEventObject;
@@ -119,7 +122,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
          */
         if (gameStateObject.inState(GameStates.STATE_IN_GAME_OPPONENT_TURN)) {
             gameStateObject.setState(GameStates.STATE_IN_GAME_PLAYER_TURN);
-            movePiece(board.getPiece(geo.getOldXCoord(), geo.getOldYCoord()), geo.getNewXCoord(), geo.getNewYCoord());
+            movePiece(board.getPiece(geo.getOldCoord()), geo.getNewCoord());
         }
         /**
          * The game is being setup
@@ -127,9 +130,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
         else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
             if (geo.getType() != Resources.PIECE_NO_PIECE) {
                 // this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord());
-                board.addPiece(new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord()));
+                board.addPiece(new Piece(otherPlayer, geo.getType(), geo.getNewCoord()));
             } else {
-                board.removePiece(geo.getNewXCoord(), geo.getNewYCoord());
+                board.removePiece(geo.getNewCoord());
             }
 
             repaint();
@@ -298,8 +301,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
     }
 
     private Point translatePieceLocationToLocalLayout(Piece piece) {
-        int x = piece.getXCoord();
-        int y = piece.getYCoord();
+        Square square = piece.getSquare().getAbsolute();
+        int x = square.getX();
+        int y = square.getY();
         Point point;
         if (player == 1) {
             point = new Point(x, 9 - y);
@@ -360,9 +364,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (currentPiece != null && markedSquares[point.x][point.y] == null)
             return;
 
-        eventCommunicator.sendEvent(new GameEventObject(currentPiece.getXCoord(), currentPiece.getYCoord(), point.x, point.y));
+        eventCommunicator.sendEvent(new GameEventObject(currentPiece.getSquare(), SquareFactory.createAbsolute(point.x, point.y)));
 
-        movePiece(currentPiece, point.x, point.y);
+        movePiece(currentPiece, convertPoint2Square(point));
         gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);
         currentPiece = null;
 
@@ -375,19 +379,12 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param y
      * @return
      */
-    public Piece getPieceAtPoint(int x, int y) {
-        return board.getPiece(x, y);
+    private Piece getPieceAtPoint(Point point) {
+        return board.getPiece(convertPoint2Square(point));
     }
 
-    /**
-     * Get the piece at a specific point on the board
-     * 
-     * @param x
-     * @param y
-     * @return
-     */
-    private Piece getPieceAtPoint(Point point) {
-        return board.getPiece(point.x, point.y);
+    private Square convertPoint2Square(Point point) {
+        return SquareFactory.createRelative(player, point.x, point.y);
     }
 
     /**
@@ -399,13 +396,15 @@ public class BoardPanel extends JPanel implements GameEventListener {
      *            The type of piece
      */
     private void setPieceAtPoint(Point point, String pieceType) {
+        Square square = convertPoint2Square(point);
         // if there is a piece in the square, remove it
-        Piece piece = board.getPiece(point.x, point.y);
+        Piece piece = getPieceAtPoint(point);
         if (piece != null && piece.getPlayer() == player) {
             // remove the piece from the opponents board
-            eventCommunicator.sendEvent(new GameEventObject(Resources.PIECE_NO_PIECE, point.x, point.y));
+            eventCommunicator.sendEvent(new GameEventObject(Resources.PIECE_NO_PIECE, square));
             owner.addPiece(player, piece.getType());
-            board.removePiece(point.x, point.y);
+            board.removePiece(square);
+            // TODO check this for correctness, point vs square...right coords?
             this.markedSquares[point.x][point.y] = new Object();
             repaint();
         }
@@ -417,9 +416,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (pieceType == Resources.PIECE_NO_PIECE)
             return;
 
-        board.addPiece(new Piece(this.player, pieceType, point.x, point.y));
+        board.addPiece(new Piece(this.player, pieceType, square));
         this.markedSquares[point.x][point.y] = null;
-        eventCommunicator.sendEvent(new GameEventObject(pieceType, point.x, point.y));
+        eventCommunicator.sendEvent(new GameEventObject(pieceType, square));
 
         repaint();
     }
@@ -480,10 +479,10 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param attacker
      * @param defender
      */
-    private void movePiece(Piece attacker, int x_coord_defender, int y_coord_defender) {
-        int result = board.movePiece(attacker, x_coord_defender, y_coord_defender);
+    private void movePiece(Piece attacker, Square target) {
+        Piece defender = board.getPiece(target);
 
-        Piece defender = board.getPiece(x_coord_defender, y_coord_defender);
+        int result = board.movePiece(attacker, target);
 
         /**
          * empty space, go ahead and move the piece to that location
