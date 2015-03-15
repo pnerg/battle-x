@@ -17,22 +17,11 @@
  */
 package org.dmonix.battlex.datamodel;
 
-import java.awt.Image;
-
-import org.dmonix.battlex.resources.Resources;
-
 /**
  * @author Peter Nerg
  * @version 1.0
  */
 public final class Piece {
-    public static final int RESULT_WIN = 1;
-    public static final int RESULT_DRAW = 0;
-    public static final int RESULT_LOOSE = -1;
-    public static final int RESULT_WIN_GAME = 69;
-
-    private final int moveDistance;
-    private final Image image;
     private final int player;
     private final String type;
 
@@ -43,15 +32,6 @@ public final class Piece {
         this.player = player;
         this.type = type;
         this.square = square.getAbsolute();
-
-        if (type == Resources.PIECE_BOMB_TYPE || type == Resources.PIECE_FLAG_TYPE)
-            moveDistance = 0;
-        else if (type == Resources.PIECE_SCOUT_TYPE)
-            moveDistance = 10;
-        else
-            moveDistance = 1;
-
-        image = Resources.getImage(player, type);
     }
 
     /**
@@ -60,23 +40,27 @@ public final class Piece {
      * @return The distance
      */
     public int getMoveDistance() {
-        return moveDistance;
+        return PieceData.getMoveDistance(type);
     }
 
+    /**
+     * Get the absolute square for this Piece.
+     * 
+     * @return
+     */
     public Square getSquare() {
-        return square;
+        return square.getAbsolute();
     }
 
     /**
      * Set the location of the piece
-     * 
-     * @param x_coord
-     *            new x-coord
-     * @param y_coord
-     *            new y-coord
      */
     public void setLocation(Square square) {
         this.square = square.getAbsolute();
+    }
+
+    public int getPieceStrength() {
+        return PieceData.getPieceStrength(type);
     }
 
     /**
@@ -88,40 +72,16 @@ public final class Piece {
         return player;
     }
 
-    /**
-     * Returns the image for the piece.
-     * 
-     * @return the image
-     * @deprecated Doesn't belong in the data model
-     */
-    public Image getImage() {
-        return image;
-    }
-
-    /**
-     * Get the image for the piece.
-     * 
-     * @param currentPlayer
-     * @return
-     * @deprecated Doesn't belong in the data model
-     */
-    public Image getImage(int currentPlayer) {
-        if (currentPlayer == this.player)
-            return image;
-        else
-            return Resources.getImage(this.player, Resources.PIECE_EMPTY_TYPE);
-    }
-
     public String getType() {
         return this.type;
     }
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        sb.append("Player = " + player + "\n");
-        sb.append("Position = " + square.getX() + ":" + square.getY() + "\n");
-        sb.append("Type = " + type);
+        Square pos = getSquare();
+        sb.append("Player = " + player);
+        sb.append(":Position = [" + pos.getX() + "][" + pos.getY() + "]");
+        sb.append(":Type = " + type);
         return sb.toString();
     }
-
 }

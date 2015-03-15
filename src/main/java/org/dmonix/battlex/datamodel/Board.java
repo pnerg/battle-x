@@ -18,23 +18,8 @@
 
 package org.dmonix.battlex.datamodel;
 
-import static org.dmonix.battlex.resources.Resources.PIECE_BOMB_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_CAPTAIN_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_COLONEL_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_FLAG_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_GENERAL_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_LIEUTENANT_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_MAJOR_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_MARSHAL_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_MINER_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_SCOUT_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_SERGEANT_TYPE;
-import static org.dmonix.battlex.resources.Resources.PIECE_SPY_TYPE;
-
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,24 +32,25 @@ import org.slf4j.LoggerFactory;
  * 
  * <pre>
  * <i>X/Y</i>
- *            <i>Player2</i>
- * 0/9 1/9 2/9 3/9 4/9 5/9 6/9 7/9 8/9 9/9
- * 0/8 1/8 2/8 3/8 4/8 5/8 6/8 7/8 8/8 9/8
- * 0/7 1/7 2/7 3/7 4/7 5/7 6/7 7/7 8/7 9/7
- * 0/6 1/6 2/6 3/6 4/6 5/6 6/6 7/6 8/6 9/6
- * 0/5 1/5 2/5 3/5 4/5 5/5 6/5 7/5 8/5 9/5
- * 0/4 1/4 2/4 3/4 4/4 5/4 6/4 7/4 8/4 9/4
- * 0/3 1/3 2/3 3/3 4/3 5/3 6/3 7/3 8/3 9/3
- * 0/2 1/2 2/2 3/2 4/2 5/2 6/2 7/2 8/2 9/2
- * 0/1 1/1 2/1 3/1 4/1 5/1 6/1 7/1 8/1 9/1
- * 0/0 1/0 2/0 3/0 4/0 5/0 6/0 7/0 8/0 9/0
- *            <i>Player1</i>
+ *               <i>Player2</i>
+ * 9 --- --- --- --- --- --- --- --- --- --- 
+ * 8 --- --- --- --- --- --- --- --- --- --- 
+ * 7 --- --- --- --- --- --- --- --- --- --- 
+ * 6 --- --- --- --- --- --- --- --- --- --- 
+ * 5 --- --- XXX XXX --- --- XXX XXX --- --- 
+ * 4 --- --- XXX XXX --- --- XXX XXX --- --- 
+ * 3 --- --- --- --- --- --- --- --- --- --- 
+ * 2 --- --- --- --- --- --- --- --- --- --- 
+ * 1 --- --- --- --- --- --- --- --- --- --- 
+ * 0 --- --- --- --- --- --- --- --- --- --- 
+ *    0   1   2   3   4   5   6   7   8   9  
+ *               <i>Player1</i>
  * </pre>
  * 
  * @author Peter Nerg
  * 
  */
-public class Board {
+public final class Board {
     public static final int RESULT_WIN = 1;
     public static final int RESULT_DRAW = 0;
     public static final int RESULT_LOOSE = -1;
@@ -72,58 +58,67 @@ public class Board {
     public static final int RESULT_WIN_GAME = 69;
 
     private static final Logger logger = LoggerFactory.getLogger(Board.class);
-    private final Piece[][] pieces = new Piece[10][10];
-    private static final Map<String, Integer> pieceStrength = new HashMap<>();
 
-    static {
-        // pre-load type to strength values
-        // lower value -> lower strength
-        pieceStrength.put(PIECE_SPY_TYPE, 1);
-        pieceStrength.put(PIECE_SCOUT_TYPE, 2);
-        pieceStrength.put(PIECE_MINER_TYPE, 3);
-        pieceStrength.put(PIECE_SERGEANT_TYPE, 4);
-        pieceStrength.put(PIECE_LIEUTENANT_TYPE, 5);
-        pieceStrength.put(PIECE_CAPTAIN_TYPE, 6);
-        pieceStrength.put(PIECE_MAJOR_TYPE, 7);
-        pieceStrength.put(PIECE_COLONEL_TYPE, 8);
-        pieceStrength.put(PIECE_GENERAL_TYPE, 9);
-        pieceStrength.put(PIECE_MARSHAL_TYPE, 10);
-        pieceStrength.put(PIECE_BOMB_TYPE, 100);
+    /** Matrix representing all 10x10 positions on the board. */
+    private final Position[][] positions = new Position[10][10];
+
+    /** Used to mark an empty position. */
+    private static final EmptyPosition EmptyPosition = new EmptyPosition();
+
+    /** Used to mark an illegal position, that is the water squares in the middle. */
+    private static final InvalidPosition InvalidPosition = new InvalidPosition();
+
+    public Board() {
+        for (int y = 9; y >= 0; y--) {
+            for (int x = 0; x < 10; x++) {
+                positions[x][y] = EmptyPosition;
+            }
+        }
+        // mark the left lake as invalid
+        positions[2][4] = InvalidPosition;
+        positions[2][5] = InvalidPosition;
+        positions[3][4] = InvalidPosition;
+        positions[3][5] = InvalidPosition;
+
+        // mark the right lake as invalid
+        positions[6][4] = InvalidPosition;
+        positions[6][5] = InvalidPosition;
+        positions[7][4] = InvalidPosition;
+        positions[7][5] = InvalidPosition;
     }
 
     void clearAllPlayerPieces(int player) {
-        // for (int y = 6; y < 10; y++) {
-        // for (int x = 0; x < 10; x++) {
-        // if (pieces[x][y] != null && pieces[x][y].getPlayer() == player) {
-        // owner.addPiece(player, pieces[x][y].getType());
-        // pieces[x][y] = null;
-        // markedSquares[x][y] = new Object();
-        // eventCommunicator.sendEvent(new GameEventObject(Resources.PIECE_NO_PIECE, x, y));
-        // }
-        // }
-        // }
+        for (Piece piece : getPiecesForPlayer(player)) {
+            emptySquare(piece.getSquare());
+        }
     }
 
     public Piece getPiece(Square square) {
         Square absolute = square.getAbsolute();
-        return pieces[absolute.getX()][absolute.getY()];
+        return positions[absolute.getX()][absolute.getY()].getPiece();
     }
 
     public void addPiece(Piece piece) {
         logger.debug("Adding piece to board [{}]", piece);
-        Square square = piece.getSquare().getAbsolute();
-        pieces[square.getX()][square.getY()] = piece;
+        Square absolute = piece.getSquare();
+        positions[absolute.getX()][absolute.getY()] = new PiecePosition(piece);
     }
 
-    public void removePiece(Square square) {
-        int x = square.getAbsolute().getX();
-        int y = square.getAbsolute().getY();
-        logger.debug("Removing piece piece from board x[{}] y[{}]", x, y);
-        pieces[x][y] = null;
+    public void removePiece(Piece piece) {
+        logger.debug("Removing piece from board [{}]", piece);
+        emptySquare(piece.getSquare());
     }
 
-    public boolean isEmpty(int x, int y) {
-        return pieces[x][y] == null;
+    // public void removePiece(Square square) {
+    // int x = square.getAbsolute().getX();
+    // int y = square.getAbsolute().getY();
+    // logger.debug("Removing piece piece from board x[{}] y[{}]", x, y);
+    // pieces[x][y] = null;
+    // }
+
+    public boolean isEmpty(Square square) {
+        Square abs = square.getAbsolute();
+        return positions[abs.getX()][abs.getY()] == EmptyPosition;
     }
 
     public boolean isPlayerPiece(int player, Square square) {
@@ -147,10 +142,11 @@ public class Board {
     public int movePiece(final Piece attacker, Square target) {
         final int x_coord_defender = target.getAbsolute().getX();
         final int y_coord_defender = target.getAbsolute().getY();
+        final Square squareAttacker = attacker.getSquare();
 
-        logger.debug("Resolve movement [{}] to x[{}] y[{}]", attacker, x_coord_defender, y_coord_defender);
+        logger.debug("Resolve movement [{}] to x[{}]", attacker, target);
 
-        Piece defender = pieces[x_coord_defender][y_coord_defender];
+        Piece defender = positions[x_coord_defender][y_coord_defender].getPiece();
         int result = resolveStrike(attacker, defender);
 
         /**
@@ -158,29 +154,46 @@ public class Board {
          */
         if (result == RESULT_MOVE_NO_BATTLE || result == RESULT_WIN) {
             logger.debug("Piece [{}] won against [{}]", attacker, defender);
-            pieces[x_coord_defender][y_coord_defender] = attacker; // move attacker to defender square
-            pieces[x_coord_defender][y_coord_defender].setLocation(SquareFactory.createAbsolute(x_coord_defender, y_coord_defender)); // set new location to
+            attacker.setLocation(SquareFactory.createAbsolute(x_coord_defender, y_coord_defender)); // set new location to
+            addPiece(attacker);// move attacker to defender square
         }
 
         // draw
         else if (result == RESULT_DRAW) {
             logger.debug("Piece [{}] draw against [{}]", attacker, defender);
-            removePiece(target); // remove the defender as it lost/tied
+            removePiece(getPiece(target)); // remove the defender as it lost/tied
         }
 
-        // remove the old position for the piece that moved
-        removePiece(attacker.getSquare()); // empty space where attacker moved from
+        // empty the old position for the piece that moved
+        emptySquare(squareAttacker);
 
         return result;
+    }
+
+    private void emptySquare(Square square) {
+        Square abs = square.getAbsolute();
+        logger.debug("Marking square [{}] as empty", square);
+        positions[abs.getX()][abs.getY()] = EmptyPosition;
     }
 
     public List<Piece> getPieces() {
         List<Piece> pieceList = new ArrayList<>();
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
-                if (pieces[x][y] != null) {
-                    pieceList.add(pieces[x][y]);
+                Position position = positions[x][y];
+                if (position.containsPiece()) {
+                    pieceList.add(position.getPiece());
                 }
+            }
+        }
+        return pieceList;
+    }
+
+    public List<Piece> getPiecesForPlayer(int player) {
+        List<Piece> pieceList = new ArrayList<>();
+        for (Piece piece : getPieces()) {
+            if (piece.getPlayer() == player) {
+                pieceList.add(piece);
             }
         }
         return pieceList;
@@ -194,30 +207,50 @@ public class Board {
      * @return
      */
     public boolean checkIfPlayerCanMove(int checkPlayer) {
-        for (int y = 0; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                // ignore empty squares, non-checkPlayer pieces and pieces that cannot move
-                if (pieces[x][y] == null || pieces[x][y].getPlayer() != checkPlayer || pieces[x][y].getMoveDistance() < 1)
-                    continue;
-
-                // check up
-                if (y > 0 && (pieces[x][y - 1] == null || pieces[x][y - 1].getPlayer() != checkPlayer))
-                    return true;
-
-                // check down
-                if (y < 9 && (pieces[x][y + 1] == null || pieces[x][y + 1].getPlayer() != checkPlayer))
-                    return true;
-
-                // check left
-                if (x > 0 && (pieces[x - 1][y] == null || pieces[x - 1][y].getPlayer() != checkPlayer))
-                    return true;
-
-                // check right
-                if (x < 9 && (pieces[x + 1][y] == null || pieces[x + 1][y].getPlayer() != checkPlayer))
-                    return true;
-
+        // get all pieces
+        for (Piece piece : getPieces()) {
+            // any piece for the player that can move counts
+            if (piece.getPlayer() == checkPlayer && canPieceMove(piece)) {
+                return true;
             }
         }
+        return false;
+    }
+
+    /**
+     * Checks if the provided Piece can move in any direction at all.
+     * 
+     * @param piece
+     * @return
+     */
+    private boolean canPieceMove(Piece piece) {
+        // TODO implement
+        // for (int y = 0; y < 10; y++) {
+        // for (int x = 0; x < 10; x++) {
+        // Position position = pieces[x][y];
+        // // ignore empty squares, non-checkPlayer pieces and pieces that cannot move
+        // if (pieces[x][y] == null || pieces[x][y].getPlayer() != checkPlayer || pieces[x][y].getMoveDistance() < 1)
+        // continue;
+        //
+        // // check up
+        // if (y > 0 && (pieces[x][y - 1] == null || pieces[x][y - 1].getPlayer() != checkPlayer))
+        // return true;
+        //
+        // // check down
+        // if (y < 9 && (pieces[x][y + 1] == null || pieces[x][y + 1].getPlayer() != checkPlayer))
+        // return true;
+        //
+        // // check left
+        // if (x > 0 && (pieces[x - 1][y] == null || pieces[x - 1][y].getPlayer() != checkPlayer))
+        // return true;
+        //
+        // // check right
+        // if (x < 9 && (pieces[x + 1][y] == null || pieces[x + 1][y].getPlayer() != checkPlayer))
+        // return true;
+        //
+        // }
+        // }
+        //
 
         return false;
     }
@@ -230,20 +263,20 @@ public class Board {
         } else {
             String atkType = attacker.getType();
             String defType = defender.getType();
-            int atkStrength = pieceStrength.get(atkType);
-            int defStrength = pieceStrength.get(defType);
+            int atkStrength = attacker.getPieceStrength();
+            int defStrength = defender.getPieceStrength();
 
             // the flag always looses
-            if (defType == PIECE_FLAG_TYPE) {
+            if (defType == PieceData.PIECE_FLAG_TYPE) {
                 result = RESULT_WIN_GAME;
             }
             // the bomb wins over everything except the miner
-            else if (atkType == PIECE_MINER_TYPE && defType == PIECE_BOMB_TYPE) {
+            else if (atkType == PieceData.PIECE_MINER_TYPE && defType == PieceData.PIECE_BOMB_TYPE) {
                 result = RESULT_WIN;
             }
 
             // the spy wins over the marshal only if the spy strikes
-            else if (atkType == PIECE_SPY_TYPE && defType == PIECE_MARSHAL_TYPE) {
+            else if (atkType == PieceData.PIECE_SPY_TYPE && defType == PieceData.PIECE_MARSHAL_TYPE) {
                 result = RESULT_WIN;
             }
 
@@ -257,7 +290,172 @@ public class Board {
             else
                 result = RESULT_LOOSE;
         }
-        logger.debug("Resolving strike [{}][{}] = [{}]", attacker, defender, result);
+        logger.debug("Resolving strike [{}] vs [{}] = [{}]", attacker, defender, result);
         return result;
     }
+
+    /**
+     * Creates a debug printout of the board.<br>
+     * Each non-empty square is represented by the piece (two first letters) and which player it belongs to.<br>
+     * Example:
+     * 
+     * <pre>
+     * 9 --- --- --- --- --- --- --- --- bo2 fl1 
+     * 8 --- --- --- --- --- --- --- --- bo2 bo2 
+     * 7 --- --- --- bo2 ge2 --- --- --- --- --- 
+     * 6 --- --- --- mi1 --- ca2 --- --- --- --- 
+     * 5 --- --- --- --- --- sc2 --- --- --- --- 
+     * 4 --- --- --- --- --- co1 --- --- --- --- 
+     * 3 --- --- --- --- --- --- --- --- --- --- 
+     * 2 --- --- --- --- sc1 --- --- --- --- --- 
+     * 1 bo1 bo1 --- --- --- --- --- --- --- --- 
+     * 0 fl1 bo1 --- --- --- --- --- --- --- --- 
+     *    0   1   2   3   4   5   6   7   8   9
+     * </pre>
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        // loop on the row, starting from the highest
+        for (int y = 9; y >= 0; y--) {
+            // loop on the column starting from left
+            sb.append(y).append(" ");
+            for (int x = 0; x < 10; x++) {
+                Position position = positions[x][y];
+                sb.append(position).append(" ");
+            }
+            sb.append("\n");
+        }
+        // print the X-coord system
+        sb.append("   ");
+        for (int i = 0; i < 10; i++) {
+            sb.append(i).append("   ");
+        }
+        sb.append("\n");
+        return sb.toString();
+    }
+
+    /**
+     * Represents a position on the board.
+     * 
+     * @author Peter Nerg
+     * 
+     */
+    private interface Position {
+        boolean isValid();
+
+        boolean isEmpty();
+
+        boolean containsPiece();
+
+        Piece getPiece();
+    }
+
+    /**
+     * Represents an empty position on the board.
+     * 
+     * @author Peter Nerg
+     */
+    private static final class EmptyPosition implements Position {
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
+        }
+
+        @Override
+        public boolean containsPiece() {
+            return false;
+        }
+
+        @Override
+        public Piece getPiece() {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "---";
+        }
+
+    }
+
+    /**
+     * Represents an invalid/water position on the board.
+     * 
+     * @author Peter Nerg
+     */
+    private static final class InvalidPosition implements Position {
+
+        @Override
+        public boolean isValid() {
+            return false;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public boolean containsPiece() {
+            return false;
+        }
+
+        @Override
+        public Piece getPiece() {
+            return null;
+        }
+
+        @Override
+        public String toString() {
+            return "XXX";
+        }
+
+    }
+
+    /**
+     * Represents a position on the board containing a {@link Piece}.
+     * 
+     * @author Peter Nerg
+     */
+    private static final class PiecePosition implements Position {
+        private final Piece piece;
+
+        private PiecePosition(Piece piece) {
+            this.piece = piece;
+        }
+
+        @Override
+        public boolean isValid() {
+            return true;
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return false;
+        }
+
+        @Override
+        public boolean containsPiece() {
+            return true;
+        }
+
+        @Override
+        public Piece getPiece() {
+            return piece;
+        }
+
+        @Override
+        public String toString() {
+            return piece.getType().substring(0, 2) + piece.getPlayer();
+        }
+    }
+
 }

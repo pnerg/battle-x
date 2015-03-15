@@ -23,7 +23,7 @@ package org.dmonix.battlex.datamodel;
  * 
  * @author Peter Nerg
  */
-public abstract class AbstractSquare implements Square {
+abstract class AbstractSquare implements Square {
     private static final long serialVersionUID = -762946745863895275L;
     private final int x;
     private final int y;

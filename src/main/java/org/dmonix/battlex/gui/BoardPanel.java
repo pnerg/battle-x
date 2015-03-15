@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import org.dmonix.battlex.Battlex;
 import org.dmonix.battlex.datamodel.Board;
 import org.dmonix.battlex.datamodel.Piece;
+import org.dmonix.battlex.datamodel.PieceData;
 import org.dmonix.battlex.datamodel.Square;
 import org.dmonix.battlex.datamodel.SquareFactory;
 import org.dmonix.battlex.event.EventCommunicator;
@@ -128,11 +129,11 @@ public class BoardPanel extends JPanel implements GameEventListener {
          * The game is being setup
          */
         else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
-            if (geo.getType() != Resources.PIECE_NO_PIECE) {
+            if (geo.getType() != PieceData.PIECE_NO_PIECE) {
                 // this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord());
                 board.addPiece(new Piece(otherPlayer, geo.getType(), geo.getNewCoord()));
             } else {
-                board.removePiece(geo.getNewCoord());
+                board.removePiece(board.getPiece(geo.getNewCoord()));
             }
 
             repaint();
@@ -186,33 +187,33 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (firstPaint) {
             firstPaint = false;
             try {
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_BOMB_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_MARSHAL_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_GENERAL_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_COLONEL_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_MAJOR_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_CAPTAIN_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_LIEUTENANT_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_SERGEANT_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_MINER_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_SCOUT_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_SPY_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_FLAG_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(1, Resources.PIECE_EMPTY_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_BOMB_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_MARSHAL_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_GENERAL_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_COLONEL_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_MAJOR_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_CAPTAIN_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_LIEUTENANT_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_SERGEANT_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_MINER_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_SCOUT_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_SPY_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_FLAG_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(1, PieceData.PIECE_EMPTY_TYPE), 100, 100, null);
 
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_BOMB_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_MARSHAL_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_GENERAL_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_COLONEL_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_MAJOR_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_CAPTAIN_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_LIEUTENANT_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_SERGEANT_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_MINER_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_SCOUT_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_SPY_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_FLAG_TYPE), 100, 100, null);
-                g2.drawImage(Resources.getImage(2, Resources.PIECE_EMPTY_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_BOMB_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_MARSHAL_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_GENERAL_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_COLONEL_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_MAJOR_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_CAPTAIN_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_LIEUTENANT_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_SERGEANT_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_MINER_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_SCOUT_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_SPY_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_FLAG_TYPE), 100, 100, null);
+                g2.drawImage(Resources.getImage(2, PieceData.PIECE_EMPTY_TYPE), 100, 100, null);
             } catch (Exception ex) {
             }
         }
@@ -287,10 +288,13 @@ public class BoardPanel extends JPanel implements GameEventListener {
             Point point = translatePieceLocationToLocalLayout(piece);
             int x = point.x;
             int y = point.y;
-            if (!revealOpponent)
-                scaledImage = piece.getImage(this.player);
-            else
-                scaledImage = piece.getImage();
+            if (!revealOpponent) {
+                if (piece.getPlayer() == player)
+                    scaledImage = Resources.getImage(player, piece.getType());
+                else
+                    scaledImage = Resources.getImage(this.player, PieceData.PIECE_EMPTY_TYPE);
+            } else
+                scaledImage = Resources.getImage(player, piece.getType());
 
             if (currentPiece != null && piece != currentPiece)
                 g2.setComposite(alphaComposite2);
@@ -300,18 +304,14 @@ public class BoardPanel extends JPanel implements GameEventListener {
         }
     }
 
+    /**
+     * 
+     * @param piece
+     * @return
+     */
     private Point translatePieceLocationToLocalLayout(Piece piece) {
-        Square square = piece.getSquare().getAbsolute();
-        int x = square.getX();
-        int y = square.getY();
-        Point point;
-        if (player == 1) {
-            point = new Point(x, 9 - y);
-        } else {
-            point = new Point(x - 9, y);
-        }
-
-        return point;
+        Square square = piece.getSquare().getRelative(player);
+        return new Point(square.getX(), square.getY());
     }
 
     /**
@@ -398,12 +398,12 @@ public class BoardPanel extends JPanel implements GameEventListener {
     private void setPieceAtPoint(Point point, String pieceType) {
         Square square = convertPoint2Square(point);
         // if there is a piece in the square, remove it
-        Piece piece = getPieceAtPoint(point);
+        Piece piece = board.getPiece(square);
         if (piece != null && piece.getPlayer() == player) {
             // remove the piece from the opponents board
-            eventCommunicator.sendEvent(new GameEventObject(Resources.PIECE_NO_PIECE, square));
+            eventCommunicator.sendEvent(new GameEventObject(PieceData.PIECE_NO_PIECE, square));
             owner.addPiece(player, piece.getType());
-            board.removePiece(square);
+            board.removePiece(piece);
             // TODO check this for correctness, point vs square...right coords?
             this.markedSquares[point.x][point.y] = new Object();
             repaint();
@@ -413,10 +413,11 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (this.markedSquares[point.x][point.y] == null)
             return;
 
-        if (pieceType == Resources.PIECE_NO_PIECE)
+        if (pieceType == PieceData.PIECE_NO_PIECE)
             return;
 
         board.addPiece(new Piece(this.player, pieceType, square));
+        // TODO check this for correctness, point vs square...right coords?
         this.markedSquares[point.x][point.y] = null;
         eventCommunicator.sendEvent(new GameEventObject(pieceType, square));
 

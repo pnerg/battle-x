@@ -36,6 +36,7 @@ import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 
 import org.dmonix.battlex.Battlex;
+import org.dmonix.battlex.datamodel.PieceData;
 import org.dmonix.battlex.event.ControlEvents;
 import org.dmonix.battlex.event.GameStateController;
 import org.dmonix.battlex.event.GameStates;
@@ -51,7 +52,7 @@ public class PiecesOnDisplayPanel extends JPanel {
     private static final long serialVersionUID = -1615792225365427489L;
     private MainFrame owner;
     private LabelTypeIcon currentLabel;
-    private int pieceCount = Resources.TOTAL_PIECES;
+    private int pieceCount = PieceData.getTotalPieceCount();
     private GameStateController gameStateObject = GameStateController.getInstance();
 
     private GridBagLayout gridBagLayout1 = new GridBagLayout();
@@ -92,47 +93,47 @@ public class PiecesOnDisplayPanel extends JPanel {
     public PiecesOnDisplayPanel(int player) {
         try {
             btnOk.setEnabled(false);
-            lblType0Icon = new LabelTypeIcon(player, Resources.PIECE_BOMB_TYPE);
-            lblType1Icon = new LabelTypeIcon(player, Resources.PIECE_MARSHAL_TYPE);
-            lblType2Icon = new LabelTypeIcon(player, Resources.PIECE_GENERAL_TYPE);
-            lblType3Icon = new LabelTypeIcon(player, Resources.PIECE_COLONEL_TYPE);
-            lblType4Icon = new LabelTypeIcon(player, Resources.PIECE_MAJOR_TYPE);
-            lblType5Icon = new LabelTypeIcon(player, Resources.PIECE_CAPTAIN_TYPE);
-            lblType6Icon = new LabelTypeIcon(player, Resources.PIECE_LIEUTENANT_TYPE);
-            lblType7Icon = new LabelTypeIcon(player, Resources.PIECE_SERGEANT_TYPE);
-            lblType8Icon = new LabelTypeIcon(player, Resources.PIECE_MINER_TYPE);
-            lblType9Icon = new LabelTypeIcon(player, Resources.PIECE_SCOUT_TYPE);
-            lblType10Icon = new LabelTypeIcon(player, Resources.PIECE_SPY_TYPE);
-            lblType11Icon = new LabelTypeIcon(player, Resources.PIECE_FLAG_TYPE);
+            lblType0Icon = new LabelTypeIcon(player, PieceData.PIECE_BOMB_TYPE);
+            lblType1Icon = new LabelTypeIcon(player, PieceData.PIECE_MARSHAL_TYPE);
+            lblType2Icon = new LabelTypeIcon(player, PieceData.PIECE_GENERAL_TYPE);
+            lblType3Icon = new LabelTypeIcon(player, PieceData.PIECE_COLONEL_TYPE);
+            lblType4Icon = new LabelTypeIcon(player, PieceData.PIECE_MAJOR_TYPE);
+            lblType5Icon = new LabelTypeIcon(player, PieceData.PIECE_CAPTAIN_TYPE);
+            lblType6Icon = new LabelTypeIcon(player, PieceData.PIECE_LIEUTENANT_TYPE);
+            lblType7Icon = new LabelTypeIcon(player, PieceData.PIECE_SERGEANT_TYPE);
+            lblType8Icon = new LabelTypeIcon(player, PieceData.PIECE_MINER_TYPE);
+            lblType9Icon = new LabelTypeIcon(player, PieceData.PIECE_SCOUT_TYPE);
+            lblType10Icon = new LabelTypeIcon(player, PieceData.PIECE_SPY_TYPE);
+            lblType11Icon = new LabelTypeIcon(player, PieceData.PIECE_FLAG_TYPE);
 
             jbInit();
 
             titledBorder.setTitle("Player " + player);
-            pieceImageLabels.put(Resources.PIECE_BOMB_TYPE, lblType0Icon);
-            pieceImageLabels.put(Resources.PIECE_MARSHAL_TYPE, lblType1Icon);
-            pieceImageLabels.put(Resources.PIECE_GENERAL_TYPE, lblType2Icon);
-            pieceImageLabels.put(Resources.PIECE_COLONEL_TYPE, lblType3Icon);
-            pieceImageLabels.put(Resources.PIECE_MAJOR_TYPE, lblType4Icon);
-            pieceImageLabels.put(Resources.PIECE_CAPTAIN_TYPE, lblType5Icon);
-            pieceImageLabels.put(Resources.PIECE_LIEUTENANT_TYPE, lblType6Icon);
-            pieceImageLabels.put(Resources.PIECE_SERGEANT_TYPE, lblType7Icon);
-            pieceImageLabels.put(Resources.PIECE_MINER_TYPE, lblType8Icon);
-            pieceImageLabels.put(Resources.PIECE_SCOUT_TYPE, lblType9Icon);
-            pieceImageLabels.put(Resources.PIECE_SPY_TYPE, lblType10Icon);
-            pieceImageLabels.put(Resources.PIECE_FLAG_TYPE, lblType11Icon);
+            pieceImageLabels.put(PieceData.PIECE_BOMB_TYPE, lblType0Icon);
+            pieceImageLabels.put(PieceData.PIECE_MARSHAL_TYPE, lblType1Icon);
+            pieceImageLabels.put(PieceData.PIECE_GENERAL_TYPE, lblType2Icon);
+            pieceImageLabels.put(PieceData.PIECE_COLONEL_TYPE, lblType3Icon);
+            pieceImageLabels.put(PieceData.PIECE_MAJOR_TYPE, lblType4Icon);
+            pieceImageLabels.put(PieceData.PIECE_CAPTAIN_TYPE, lblType5Icon);
+            pieceImageLabels.put(PieceData.PIECE_LIEUTENANT_TYPE, lblType6Icon);
+            pieceImageLabels.put(PieceData.PIECE_SERGEANT_TYPE, lblType7Icon);
+            pieceImageLabels.put(PieceData.PIECE_MINER_TYPE, lblType8Icon);
+            pieceImageLabels.put(PieceData.PIECE_SCOUT_TYPE, lblType9Icon);
+            pieceImageLabels.put(PieceData.PIECE_SPY_TYPE, lblType10Icon);
+            pieceImageLabels.put(PieceData.PIECE_FLAG_TYPE, lblType11Icon);
 
-            pieceCounterLabels.put(Resources.PIECE_BOMB_TYPE, lblType0Counter);
-            pieceCounterLabels.put(Resources.PIECE_MARSHAL_TYPE, lblType1Counter);
-            pieceCounterLabels.put(Resources.PIECE_GENERAL_TYPE, lblType2Counter);
-            pieceCounterLabels.put(Resources.PIECE_COLONEL_TYPE, lblType3Counter);
-            pieceCounterLabels.put(Resources.PIECE_MAJOR_TYPE, lblType4Counter);
-            pieceCounterLabels.put(Resources.PIECE_CAPTAIN_TYPE, lblType5Counter);
-            pieceCounterLabels.put(Resources.PIECE_LIEUTENANT_TYPE, lblType6Counter);
-            pieceCounterLabels.put(Resources.PIECE_SERGEANT_TYPE, lblType7Counter);
-            pieceCounterLabels.put(Resources.PIECE_MINER_TYPE, lblType8Counter);
-            pieceCounterLabels.put(Resources.PIECE_SCOUT_TYPE, lblType9Counter);
-            pieceCounterLabels.put(Resources.PIECE_SPY_TYPE, lblType10Counter);
-            pieceCounterLabels.put(Resources.PIECE_FLAG_TYPE, lblType11Counter);
+            pieceCounterLabels.put(PieceData.PIECE_BOMB_TYPE, lblType0Counter);
+            pieceCounterLabels.put(PieceData.PIECE_MARSHAL_TYPE, lblType1Counter);
+            pieceCounterLabels.put(PieceData.PIECE_GENERAL_TYPE, lblType2Counter);
+            pieceCounterLabels.put(PieceData.PIECE_COLONEL_TYPE, lblType3Counter);
+            pieceCounterLabels.put(PieceData.PIECE_MAJOR_TYPE, lblType4Counter);
+            pieceCounterLabels.put(PieceData.PIECE_CAPTAIN_TYPE, lblType5Counter);
+            pieceCounterLabels.put(PieceData.PIECE_LIEUTENANT_TYPE, lblType6Counter);
+            pieceCounterLabels.put(PieceData.PIECE_SERGEANT_TYPE, lblType7Counter);
+            pieceCounterLabels.put(PieceData.PIECE_MINER_TYPE, lblType8Counter);
+            pieceCounterLabels.put(PieceData.PIECE_SCOUT_TYPE, lblType9Counter);
+            pieceCounterLabels.put(PieceData.PIECE_SPY_TYPE, lblType10Counter);
+            pieceCounterLabels.put(PieceData.PIECE_FLAG_TYPE, lblType11Counter);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -154,18 +155,18 @@ public class PiecesOnDisplayPanel extends JPanel {
         btnLoad.setVisible(false);
         titledBorder = new TitledBorder(BorderFactory.createEtchedBorder(Color.white, new Color(148, 145, 140)), "Player 1");
         this.setLayout(gridBagLayout1);
-        lblType0Counter.setText("" + Resources.PIECE_BOMB_COUNT);
-        lblType1Counter.setText("" + Resources.PIECE_MARSHAL_COUNT);
-        lblType2Counter.setText("" + Resources.PIECE_GENERAL_COUNT);
-        lblType3Counter.setText("" + Resources.PIECE_COLONEL_COUNT);
-        lblType4Counter.setText("" + Resources.PIECE_MAJOR_COUNT);
-        lblType5Counter.setText("" + Resources.PIECE_CAPTAIN_COUNT);
-        lblType6Counter.setText("" + Resources.PIECE_LIEUTENANT_COUNT);
-        lblType7Counter.setText("" + Resources.PIECE_SERGEANT_COUNT);
-        lblType8Counter.setText("" + Resources.PIECE_MINER_COUNT);
-        lblType9Counter.setText("" + Resources.PIECE_SCOUT_COUNT);
-        lblType10Counter.setText("" + Resources.PIECE_SPY_COUNT);
-        lblType11Counter.setText("" + Resources.PIECE_FLAG_COUNT);
+        lblType0Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_BOMB_TYPE));
+        lblType1Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_MARSHAL_TYPE));
+        lblType2Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_GENERAL_TYPE));
+        lblType3Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_COLONEL_TYPE));
+        lblType4Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_MAJOR_TYPE));
+        lblType5Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_CAPTAIN_TYPE));
+        lblType6Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_LIEUTENANT_TYPE));
+        lblType7Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_SERGEANT_TYPE));
+        lblType8Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_MINER_TYPE));
+        lblType9Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_SCOUT_TYPE));
+        lblType10Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_SPY_TYPE));
+        lblType11Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_FLAG_TYPE));
         this.setBackground(Battlex.BACKGOUND_COLOR);
         this.setBorder(titledBorder);
 
@@ -247,7 +248,7 @@ public class PiecesOnDisplayPanel extends JPanel {
 
     public String getSelectedPieceType() {
         if (currentLabel == null)
-            return Resources.PIECE_NO_PIECE;
+            return PieceData.PIECE_NO_PIECE;
 
         String pieceType = currentLabel.type;
         subtractPiece(pieceType);
@@ -289,18 +290,18 @@ public class PiecesOnDisplayPanel extends JPanel {
         lblType10Counter.setEnabled(true);
         lblType11Counter.setEnabled(true);
 
-        lblType0Counter.setText("" + Resources.PIECE_BOMB_COUNT);
-        lblType1Counter.setText("" + Resources.PIECE_MARSHAL_COUNT);
-        lblType2Counter.setText("" + Resources.PIECE_GENERAL_COUNT);
-        lblType3Counter.setText("" + Resources.PIECE_COLONEL_COUNT);
-        lblType4Counter.setText("" + Resources.PIECE_MAJOR_COUNT);
-        lblType5Counter.setText("" + Resources.PIECE_CAPTAIN_COUNT);
-        lblType6Counter.setText("" + Resources.PIECE_LIEUTENANT_COUNT);
-        lblType7Counter.setText("" + Resources.PIECE_SERGEANT_COUNT);
-        lblType8Counter.setText("" + Resources.PIECE_MINER_COUNT);
-        lblType9Counter.setText("" + Resources.PIECE_SCOUT_COUNT);
-        lblType10Counter.setText("" + Resources.PIECE_SPY_COUNT);
-        lblType11Counter.setText("" + Resources.PIECE_FLAG_COUNT);
+        lblType0Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_BOMB_TYPE));
+        lblType1Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_MARSHAL_TYPE));
+        lblType2Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_GENERAL_TYPE));
+        lblType3Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_COLONEL_TYPE));
+        lblType4Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_MAJOR_TYPE));
+        lblType5Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_CAPTAIN_TYPE));
+        lblType6Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_LIEUTENANT_TYPE));
+        lblType7Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_SERGEANT_TYPE));
+        lblType8Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_MINER_TYPE));
+        lblType9Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_SCOUT_TYPE));
+        lblType10Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_SPY_TYPE));
+        lblType11Counter.setText("" + PieceData.getPieceCount(PieceData.PIECE_FLAG_TYPE));
     }
 
     public void addPiece(String type) {

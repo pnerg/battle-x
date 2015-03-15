@@ -19,9 +19,9 @@ package org.dmonix.battlex.event;
 
 import java.io.Serializable;
 
+import org.dmonix.battlex.datamodel.PieceData;
 import org.dmonix.battlex.datamodel.Square;
 import org.dmonix.battlex.datamodel.SquareFactory;
-import org.dmonix.battlex.resources.Resources;
 
 /**
  * @author Peter Nerg
@@ -37,7 +37,7 @@ public final class GameEventObject implements Serializable {
 
     public GameEventObject(Square oldCoord, Square newCoord) {
         // TODO is this used? null as type is bad.
-        this(Resources.PIECE_NO_PIECE, oldCoord, newCoord);
+        this(PieceData.PIECE_NO_PIECE, oldCoord, newCoord);
     }
 
     public GameEventObject(String type, Square newCoord) {
@@ -69,8 +69,7 @@ public final class GameEventObject implements Serializable {
         sb.append("\n");
 
         // TODO when does this happen
-        if (Resources.PIECE_NO_PIECE.equals(type)) {
-
+        if (PieceData.PIECE_NO_PIECE.equals(type)) {
             sb.append("oldCoord=").append(oldCoord).append("\n");
         } else {
             sb.append("type=").append(type).append("\n");
