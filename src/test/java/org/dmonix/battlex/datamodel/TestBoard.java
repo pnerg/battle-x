@@ -224,6 +224,17 @@ public class TestBoard extends BaseAssert {
     }
 
     /**
+     * Miner -> Miner
+     */
+    @Test
+    public void move_x9y7_x8y7() {
+        Square originalPosition = SquareFactory.createAbsolute(9, 7);
+        Square movedPosition = SquareFactory.createAbsolute(8, 7);
+
+        assertMove(originalPosition, movedPosition, Board.RESULT_DRAW);
+    }
+
+    /**
      * Miner -> Bomb -> Flag
      */
     @Test
