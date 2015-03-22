@@ -50,7 +50,7 @@ import org.slf4j.LoggerFactory;
  * 3 --- --- --- --- --- --- --- --- --- --- 
  * 2 --- --- --- --- sc1 --- --- --- --- --- 
  * 1 bo1 bo1 --- --- --- --- --- --- --- --- 
- * 0 fl1 bo1 --- --- --- --- --- --- --- --- 
+ * 0 fl1 bo1 sc1 --- --- --- --- --- --- --- 
  *    0   1   2   3   4   5   6   7   8   9   
  *             <i>Player1</i>
  * </pre>
@@ -62,28 +62,43 @@ public class TestBoard extends BaseAssert {
     private static final Logger logger = LoggerFactory.getLogger(TestBoard.class);
     private final Board board = new Board();
 
-    public TestBoard() {
-        board.addPiece(new Piece(1, PieceData.PIECE_FLAG_TYPE, SquareFactory.createAbsolute(0, 0)));
-        board.addPiece(new Piece(1, PieceData.PIECE_BOMB_TYPE, SquareFactory.createAbsolute(1, 0)));
-        board.addPiece(new Piece(1, PieceData.PIECE_CAPTAIN_TYPE, SquareFactory.createAbsolute(1, 8)));
-        board.addPiece(new Piece(1, PieceData.PIECE_BOMB_TYPE, SquareFactory.createAbsolute(0, 1)));
-        board.addPiece(new Piece(1, PieceData.PIECE_BOMB_TYPE, SquareFactory.createAbsolute(1, 1)));
-        board.addPiece(new Piece(1, PieceData.PIECE_SCOUT_TYPE, SquareFactory.createAbsolute(4, 2)));
-        board.addPiece(new Piece(1, PieceData.PIECE_COLONEL_TYPE, SquareFactory.createAbsolute(5, 4)));
-        board.addPiece(new Piece(1, PieceData.PIECE_MINER_TYPE, SquareFactory.createAbsolute(3, 6)));
-        board.addPiece(new Piece(1, PieceData.PIECE_MARSHAL_TYPE, SquareFactory.createAbsolute(2, 7)));
-        board.addPiece(new Piece(1, PieceData.PIECE_MINER_TYPE, SquareFactory.createAbsolute(9, 7)));
+    /** Total amount of pieces added to player 1 */
+    private int pieceCountP1 = 0;
+    /** Total amount of pieces added to player 2 */
+    private int pieceCountP2 = 0;
 
-        board.addPiece(new Piece(2, PieceData.PIECE_SPY_TYPE, SquareFactory.createAbsolute(2, 8)));
-        board.addPiece(new Piece(2, PieceData.PIECE_FLAG_TYPE, SquareFactory.createAbsolute(9, 9)));
-        board.addPiece(new Piece(2, PieceData.PIECE_BOMB_TYPE, SquareFactory.createAbsolute(8, 9)));
-        board.addPiece(new Piece(2, PieceData.PIECE_MINER_TYPE, SquareFactory.createAbsolute(8, 7)));
-        board.addPiece(new Piece(2, PieceData.PIECE_BOMB_TYPE, SquareFactory.createAbsolute(9, 8)));
-        board.addPiece(new Piece(2, PieceData.PIECE_BOMB_TYPE, SquareFactory.createAbsolute(8, 8)));
-        board.addPiece(new Piece(2, PieceData.PIECE_BOMB_TYPE, SquareFactory.createAbsolute(3, 7)));
-        board.addPiece(new Piece(2, PieceData.PIECE_GENERAL_TYPE, SquareFactory.createAbsolute(4, 7)));
-        board.addPiece(new Piece(2, PieceData.PIECE_SCOUT_TYPE, SquareFactory.createAbsolute(5, 5)));
-        board.addPiece(new Piece(2, PieceData.PIECE_CAPTAIN_TYPE, SquareFactory.createAbsolute(5, 6)));
+    public TestBoard() {
+        addPiece(1, PieceData.PIECE_FLAG_TYPE, 0, 0);
+        addPiece(1, PieceData.PIECE_BOMB_TYPE, 1, 0);
+        addPiece(1, PieceData.PIECE_SCOUT_TYPE, 2, 0);
+        addPiece(1, PieceData.PIECE_CAPTAIN_TYPE, 1, 8);
+        addPiece(1, PieceData.PIECE_BOMB_TYPE, 0, 1);
+        addPiece(1, PieceData.PIECE_BOMB_TYPE, 1, 1);
+        addPiece(1, PieceData.PIECE_SCOUT_TYPE, 4, 2);
+        addPiece(1, PieceData.PIECE_COLONEL_TYPE, 5, 4);
+        addPiece(1, PieceData.PIECE_MINER_TYPE, 3, 6);
+        addPiece(1, PieceData.PIECE_MARSHAL_TYPE, 2, 7);
+        addPiece(1, PieceData.PIECE_MINER_TYPE, 9, 7);
+
+        addPiece(2, PieceData.PIECE_SPY_TYPE, 2, 8);
+        addPiece(2, PieceData.PIECE_FLAG_TYPE, 9, 9);
+        addPiece(2, PieceData.PIECE_BOMB_TYPE, 8, 9);
+        addPiece(2, PieceData.PIECE_MINER_TYPE, 8, 7);
+        addPiece(2, PieceData.PIECE_BOMB_TYPE, 9, 8);
+        addPiece(2, PieceData.PIECE_BOMB_TYPE, 8, 8);
+        addPiece(2, PieceData.PIECE_BOMB_TYPE, 3, 7);
+        addPiece(2, PieceData.PIECE_GENERAL_TYPE, 4, 7);
+        addPiece(2, PieceData.PIECE_SCOUT_TYPE, 5, 5);
+        addPiece(2, PieceData.PIECE_CAPTAIN_TYPE, 5, 6);
+    }
+
+    private void addPiece(int player, String type, int x, int y) {
+        board.addPiece(new Piece(player, type, SquareFactory.createAbsolute(x, y)));
+        if (player == 1) {
+            pieceCountP1++;
+        } else {
+            pieceCountP2++;
+        }
     }
 
     @Test
@@ -96,7 +111,21 @@ public class TestBoard extends BaseAssert {
     public void getPieces() {
         List<Piece> pieces = board.getPieces();
         assertNotNull(pieces);
-        assertEquals(20, pieces.size());
+        assertEquals(pieceCountP1 + pieceCountP2, pieces.size());
+    }
+
+    @Test
+    public void getPiecesForPlayer_P1() {
+        List<Piece> pieces = board.getPiecesForPlayer(1);
+        assertNotNull(pieces);
+        assertEquals(pieceCountP1, pieces.size());
+    }
+
+    @Test
+    public void getPiecesForPlayer_P2() {
+        List<Piece> pieces = board.getPiecesForPlayer(2);
+        assertNotNull(pieces);
+        assertEquals(pieceCountP2, pieces.size());
     }
 
     @Test
@@ -248,6 +277,77 @@ public class TestBoard extends BaseAssert {
         Square movedPosition = SquareFactory.createAbsolute(9, 9);
 
         assertMove(originalPosition, movedPosition, Board.RESULT_WIN_GAME);
+    }
+
+    /**
+     * Flag
+     */
+    @Test
+    public void getAllowedMoves_x0y0() {
+        Piece piece = board.getPiece(SquareFactory.createAbsolute(0, 0));
+        List<Square> allowedMoves = board.getAllowedMoves(piece);
+        assertNotNull(allowedMoves);
+        assertEquals(0, allowedMoves.size());
+    }
+
+    /**
+     * Scout <br>
+     * 5 in right direction <br>
+     * 4 in left direction <br>
+     * 5 in up direction <br>
+     * 2 in down direction
+     */
+    @Test
+    public void getAllowedMoves_x4y2() {
+        Piece piece = board.getPiece(SquareFactory.createAbsolute(4, 2));
+        List<Square> allowedMoves = board.getAllowedMoves(piece);
+        assertNotNull(allowedMoves);
+        assertEquals(16, allowedMoves.size());
+    }
+
+    /**
+     * Scout <br>
+     * 7 in right direction <br>
+     * 0 in left direction <br>
+     * 3 in up direction <br>
+     * 0 in down direction
+     */
+    @Test
+    public void getAllowedMoves_x2y0() {
+        Piece piece = board.getPiece(SquareFactory.createAbsolute(2, 0));
+        List<Square> allowedMoves = board.getAllowedMoves(piece);
+        assertNotNull(allowedMoves);
+        assertEquals(10, allowedMoves.size());
+    }
+
+    /**
+     * Miner <br>
+     * 1 in right direction <br>
+     * 1 in left direction <br>
+     * 1 in up direction <br>
+     * 0 in down direction
+     */
+    @Test
+    public void getAllowedMoves_x3y6() {
+        Piece piece = board.getPiece(SquareFactory.createAbsolute(3, 6));
+        List<Square> allowedMoves = board.getAllowedMoves(piece);
+        assertNotNull(allowedMoves);
+        assertEquals(3, allowedMoves.size());
+    }
+
+    /**
+     * Scout <br>
+     * 0 in right direction <br>
+     * 1 in left direction <br>
+     * 0 in up direction <br>
+     * 1 in down direction
+     */
+    @Test
+    public void getAllowedMoves_x5y5() {
+        Piece piece = board.getPiece(SquareFactory.createAbsolute(5, 5));
+        List<Square> allowedMoves = board.getAllowedMoves(piece);
+        assertNotNull(allowedMoves);
+        assertEquals(2, allowedMoves.size());
     }
 
     private void assertMove(Square originalPosition, Square movedPosition, int expectedResult) {

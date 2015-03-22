@@ -62,29 +62,23 @@ public final class Board {
     /** Matrix representing all 10x10 positions on the board. */
     private final Position[][] positions = new Position[10][10];
 
-    /** Used to mark an empty position. */
-    private static final EmptyPosition EmptyPosition = new EmptyPosition();
-
-    /** Used to mark an illegal position, that is the water squares in the middle. */
-    private static final InvalidPosition InvalidPosition = new InvalidPosition();
-
     public Board() {
         for (int y = 9; y >= 0; y--) {
             for (int x = 0; x < 10; x++) {
-                positions[x][y] = EmptyPosition;
+                positions[x][y] = new EmptyPosition(SquareFactory.createAbsolute(x, y));
             }
         }
         // mark the left lake as invalid
-        positions[2][4] = InvalidPosition;
-        positions[2][5] = InvalidPosition;
-        positions[3][4] = InvalidPosition;
-        positions[3][5] = InvalidPosition;
+        positions[2][4] = new InvalidPosition(SquareFactory.createAbsolute(2, 4));
+        positions[2][5] = new InvalidPosition(SquareFactory.createAbsolute(2, 5));
+        positions[3][4] = new InvalidPosition(SquareFactory.createAbsolute(3, 4));
+        positions[3][5] = new InvalidPosition(SquareFactory.createAbsolute(3, 5));
 
         // mark the right lake as invalid
-        positions[6][4] = InvalidPosition;
-        positions[6][5] = InvalidPosition;
-        positions[7][4] = InvalidPosition;
-        positions[7][5] = InvalidPosition;
+        positions[6][4] = new InvalidPosition(SquareFactory.createAbsolute(6, 4));
+        positions[6][5] = new InvalidPosition(SquareFactory.createAbsolute(6, 5));
+        positions[7][4] = new InvalidPosition(SquareFactory.createAbsolute(7, 4));
+        positions[7][5] = new InvalidPosition(SquareFactory.createAbsolute(7, 5));
     }
 
     void clearAllPlayerPieces(int player) {
@@ -116,7 +110,7 @@ public final class Board {
 
     public void addPiece(Piece piece) {
         if (!isEmpty(piece.getSquare())) {
-            throw new IllegalArgumentException("Cannot add piece to non-empty square [" + piece.getSquare() + "]");
+            throw new IllegalArgumentException("Cannot add piece [" + piece + "] to non-empty square [" + piece.getSquare() + "]");
         }
 
         logger.debug("Adding piece to board [{}]", piece);
@@ -130,7 +124,7 @@ public final class Board {
 
     public boolean isEmpty(Square square) {
         Square abs = square.getAbsolute();
-        return positions[abs.getX()][abs.getY()] == EmptyPosition;
+        return positions[abs.getX()][abs.getY()].isEmpty();
     }
 
     /**
@@ -148,8 +142,138 @@ public final class Board {
 
     // TODO implement
     public List<Square> getAllowedMoves(Piece piece) {
-        List<Square> allowedMoves = new ArrayList<>();
+        // bombs and flags can't move at all.
+        List<Position> positionsRight = getAllPositionsRight(piece);
+        List<Position> positionsLeft = getAllPositionsLeft(piece);
+        List<Position> positionsUp = getAllPositionsAbove(piece);
+        List<Position> positionsDown = getAllPositionsBelow(piece);
+        logger.debug("Possible positions for [{}] left:[{}], right:[{}], up:[{}], down:[{}]", piece, positionsLeft.size(), positionsRight.size(),
+                positionsUp.size(), positionsDown.size());
 
+        List<Square> allowedMovesRight = getAllowedMoves(positionsRight, piece);
+        List<Square> allowedMovesLeft = getAllowedMoves(positionsLeft, piece);
+        List<Square> allowedMovesUp = getAllowedMoves(positionsUp, piece);
+        List<Square> allowedMovesDown = getAllowedMoves(positionsDown, piece);
+
+        logger.debug("Allowed positions for [{}] left:[{}], right:[{}], up:[{}], down:[{}]", piece, allowedMovesLeft.size(), allowedMovesRight.size(),
+                allowedMovesUp.size(), allowedMovesDown.size());
+
+        List<Square> allowedMoves = new ArrayList<>();
+        allowedMoves.addAll(allowedMovesRight);
+        allowedMoves.addAll(allowedMovesLeft);
+        allowedMoves.addAll(allowedMovesUp);
+        allowedMoves.addAll(allowedMovesDown);
+
+        return allowedMoves;
+    }
+
+    /**
+     * Get all the possible positions to the <tt>left</tt> of the provided piece.<br>
+     * This includes all positions, even those not valid/water and occupied positions.
+     * 
+     * @param piece
+     * @return
+     */
+    private List<Position> getAllPositionsLeft(Piece piece) {
+        List<Position> possiblePositions = new ArrayList<>();
+        int xPos = piece.getSquare().getAbsolute().getX();
+        int yPos = piece.getSquare().getAbsolute().getY();
+        for (int x = xPos - 1; x >= 0; x--) {
+            possiblePositions.add(positions[x][yPos]);
+        }
+        return possiblePositions;
+    }
+
+    /**
+     * Get all the possible positions to the <tt>right</tt> of the provided piece.<br>
+     * This includes all positions, even those not valid/water and occupied positions.
+     * 
+     * @param piece
+     * @return
+     */
+    private List<Position> getAllPositionsRight(Piece piece) {
+        List<Position> possiblePositions = new ArrayList<>();
+        int xPos = piece.getSquare().getAbsolute().getX();
+        int yPos = piece.getSquare().getAbsolute().getY();
+        for (int x = xPos + 1; x < 10; x++) {
+            possiblePositions.add(positions[x][yPos]);
+        }
+        return possiblePositions;
+    }
+
+    /**
+     * Get all the possible positions to the <tt>up</tt> of the provided piece.<br>
+     * This includes all positions, even those not valid/water and occupied positions.
+     * 
+     * @param piece
+     * @return
+     */
+    private List<Position> getAllPositionsAbove(Piece piece) {
+        List<Position> possiblePositions = new ArrayList<>();
+        int xPos = piece.getSquare().getAbsolute().getX();
+        int yPos = piece.getSquare().getAbsolute().getY();
+        for (int y = yPos + 1; y < 10; y++) {
+            possiblePositions.add(positions[xPos][y]);
+        }
+        return possiblePositions;
+    }
+
+    /**
+     * Get all the possible positions to the <tt>down</tt> of the provided piece.<br>
+     * This includes all positions, even those not valid/water and occupied positions.
+     * 
+     * @param piece
+     * @return
+     */
+    private List<Position> getAllPositionsBelow(Piece piece) {
+        List<Position> possiblePositions = new ArrayList<>();
+        int xPos = piece.getSquare().getAbsolute().getX();
+        int yPos = piece.getSquare().getAbsolute().getY();
+        for (int y = yPos - 1; y >= 0; y--) {
+            possiblePositions.add(positions[xPos][y]);
+        }
+        return possiblePositions;
+    }
+
+    private List<Square> getAllowedMoves(List<Position> possibleMoves, Piece piece) {
+        int moveDistance = piece.getMoveDistance();
+        if (moveDistance == 0) {
+            return new ArrayList<>();
+        }
+        int player = piece.getPlayer();
+
+        List<Square> allowedMoves = new ArrayList<>();
+        int moveCounter = 0;
+        for (Position position : possibleMoves) {
+            moveCounter++;
+            Square square2BeChecked = position.getSquare();
+            // invalid/water found, break
+            if (!position.isValid()) {
+                logger.debug("checking position [{}], was invalid", square2BeChecked);
+                break;
+            }
+
+            // non-empty square
+            // not possible to move further
+            if (position.containsPiece()) {
+                logger.debug("checking position [{}], contained [{}]", square2BeChecked, position.getPiece());
+                // non-empty square containing opponent piece
+                // allowed to move there, if it's own piece then not allowed to move there
+                if (position.getPiece().getPlayer() != player) {
+                    allowedMoves.add(square2BeChecked);
+                }
+                break;
+            }
+
+            // empty square, allowed to move there
+            logger.debug("checking position [{}], was empty", square2BeChecked);
+            allowedMoves.add(square2BeChecked);
+
+            // we've walked as far as this piece can move
+            if (moveCounter >= moveDistance) {
+                break;
+            }
+        }
         return allowedMoves;
     }
 
@@ -169,6 +293,10 @@ public final class Board {
 
         Position position = positions[squareDefender.getX()][squareDefender.getY()];
         int result;
+
+        // empty the old position for the piece that moved
+        emptySquare(squareAttacker);
+
         /**
          * empty space, go ahead and move the piece to that location
          */
@@ -188,6 +316,7 @@ public final class Board {
             if (result == RESULT_WIN) {
                 logger.debug("Piece [{}] won against [{}]", attacker, defender);
                 attacker.setLocation(squareDefender); // set new location to
+                emptySquare(squareDefender);
                 addPiece(attacker);// move attacker to defender square
             }
             // attacker lost
@@ -200,9 +329,6 @@ public final class Board {
                 emptySquare(squareDefender);
             }
         }
-
-        // empty the old position for the piece that moved
-        emptySquare(squareAttacker);
 
         return result;
     }
@@ -217,7 +343,7 @@ public final class Board {
             }
             logger.debug("Marking square [{}] containing [{}] as empty", abs, pieceString);
         }
-        positions[abs.getX()][abs.getY()] = EmptyPosition;
+        positions[abs.getX()][abs.getY()] = new EmptyPosition(abs);
     }
 
     public List<Piece> getPieces() {
@@ -394,6 +520,8 @@ public final class Board {
         boolean containsPiece();
 
         Piece getPiece();
+
+        Square getSquare();
     }
 
     /**
@@ -402,6 +530,12 @@ public final class Board {
      * @author Peter Nerg
      */
     private static final class EmptyPosition implements Position {
+
+        private final Square square;
+
+        EmptyPosition(Square square) {
+            this.square = square;
+        }
 
         @Override
         public boolean isValid() {
@@ -424,6 +558,11 @@ public final class Board {
         }
 
         @Override
+        public Square getSquare() {
+            return square;
+        }
+
+        @Override
         public String toString() {
             return "---";
         }
@@ -436,6 +575,12 @@ public final class Board {
      * @author Peter Nerg
      */
     private static final class InvalidPosition implements Position {
+
+        private final Square square;
+
+        InvalidPosition(Square square) {
+            this.square = square;
+        }
 
         @Override
         public boolean isValid() {
@@ -455,6 +600,11 @@ public final class Board {
         @Override
         public Piece getPiece() {
             throw new UnsupportedOperationException("Invalid squares don't have pieces");
+        }
+
+        @Override
+        public Square getSquare() {
+            return square;
         }
 
         @Override
@@ -494,6 +644,11 @@ public final class Board {
         @Override
         public Piece getPiece() {
             return piece;
+        }
+
+        @Override
+        public Square getSquare() {
+            return piece.getSquare();
         }
 
         @Override
