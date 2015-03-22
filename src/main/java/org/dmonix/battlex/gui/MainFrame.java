@@ -106,7 +106,7 @@ public class MainFrame extends JFrame {
     public MainFrame() throws HeadlessException {
         try {
             logger.info("STARTING");
-            if (System.getProperty("battlex.nosplash") == null) {
+            if (System.getProperty("battlex.nosplash") != null) {
                 SplashPanel.showSplash("BattleX", majorVersion, minorVersion);
             }
 

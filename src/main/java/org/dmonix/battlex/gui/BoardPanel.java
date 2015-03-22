@@ -24,7 +24,6 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -38,6 +37,7 @@ import org.dmonix.battlex.datamodel.Piece;
 import org.dmonix.battlex.datamodel.PieceData;
 import org.dmonix.battlex.datamodel.Square;
 import org.dmonix.battlex.datamodel.SquareFactory;
+import org.dmonix.battlex.event.ClearSquareEventObject;
 import org.dmonix.battlex.event.EventCommunicator;
 import org.dmonix.battlex.event.GameEventListener;
 import org.dmonix.battlex.event.GameEventObject;
@@ -133,7 +133,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
                 // this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord());
                 board.addPiece(new Piece(otherPlayer, geo.getType(), geo.getNewCoord()));
             } else {
-                board.removePiece(board.getPiece(geo.getNewCoord()));
+                board.emptySquare(geo.getNewCoord());
             }
 
             repaint();
@@ -285,33 +285,24 @@ public class BoardPanel extends JPanel implements GameEventListener {
         Image scaledImage;
 
         for (Piece piece : board.getPieces()) {
-            Point point = translatePieceLocationToLocalLayout(piece);
-            int x = point.x;
-            int y = point.y;
+            Square relativePieceSquare = piece.getSquare().getRelative(player);
+            int x = relativePieceSquare.getX();
+            int y = relativePieceSquare.getY();
             if (!revealOpponent) {
                 if (piece.getPlayer() == player)
                     scaledImage = Resources.getImage(player, piece.getType());
                 else
-                    scaledImage = Resources.getImage(this.player, PieceData.PIECE_EMPTY_TYPE);
+                    scaledImage = Resources.getImage(piece.getPlayer(), PieceData.PIECE_EMPTY_TYPE);
             } else
                 scaledImage = Resources.getImage(player, piece.getType());
 
-            if (currentPiece != null && piece != currentPiece)
+            if (currentPiece != null && piece != currentPiece) {
                 g2.setComposite(alphaComposite2);
+            }
             log.debug("Painting [{}] at x[{}] y[{}]", piece, x, y);
             g2.drawImage(scaledImage, (int) squareWidth * x + scaledImage.getWidth(null) / 2, (int) squareHeight * y + scaledImage.getHeight(null) / 8, null);
             g2.setComposite(originalComposite);
         }
-    }
-
-    /**
-     * 
-     * @param piece
-     * @return
-     */
-    private Point translatePieceLocationToLocalLayout(Piece piece) {
-        Square square = piece.getSquare().getRelative(player);
-        return new Point(square.getX(), square.getY());
     }
 
     /**
@@ -320,7 +311,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param e
      */
     void inGameClick(MouseEvent e) {
-        Point point = getClickedSquare(e);
+        Square clickedSquare = getClickedSquare(e);
 
         /**
          * If the user has pressed any other mouse button than button 1 then clear the selection
@@ -332,18 +323,16 @@ public class BoardPanel extends JPanel implements GameEventListener {
             return;
         }
 
-        log.debug("Clicked in: " + e.getPoint() + " x_coord=" + point.x + " y_coord=" + point.y);
-
-        Piece selectedPiece = getPieceAtPoint(point);
-
         // not selected any piece and clicked in an empty space
-        if (selectedPiece == null && currentPiece == null)
+        if (board.isEmpty(clickedSquare) && currentPiece == null)
             return;
 
         /**
          * first click, no selected piece
          */
-        if (selectedPiece != null && currentPiece == null) {
+        if (currentPiece == null) {
+            Piece selectedPiece = board.getPiece(clickedSquare);
+
             // it's not allowed to move the other players pieces
             if (selectedPiece.getPlayer() != player)
                 return;
@@ -355,84 +344,98 @@ public class BoardPanel extends JPanel implements GameEventListener {
             super.repaint();
             return;
         }
-
-        log.debug("Current object in position [{}] ", selectedPiece);
-
-        /**
-         * If a piece has been selected it's only valid to move to highlighted squares
+        /*
+         * If a piece has been selected it's only valid to move to highlighted/valid squares
          */
-        if (currentPiece != null && markedSquares[point.x][point.y] == null)
+        else if (!board.canMoveTo(currentPiece, clickedSquare)) {
             return;
-
-        eventCommunicator.sendEvent(new GameEventObject(currentPiece.getSquare(), SquareFactory.createAbsolute(point.x, point.y)));
-
-        movePiece(currentPiece, convertPoint2Square(point));
-        gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);
-        currentPiece = null;
-
-    }
-
-    /**
-     * Get the piece at a specific point on the board
-     * 
-     * @param x
-     * @param y
-     * @return
-     */
-    private Piece getPieceAtPoint(Point point) {
-        return board.getPiece(convertPoint2Square(point));
-    }
-
-    private Square convertPoint2Square(Point point) {
-        return SquareFactory.createRelative(player, point.x, point.y);
-    }
-
-    /**
-     * Sets a piece at a specific point
-     * 
-     * @param point
-     *            The point for the piece
-     * @param pieceType
-     *            The type of piece
-     */
-    private void setPieceAtPoint(Point point, String pieceType) {
-        Square square = convertPoint2Square(point);
-        // if there is a piece in the square, remove it
-        Piece piece = board.getPiece(square);
-        if (piece != null && piece.getPlayer() == player) {
-            // remove the piece from the opponents board
-            eventCommunicator.sendEvent(new GameEventObject(PieceData.PIECE_NO_PIECE, square));
-            owner.addPiece(player, piece.getType());
-            board.removePiece(piece);
-            // TODO check this for correctness, point vs square...right coords?
-            this.markedSquares[point.x][point.y] = new Object();
-            repaint();
         }
 
-        // can only add pieces to marked squares
-        if (this.markedSquares[point.x][point.y] == null)
-            return;
+        eventCommunicator.sendEvent(new GameEventObject(currentPiece.getSquare(), clickedSquare));
 
-        if (pieceType == PieceData.PIECE_NO_PIECE)
-            return;
-
-        board.addPiece(new Piece(this.player, pieceType, square));
-        // TODO check this for correctness, point vs square...right coords?
-        this.markedSquares[point.x][point.y] = null;
-        eventCommunicator.sendEvent(new GameEventObject(pieceType, square));
-
-        repaint();
+        movePiece(currentPiece, clickedSquare);
+        gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);
+        currentPiece = null;
     }
+
+    // /**
+    // * Get the piece at a specific point on the board
+    // *
+    // * @param x
+    // * @param y
+    // * @return
+    // */
+    // private Piece getPieceAtPoint(Point point) {
+    // return board.getPiece(SquarePointConverter.point2Square(point, player));
+    // }
+
+    // /**
+    // * Sets a piece at a specific point
+    // *
+    // * @param point
+    // * The point for the piece
+    // * @param pieceType
+    // * The type of piece
+    // */
+    // private void setPieceAtPoint(Point point, String pieceType) {
+    // Square square = SquarePointConverter.point2Square(point, player);
+    // // if there is a piece in the square, remove it
+    // if (!board.isEmpty(square) && board.getPiece(square).getPlayer() == player) {
+    // Piece piece = board.getPiece(square);
+    // // remove the piece from the opponents board
+    // eventCommunicator.sendEvent(new GameEventObject(PieceData.PIECE_NO_PIECE, square));
+    // owner.addPiece(player, piece.getType());
+    // board.removePiece(piece);
+    // this.markedSquares[point.x][point.y] = new Object();
+    // repaint();
+    // }
+    //
+    // // can only add pieces to marked squares
+    // if (this.markedSquares[point.x][point.y] == null)
+    // return;
+    //
+    // if (pieceType == PieceData.PIECE_NO_PIECE)
+    // return;
+    //
+    // board.addPiece(new Piece(this.player, pieceType, square));
+    // this.markedSquares[point.x][point.y] = null;
+    // eventCommunicator.sendEvent(new GameEventObject(pieceType, square));
+    //
+    // repaint();
+    // }
 
     private void gameSetupClick(MouseEvent e) {
         // find the point for the click
-        Point point = getClickedSquare(e);
-        // can only click on own squares
-        if ((player == 1 && point.y > 3) || (player == 2 && point.y < 6))
+        Square clickedSquare = getClickedSquare(e).getRelative(player);
+
+        // only allowed to place piece on the 4 lines closest to the player
+        if (clickedSquare.getY() < 6) {
             return;
+        }
+
         // get the selected setup piece
         String pieceType = owner.getSelectedSetupPiece(this.player);
-        setPieceAtPoint(point, pieceType);
+
+        // empty square, add the selected piece
+        if (board.isEmpty(clickedSquare)) {
+            // ignore if clicking in an empty square with no selected piece
+            if (pieceType != PieceData.PIECE_NO_PIECE) {
+                board.addPiece(new Piece(this.player, pieceType, clickedSquare));
+                this.markedSquares[clickedSquare.getX()][clickedSquare.getY()] = null;
+                eventCommunicator.sendEvent(new GameEventObject(pieceType, clickedSquare));
+            }
+        }
+        // if there is a piece in the square, remove it
+        else {
+            Piece piece = board.getPiece(clickedSquare);
+            // remove the piece from the opponents board
+            eventCommunicator.sendEvent(new ClearSquareEventObject(clickedSquare));
+            owner.addPiece(player, piece.getType());
+            board.removePiece(piece);
+            this.markedSquares[clickedSquare.getX()][clickedSquare.getY()] = new Object();
+        }
+
+        repaint();
     }
 
     /**
@@ -454,24 +457,22 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * @param e
      * @return
      */
-    private Point getClickedSquare(MouseEvent e) {
+    private Square getClickedSquare(MouseEvent e) {
         Dimension d = super.getSize();
         squareWidth = d.width / 10;
         squareHeight = d.height / 10;
-
         final int x = e.getPoint().x / (int) squareWidth;
         final int y = e.getPoint().y / (int) squareHeight;
-        int x_transposed, y_transposed;
-        if (player == 1) {
-            x_transposed = x;
-            y_transposed = 9 - y;
-        } else {
-            x_transposed = 9 - x;
-            y_transposed = y;
+        Square square = SquareFactory.createRelative(player, x, y);
+        // debug the square clicked and its contents
+        if (log.isDebugEnabled()) {
+            String pieceAtClickedPoint = "EMPTY";
+            if (!board.isEmpty(square)) {
+                pieceAtClickedPoint = board.getPiece(square).toString();
+            }
+            log.debug("Player [{}] clicked in gfx square/point x[{}] y[{}] - [{}]", player, x, y, pieceAtClickedPoint);
         }
-        Point point = new Point(x_transposed, y_transposed);
-        log.debug("Player [{}] clicked in square x[{}] y[{}]", player, point.x, point.y);
-        return point;
+        return square;
     }
 
     /**
@@ -564,11 +565,8 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (moveDistance == 0)
             return;
 
-        boolean[][] allowedMoves = board.getAllowedMoves(piece);
-        for (int y = 0; y < 9; y++) {
-            for (int x = 0; x < 9; x++) {
-                markedSquares[x][y] = allowedMoves[x][y] ? new Object() : null;
-            }
+        for (Square allowedMove : board.getAllowedMoves(piece)) {
+            markedSquares[allowedMove.getX()][allowedMove.getY()] = new Object();
         }
         // // check up
         // for (int i = 1; i <= moveDistance; i++) {

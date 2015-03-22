@@ -19,11 +19,14 @@ package org.dmonix.battlex.event;
 
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +49,7 @@ public class EventCommunicator implements Runnable {
     private final List<ControlEventListener> ctrlEventListeners = new ArrayList<>();
 
     /** The game event listeners */
-    private final List<GameEventListener> gameEventListeners = new ArrayList<>();
+    private final Set<GameEventListener> gameEventListeners = new HashSet<>();
 
     /**
      * Sets up the communicator as a server
@@ -196,29 +199,16 @@ public class EventCommunicator implements Runnable {
      * @param ceo
      * @throws IOException
      */
-    public void sendEvent(ControlEventObject ceo)// throws IOException
+    public void sendEvent(Serializable event)// throws IOException
     {
         try {
-            this.send(ceo);
+            logger.debug("Sending event [{}]", event);
+            this.ostream.writeUnshared(event);
+            this.ostream.flush();
         } catch (IOException ex) {
-            logger.warn("Failed to send control event", ex);
+            logger.warn("Failed to send event object", ex);
         }
     }
-
-    /**
-     * Sends a game event object
-     * 
-     * @param geo
-     * @throws IOException
-     */
-    public void sendEvent(GameEventObject geo) {
-        try {
-            this.send(geo);
-        } catch (IOException ex) {
-            logger.warn("Failed to send game event", ex);
-        }
-    }
-
     /**
      * General send method.
      * 
@@ -235,15 +225,4 @@ public class EventCommunicator implements Runnable {
     // ostream.flush();
     // ostream.close();
     // }
-    /**
-     * General send method.
-     * 
-     * @param obj
-     * @throws IOException
-     */
-    private void send(Object obj) throws IOException {
-        logger.debug("Sending object [{}]", obj);
-        this.ostream.writeObject(obj);
-        this.ostream.flush();
-    }
 }

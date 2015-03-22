@@ -93,42 +93,62 @@ public final class Board {
         }
     }
 
+    /**
+     * Gets all the allowed moves the piece can do and verify if the requested target is amongst these
+     * 
+     * @param piece
+     * @param target
+     * @return
+     */
+    public boolean canMoveTo(Piece piece, Square target) {
+        for (Square allowedSquare : getAllowedMoves(piece)) {
+            if (allowedSquare.equals(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public Piece getPiece(Square square) {
         Square absolute = square.getAbsolute();
         return positions[absolute.getX()][absolute.getY()].getPiece();
     }
 
     public void addPiece(Piece piece) {
+        if (!isEmpty(piece.getSquare())) {
+            throw new IllegalArgumentException("Cannot add piece to non-empty square [" + piece.getSquare() + "]");
+        }
+
         logger.debug("Adding piece to board [{}]", piece);
         Square absolute = piece.getSquare();
         positions[absolute.getX()][absolute.getY()] = new PiecePosition(piece);
     }
 
     public void removePiece(Piece piece) {
-        logger.debug("Removing piece from board [{}]", piece);
         emptySquare(piece.getSquare());
     }
-
-    // public void removePiece(Square square) {
-    // int x = square.getAbsolute().getX();
-    // int y = square.getAbsolute().getY();
-    // logger.debug("Removing piece piece from board x[{}] y[{}]", x, y);
-    // pieces[x][y] = null;
-    // }
 
     public boolean isEmpty(Square square) {
         Square abs = square.getAbsolute();
         return positions[abs.getX()][abs.getY()] == EmptyPosition;
     }
 
+    /**
+     * Returns <code>true</code> if the provided square contains a Piece belonging to the provided player, <code>false</code> otherwise.
+     * 
+     * @param player
+     * @param square
+     * @return
+     */
     public boolean isPlayerPiece(int player, Square square) {
-        Piece piece = getPiece(square);
-        return piece != null ? piece.getPlayer() == player : false;
+        Square abs = square.getAbsolute();
+        Position position = positions[abs.getX()][abs.getY()];
+        return position.containsPiece() ? position.getPiece().getPlayer() == player : false;
     }
 
     // TODO implement
-    public boolean[][] getAllowedMoves(Piece piece) {
-        boolean[][] allowedMoves = new boolean[9][9];
+    public List<Square> getAllowedMoves(Piece piece) {
+        List<Square> allowedMoves = new ArrayList<>();
 
         return allowedMoves;
     }
@@ -140,28 +160,45 @@ public final class Board {
      * @param defender
      */
     public int movePiece(final Piece attacker, Square target) {
-        final int x_coord_defender = target.getAbsolute().getX();
-        final int y_coord_defender = target.getAbsolute().getY();
+        // final int x_coord_defender = target.getAbsolute().getX();
+        // final int y_coord_defender = target.getAbsolute().getY();
+        final Square squareDefender = target.getAbsolute();
         final Square squareAttacker = attacker.getSquare();
 
         logger.debug("Resolve movement [{}] to x[{}]", attacker, target);
 
-        Piece defender = positions[x_coord_defender][y_coord_defender].getPiece();
-        int result = resolveStrike(attacker, defender);
-
+        Position position = positions[squareDefender.getX()][squareDefender.getY()];
+        int result;
         /**
          * empty space, go ahead and move the piece to that location
          */
-        if (result == RESULT_MOVE_NO_BATTLE || result == RESULT_WIN) {
-            logger.debug("Piece [{}] won against [{}]", attacker, defender);
-            attacker.setLocation(SquareFactory.createAbsolute(x_coord_defender, y_coord_defender)); // set new location to
+        if (position.isEmpty()) {
+            logger.debug("Piece [{}] moved to empty square [{}]", attacker, squareDefender);
+            result = RESULT_MOVE_NO_BATTLE;
+            attacker.setLocation(squareDefender); // set new location to
             addPiece(attacker);// move attacker to defender square
         }
-
-        // draw
-        else if (result == RESULT_DRAW) {
-            logger.debug("Piece [{}] draw against [{}]", attacker, defender);
-            removePiece(getPiece(target)); // remove the defender as it lost/tied
+        /**
+         * non-empty space, resolve strike
+         */
+        else {
+            Piece defender = position.getPiece();
+            result = resolveStrike(attacker, defender);
+            // attacker won
+            if (result == RESULT_WIN) {
+                logger.debug("Piece [{}] won against [{}]", attacker, defender);
+                attacker.setLocation(squareDefender); // set new location to
+                addPiece(attacker);// move attacker to defender square
+            }
+            // attacker lost
+            else if (result == RESULT_LOOSE) {
+                logger.debug("Piece [{}] lost against [{}]", attacker, defender);
+            }
+            // draw
+            else if (result == RESULT_DRAW) {
+                logger.debug("Piece [{}] draw against [{}]", attacker, defender);
+                emptySquare(squareDefender);
+            }
         }
 
         // empty the old position for the piece that moved
@@ -170,9 +207,16 @@ public final class Board {
         return result;
     }
 
-    private void emptySquare(Square square) {
+    public void emptySquare(Square square) {
         Square abs = square.getAbsolute();
-        logger.debug("Marking square [{}] as empty", square);
+        if (logger.isDebugEnabled()) {
+            Position position = positions[abs.getX()][abs.getY()];
+            String pieceString = "EMPTY";
+            if (position.containsPiece()) {
+                pieceString = position.getPiece().toString();
+            }
+            logger.debug("Marking square [{}] containing [{}] as empty", abs, pieceString);
+        }
         positions[abs.getX()][abs.getY()] = EmptyPosition;
     }
 
@@ -215,6 +259,48 @@ public final class Board {
             }
         }
         return false;
+    }
+
+    /**
+     * Creates a debug printout of the board.<br>
+     * Each non-empty square is represented by the piece (two first letters) and which player it belongs to.<br>
+     * Example:
+     * 
+     * <pre>
+     * 9 --- --- --- --- --- --- --- --- bo2 fl1 
+     * 8 --- --- --- --- --- --- --- --- bo2 bo2 
+     * 7 --- --- --- bo2 ge2 --- --- --- --- --- 
+     * 6 --- --- --- mi1 --- ca2 --- --- --- --- 
+     * 5 --- --- --- --- --- sc2 --- --- --- --- 
+     * 4 --- --- --- --- --- co1 --- --- --- --- 
+     * 3 --- --- --- --- --- --- --- --- --- --- 
+     * 2 --- --- --- --- sc1 --- --- --- --- --- 
+     * 1 bo1 bo1 --- --- --- --- --- --- --- --- 
+     * 0 fl1 bo1 --- --- --- --- --- --- --- --- 
+     *    0   1   2   3   4   5   6   7   8   9
+     * </pre>
+     */
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("\n");
+        // loop on the row, starting from the highest
+        for (int y = 9; y >= 0; y--) {
+            // loop on the column starting from left
+            sb.append(y).append(" ");
+            for (int x = 0; x < 10; x++) {
+                Position position = positions[x][y];
+                sb.append(position).append(" ");
+            }
+            sb.append("\n");
+        }
+        // print the X-coord system
+        sb.append("   ");
+        for (int i = 0; i < 10; i++) {
+            sb.append(i).append("   ");
+        }
+        sb.append("\n");
+        return sb.toString();
     }
 
     /**
@@ -295,48 +381,6 @@ public final class Board {
     }
 
     /**
-     * Creates a debug printout of the board.<br>
-     * Each non-empty square is represented by the piece (two first letters) and which player it belongs to.<br>
-     * Example:
-     * 
-     * <pre>
-     * 9 --- --- --- --- --- --- --- --- bo2 fl1 
-     * 8 --- --- --- --- --- --- --- --- bo2 bo2 
-     * 7 --- --- --- bo2 ge2 --- --- --- --- --- 
-     * 6 --- --- --- mi1 --- ca2 --- --- --- --- 
-     * 5 --- --- --- --- --- sc2 --- --- --- --- 
-     * 4 --- --- --- --- --- co1 --- --- --- --- 
-     * 3 --- --- --- --- --- --- --- --- --- --- 
-     * 2 --- --- --- --- sc1 --- --- --- --- --- 
-     * 1 bo1 bo1 --- --- --- --- --- --- --- --- 
-     * 0 fl1 bo1 --- --- --- --- --- --- --- --- 
-     *    0   1   2   3   4   5   6   7   8   9
-     * </pre>
-     */
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("\n");
-        // loop on the row, starting from the highest
-        for (int y = 9; y >= 0; y--) {
-            // loop on the column starting from left
-            sb.append(y).append(" ");
-            for (int x = 0; x < 10; x++) {
-                Position position = positions[x][y];
-                sb.append(position).append(" ");
-            }
-            sb.append("\n");
-        }
-        // print the X-coord system
-        sb.append("   ");
-        for (int i = 0; i < 10; i++) {
-            sb.append(i).append("   ");
-        }
-        sb.append("\n");
-        return sb.toString();
-    }
-
-    /**
      * Represents a position on the board.
      * 
      * @author Peter Nerg
@@ -376,7 +420,7 @@ public final class Board {
 
         @Override
         public Piece getPiece() {
-            return null;
+            throw new UnsupportedOperationException("Empty squares don't have pieces");
         }
 
         @Override
@@ -410,7 +454,7 @@ public final class Board {
 
         @Override
         public Piece getPiece() {
-            return null;
+            throw new UnsupportedOperationException("Invalid squares don't have pieces");
         }
 
         @Override

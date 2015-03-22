@@ -54,7 +54,7 @@ public final class EventThread implements Runnable {
     public void run() {
         try {
             while (true) {
-                Object event = istream.readObject();
+                Object event = istream.readUnshared();
                 logger.debug("Received event [{}] from [{}]", event, socket);
 
                 if (event instanceof GameEventObject) {

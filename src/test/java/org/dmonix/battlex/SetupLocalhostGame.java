@@ -24,7 +24,6 @@ import org.dmonix.battlex.gui.MainFrame;
  * @author Peter Nerg
  * @version 1.0
  */
-
 public class SetupLocalhostGame {
 
     public static void main(String[] args) throws ClassNotFoundException, InstantiationException, IllegalAccessException, UnsupportedLookAndFeelException {

@@ -136,19 +136,23 @@ public class TestBoard extends BaseAssert {
         assertEquals(SquareFactory.createAbsolute(9, 9), piece.getSquare());
     }
 
-    @Test
-    public void getPiece_x4y4() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(4, 4));
-        assertNull(piece);
+    @Test(expected = UnsupportedOperationException.class)
+    public void getPiece_x4y4_emptySquare() {
+        board.getPiece(SquareFactory.createAbsolute(4, 4));
+    }
+
+    @Test(expected = UnsupportedOperationException.class)
+    public void getPiece_x3y4_illegalSquare() {
+        board.getPiece(SquareFactory.createAbsolute(3, 4));
     }
 
     @Test
-    public void isEmpty_x4y2() {
+    public void isEmpty_x4y2_nonEmpty() {
         assertFalse(board.isEmpty(SquareFactory.createAbsolute(4, 2)));
     }
 
     @Test
-    public void isEmpty_x4y3() {
+    public void isEmpty_x4y4_emptySquare() {
         assertTrue(board.isEmpty(SquareFactory.createAbsolute(4, 3)));
     }
 
@@ -248,18 +252,23 @@ public class TestBoard extends BaseAssert {
 
     private void assertMove(Square originalPosition, Square movedPosition, int expectedResult) {
         Piece atk = board.getPiece(originalPosition);
-        Piece def = board.getPiece(movedPosition);
         int result = board.movePiece(atk, movedPosition);
         assertEquals(expectedResult, result);
 
         // assert there is nothing at the original position
         assertPositionEmpty(originalPosition);
 
+        // attacker wins or moved to empty square
         if (result == Board.RESULT_WIN || result == Board.RESULT_MOVE_NO_BATTLE) {
             assertPieceAtPosition(movedPosition, atk.getType(), atk.getPlayer());
-        } else if (result == Board.RESULT_LOOSE) {
+        }
+        // defender wins
+        else if (result == Board.RESULT_LOOSE) {
+            Piece def = board.getPiece(movedPosition);
             assertPieceAtPosition(movedPosition, def.getType(), def.getPlayer());
-        } else if (result == Board.RESULT_DRAW) {
+        }
+        // draw - both pieces are removed
+        else if (result == Board.RESULT_DRAW) {
             assertPositionEmpty(originalPosition);
             assertPositionEmpty(movedPosition);
         }
@@ -271,8 +280,7 @@ public class TestBoard extends BaseAssert {
      * @param position
      */
     public void assertPositionEmpty(Square position) {
-        assertTrue(board.isEmpty(position));
-        assertNull(board.getPiece(position));
+        assertTrue("Expected square @ [" + position + "] to be empty", board.isEmpty(position));
     }
 
     /**
@@ -283,10 +291,10 @@ public class TestBoard extends BaseAssert {
      * @param expectedPlayer
      */
     public void assertPieceAtPosition(Square position, String expectedType, int expectedPlayer) {
+        assertFalse("Unexpected empty square @ [" + position + "]", board.isEmpty(position));
         Piece piece = board.getPiece(position);
-        assertNotNull(piece);
-        assertFalse(board.isEmpty(position));
-        assertEquals(expectedType, piece.getType());
-        assertEquals(expectedPlayer, piece.getPlayer());
+        assertNotNull("Expected valid piece @ [" + position + "]", piece);
+        assertEquals("Expected piece @ [" + position + "]", expectedType, piece.getType());
+        assertEquals("Expected piece @ [" + position + "]", expectedPlayer, piece.getPlayer());
     }
 }
