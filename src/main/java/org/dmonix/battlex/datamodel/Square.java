@@ -45,6 +45,28 @@ import java.io.Serializable;
  * 
  */
 public interface Square extends Serializable {
+    /**
+     * Create an absolute square for the provided coordinates.
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    static Square apply(int x, int y) {
+        return new AbsoluteSquare(x, y);
+    }
+
+    /**
+     * Create a relative square for the provided user and coordinates.
+     * 
+     * @param x
+     * @param y
+     * @return
+     */
+    static Square apply(int player, int x, int y) {
+        return player == 1 ? new PlayerOneRelativeSquare(x, y) : new PlayerTwoRelativeSquare(x, y);
+    }
+
     Square getAbsolute();
 
     Square getRelative(int player);

@@ -29,7 +29,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void absoluteSquare_getAbsolute() {
-        Square square = SquareFactory.createAbsolute(0, 0);
+        Square square = Square.apply(0, 0);
         Square absolute = square.getAbsolute();
         assertEquals(square, absolute);
         assertEquals(square.getX(), absolute.getX());
@@ -38,7 +38,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void absoluteSquare_getRelative1_0_0() {
-        Square square = SquareFactory.createAbsolute(0, 0);
+        Square square = Square.apply(0, 0);
         Square relative = square.getRelative(1);
         assertNotSame(square, relative);
         assertEquals(0, relative.getX());
@@ -47,7 +47,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void absoluteSquare_getRelative1_2_3() {
-        Square square = SquareFactory.createAbsolute(2, 3);
+        Square square = Square.apply(2, 3);
         Square relative = square.getRelative(1);
         assertNotSame(square, relative);
         assertEquals(2, relative.getX());
@@ -58,7 +58,7 @@ public class TestSquare extends BaseAssert {
     public void absoluteSquare_getRelative1_all() {
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
-                Square square = SquareFactory.createAbsolute(x, y);
+                Square square = Square.apply(x, y);
                 Square relative = square.getRelative(1);
                 assertNotSame(square, relative);
                 assertEquals(x, relative.getX());
@@ -69,7 +69,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void absoluteSquare_getRelative2_0_0() {
-        Square square = SquareFactory.createAbsolute(0, 0);
+        Square square = Square.apply(0, 0);
         Square relative = square.getRelative(2);
         assertNotSame(square, relative);
         assertEquals(9, relative.getX());
@@ -78,7 +78,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void absoluteSquare_getRelative2_2_3() {
-        Square square = SquareFactory.createAbsolute(2, 3);
+        Square square = Square.apply(2, 3);
         Square relative = square.getRelative(2);
         assertNotSame(square, relative);
         assertEquals(7, relative.getX());
@@ -89,7 +89,7 @@ public class TestSquare extends BaseAssert {
     public void absoluteSquare_getRelative2_all() {
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
-                Square square = SquareFactory.createAbsolute(x, y);
+                Square square = Square.apply(x, y);
                 Square relative = square.getRelative(2);
                 assertNotSame(square, relative);
                 assertEquals(9 - x, relative.getX());
@@ -100,7 +100,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void playerOneRelativeSquare_getAbsolute() {
-        Square square = SquareFactory.createRelative(1, 0, 9);
+        Square square = Square.apply(1, 0, 9);
         Square absolute = square.getAbsolute();
         assertNotSame(square, absolute);
         assertEquals(0, absolute.getX());
@@ -109,7 +109,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void playerOneRelativeSquare_getRelative1() {
-        Square square = SquareFactory.createRelative(1, 0, 0);
+        Square square = Square.apply(1, 0, 0);
         Square relative = square.getRelative(1);
         assertEquals(square, relative);
         assertEquals(square.getX(), relative.getX());
@@ -118,7 +118,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void playerOneRelativeSquare_getRelative2() {
-        Square square = SquareFactory.createRelative(1, 0, 0);
+        Square square = Square.apply(1, 0, 0);
         Square relative = square.getRelative(2);
         assertNotSame(square, relative);
         assertEquals(9, relative.getX());
@@ -127,7 +127,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void playerTwoRelativeSquare_getAbsolute() {
-        Square square = SquareFactory.createRelative(2, 9, 0);
+        Square square = Square.apply(2, 9, 0);
         Square absolute = square.getAbsolute();
         assertNotSame(square, absolute);
         assertEquals(0, absolute.getX());
@@ -136,7 +136,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void playerTwoRelativeSquare_getRelative2() {
-        Square square = SquareFactory.createRelative(2, 0, 0);
+        Square square = Square.apply(2, 0, 0);
         Square relative = square.getRelative(2);
         assertEquals(square, relative);
         assertEquals(square.getX(), relative.getX());
@@ -145,7 +145,7 @@ public class TestSquare extends BaseAssert {
 
     @Test
     public void playerTwoRelativeSquare_getRelative1() {
-        Square square = SquareFactory.createRelative(2, 0, 0);
+        Square square = Square.apply(2, 0, 0);
         Square relative = square.getRelative(1);
         assertNotSame(square, relative);
         assertEquals(9, relative.getX());
