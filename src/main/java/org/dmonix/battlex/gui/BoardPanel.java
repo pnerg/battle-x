@@ -1,19 +1,17 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ *  Copyright 2015 Peter Nerg
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
 package org.dmonix.battlex.gui;
 
@@ -27,6 +25,7 @@ import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
@@ -36,7 +35,6 @@ import org.dmonix.battlex.datamodel.Board;
 import org.dmonix.battlex.datamodel.Piece;
 import org.dmonix.battlex.datamodel.PieceData;
 import org.dmonix.battlex.datamodel.Square;
-import org.dmonix.battlex.datamodel.SquareFactory;
 import org.dmonix.battlex.event.ClearSquareEventObject;
 import org.dmonix.battlex.event.EventCommunicator;
 import org.dmonix.battlex.event.GameEventListener;
@@ -56,21 +54,18 @@ public class BoardPanel extends JPanel implements GameEventListener {
     private static final Logger log = LoggerFactory.getLogger(BoardPanel.class);
     private GameStateController gameStateObject = GameStateController.getInstance();
     private MainFrame owner;
-    private boolean firstPaint = true;
-    private static boolean revealOpponent = false;
+
+    /** Used to keep track if we've painted the gfx once. */
+    private final AtomicBoolean paintedOnce = new AtomicBoolean(false);
 
     // composite used to draw translucent graphics
     private final Composite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.3f);
     private final Composite alphaComposite2 = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.75f);
 
     private BufferedImage boardBackgroundImage = null;
-    private float squareWidth = -1;
-    private float squareHeight = -1;
 
     private final Board board = new Board();
-    private Object[][] markedSquares = new Object[10][10];
     private int player = -1;
-    private int otherPlayer = -1;
 
     private Piece currentPiece = null;
     private EventCommunicator eventCommunicator;
@@ -130,7 +125,12 @@ public class BoardPanel extends JPanel implements GameEventListener {
          */
         else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
             if (geo.getType() != PieceData.PIECE_NO_PIECE) {
-                // this.pieces[geo.getNewXCoord()][geo.getNewYCoord()] = new Piece(otherPlayer, geo.getType(), geo.getNewXCoord(), geo.getNewYCoord());
+                int otherPlayer;
+                if (player == 1) {
+                    otherPlayer = 2;
+                } else {
+                    otherPlayer = 1;
+                }
                 board.addPiece(new Piece(otherPlayer, geo.getType(), geo.getNewCoord()));
             } else {
                 board.emptySquare(geo.getNewCoord());
@@ -157,17 +157,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
         this.eventCommunicator = eventCommunicator;
         this.eventCommunicator.addEventListener(this);
 
-        if (player == 1) {
-            otherPlayer = 2;
-        } else {
-            otherPlayer = 1;
-        }
-
-        for (int y = 6; y < 10; y++) {
-            for (int x = 0; x < 10; x++) {
-                markedSquares[x][y] = new Object();
-            }
-        }
         repaint();
     }
 
@@ -176,7 +165,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
      * 
      * @param g
      */
-    public void paint(Graphics g) {
+    public void paint(final Graphics g) {
         super.paint(g);
         Graphics2D g2 = (Graphics2D) g;
 
@@ -184,8 +173,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
          * pre-load all images (for both players) the first time, otherwise it might sometimes result in strange behavior where the image isn't rendered until
          * after a few repaints
          */
-        if (firstPaint) {
-            firstPaint = false;
+        if (paintedOnce.compareAndSet(false, true)) {
             try {
                 g2.drawImage(Resources.getImage(1, PieceData.PIECE_BOMB_TYPE), 100, 100, null);
                 g2.drawImage(Resources.getImage(1, PieceData.PIECE_MARSHAL_TYPE), 100, 100, null);
@@ -222,14 +210,13 @@ public class BoardPanel extends JPanel implements GameEventListener {
         Composite originalComposite = g2.getComposite();
 
         g2.clearRect(0, 0, dim.width, dim.height);
-        if (boardBackgroundImage != null)
+        if (boardBackgroundImage != null) {
             g2.drawImage(boardBackgroundImage, 0, 0, dim.width, dim.height, null);
+        }
 
         // calculate the dimension of the squares
-        squareWidth = (float) dim.width / 10;
-        squareHeight = (float) dim.height / 10;
-
-        // System.out.println("Boardpanel w="+dim.width+"; h="+dim.height+"   #   sw="+squareWidth+": sh="+squareHeight);
+        final float squareWidth = (float) dim.width / 10;
+        final float squareHeight = (float) dim.height / 10;
 
         /**
          * ======================================== Draw the lines of the board ========================================
@@ -254,31 +241,54 @@ public class BoardPanel extends JPanel implements GameEventListener {
         }
 
         /**
-         * ======================================== paint the marked squares ========================================
+         * ======================================== during setup ======================================== <br>
+         * ======================================== paint the lowest four rows ========================================
          */
-        if ((currentPiece != null && gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN))
-                || (currentPiece == null && gameStateObject.inState(GameStates.STATE_GAME_SETUP))
-                || (currentPiece == null && gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP))) {
+        if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP)) {
             g2.setComposite(alphaComposite);
-
-            Color fill;
-            if (this.player == 1)
-                fill = Color.red;
-            else
-                fill = Color.blue;
-
-            for (int y = 0; y < 10; y++) {
+            for (int y = 6; y < 10; y++) {
                 for (int x = 0; x < 10; x++) {
-                    if (markedSquares[x][y] != null) {
-                        // log.debug("Marking/painting square x[{}] y[{}]", x, y);
-                        g2.setColor(fill);
-                        g2.fill(new Rectangle((int) (squareWidth * x), (int) (squareHeight * y), (int) squareWidth, (int) squareHeight));
-                    }
+                    paintSquare(g2, x, y);
                 }
             }
             g2.setComposite(originalComposite);
         }
 
+        /**
+         * ======================================== during game ======================================== <br>
+         * ======================================== paint the allowed move squares ========================================
+         */
+        if (currentPiece != null && gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN)) {
+            g2.setComposite(alphaComposite);
+            for (Square square : board.getAllowedMoves(currentPiece)) {
+                Square relative = square.getRelative(player);
+                paintSquare(g2, relative.getX(), relative.getY());
+            }
+            g2.setComposite(originalComposite);
+        }
+
+        // if ((currentPiece != null && gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN))
+        // || (currentPiece == null && gameStateObject.inState(GameStates.STATE_GAME_SETUP))
+        // || (currentPiece == null && gameStateObject.inState(GameStates.STATE_GAME_SETUP_RECEIVED_SETUP))) {
+        // g2.setComposite(alphaComposite);
+        //
+        // Color fill;
+        // if (this.player == 1)
+        // fill = Color.red;
+        // else
+        // fill = Color.blue;
+        //
+        // for (int y = 0; y < 10; y++) {
+        // for (int x = 0; x < 10; x++) {
+        // if (markedSquares[x][y] != null) {
+        // // log.debug("Marking/painting square x[{}] y[{}]", x, y);
+        // g2.setColor(fill);
+        // g2.fill(new Rectangle((int) (squareWidth * x), (int) (squareHeight * y), (int) squareWidth, (int) squareHeight));
+        // }
+        // }
+        // }
+        // g2.setComposite(originalComposite);
+        // }
         /**
          * ======================================== paint the pieces ========================================
          */
@@ -288,13 +298,10 @@ public class BoardPanel extends JPanel implements GameEventListener {
             Square relativePieceSquare = piece.getSquare().getRelative(player);
             int x = relativePieceSquare.getX();
             int y = relativePieceSquare.getY();
-            if (!revealOpponent) {
-                if (piece.getPlayer() == player)
-                    scaledImage = Resources.getImage(player, piece.getType());
-                else
-                    scaledImage = Resources.getImage(piece.getPlayer(), PieceData.PIECE_EMPTY_TYPE);
-            } else
+            if (piece.getPlayer() == player)
                 scaledImage = Resources.getImage(player, piece.getType());
+            else
+                scaledImage = Resources.getImage(piece.getPlayer(), PieceData.PIECE_EMPTY_TYPE);
 
             if (currentPiece != null && piece != currentPiece) {
                 g2.setComposite(alphaComposite2);
@@ -303,6 +310,21 @@ public class BoardPanel extends JPanel implements GameEventListener {
             g2.drawImage(scaledImage, (int) squareWidth * x + scaledImage.getWidth(null) / 2, (int) squareHeight * y + scaledImage.getHeight(null) / 8, null);
             g2.setComposite(originalComposite);
         }
+    }
+
+    private void paintSquare(Graphics2D g2, int x, int y) {
+        log.trace("Painting square [" + x + "][" + y + "]", x, y);
+        Color fill;
+        if (this.player == 1) {
+            fill = Color.red;
+        } else {
+            fill = Color.blue;
+        }
+        final Dimension dim = super.getSize();
+        final float squareWidth = (float) dim.width / 10;
+        final float squareHeight = (float) dim.height / 10;
+        g2.setColor(fill);
+        g2.fill(new Rectangle((int) (squareWidth * x), (int) (squareHeight * y), (int) squareWidth, (int) squareHeight));
     }
 
     /**
@@ -318,7 +340,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
          */
         if (e.getButton() != MouseEvent.BUTTON1) {
             currentPiece = null;
-            clearMarkedSquares();
             repaint();
             return;
         }
@@ -340,7 +361,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
             currentPiece = selectedPiece;
             log.debug("Selected [{}]", currentPiece);
 
-            markSquares(selectedPiece);
             super.repaint();
             return;
         }
@@ -421,7 +441,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
             // ignore if clicking in an empty square with no selected piece
             if (pieceType != PieceData.PIECE_NO_PIECE) {
                 board.addPiece(new Piece(this.player, pieceType, clickedSquare));
-                this.markedSquares[clickedSquare.getX()][clickedSquare.getY()] = null;
                 eventCommunicator.sendEvent(new GameEventObject(pieceType, clickedSquare));
             }
         }
@@ -432,7 +451,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
             eventCommunicator.sendEvent(new ClearSquareEventObject(clickedSquare));
             owner.addPiece(player, piece.getType());
             board.removePiece(piece);
-            this.markedSquares[clickedSquare.getX()][clickedSquare.getY()] = new Object();
         }
 
         repaint();
@@ -459,11 +477,11 @@ public class BoardPanel extends JPanel implements GameEventListener {
      */
     private Square getClickedSquare(MouseEvent e) {
         Dimension d = super.getSize();
-        squareWidth = d.width / 10;
-        squareHeight = d.height / 10;
+        final float squareWidth = d.width / 10;
+        final float squareHeight = d.height / 10;
         final int x = e.getPoint().x / (int) squareWidth;
         final int y = e.getPoint().y / (int) squareHeight;
-        Square square = SquareFactory.createRelative(player, x, y);
+        Square square = Square.apply(player, x, y);
         // debug the square clicked and its contents
         if (log.isDebugEnabled()) {
             String pieceAtClickedPoint = "EMPTY";
@@ -524,7 +542,6 @@ public class BoardPanel extends JPanel implements GameEventListener {
 
         checkIfAnyPlayerCanMove();
 
-        clearMarkedSquares();
         repaint();
     }
 
@@ -553,85 +570,12 @@ public class BoardPanel extends JPanel implements GameEventListener {
 
     }
 
-    /**
-     * Highlights the squares that the currently selected piece can move to
-     * 
-     * @param piece
-     */
-    private void markSquares(Piece piece) {
-        clearMarkedSquares();
-        int moveDistance = piece.getMoveDistance();
-
-        if (moveDistance == 0)
-            return;
-
-        for (Square allowedMove : board.getAllowedMoves(piece)) {
-            markedSquares[allowedMove.getX()][allowedMove.getY()] = new Object();
-        }
-        // // check up
-        // for (int i = 1; i <= moveDistance; i++) {
-        // if (y_coord - i < 0 || ((x_coord == 2 || x_coord == 3 || x_coord == 6 || x_coord == 7) && (y_coord - i == 4 || y_coord - i == 5))
-        // || board.isPlayerPiece(player, x_coord, y_coord-i)(pieces[x_coord][y_coord - i] != null && pieces[x_coord][y_coord - i].getPlayer() ==
-        // piece.getPlayer()))
-        // break;
-        //
-        // markedSquares[x_coord][y_coord - i] = new Object();
-        //
-        // if (pieces[x_coord][y_coord - i] != null && pieces[x_coord][y_coord - i].getPlayer() != piece.getPlayer())
-        // break;
-        // }
-        //
-        // // check down
-        // for (int i = 1; i <= moveDistance; i++) {
-        // if (y_coord + i > 9 || ((x_coord == 2 || x_coord == 3 || x_coord == 6 || x_coord == 7) && (y_coord + i == 4 || y_coord + i == 5))
-        // || (pieces[x_coord][y_coord + i] != null && pieces[x_coord][y_coord + i].getPlayer() == piece.getPlayer()))
-        // break;
-        //
-        // markedSquares[x_coord][y_coord + i] = new Object();
-        //
-        // if (pieces[x_coord][y_coord + i] != null && pieces[x_coord][y_coord + i].getPlayer() != piece.getPlayer())
-        // break;
-        // }
-        //
-        // // check right
-        // for (int i = 1; i <= moveDistance; i++) {
-        // if (x_coord + i > 9 || ((x_coord + i == 2 || x_coord + i == 3 || x_coord + i == 6 || x_coord + i == 7) && (y_coord == 4 || y_coord == 5))
-        // || (pieces[x_coord + i][y_coord] != null && pieces[x_coord + i][y_coord].getPlayer() == piece.getPlayer()))
-        // break;
-        //
-        // markedSquares[x_coord + i][y_coord] = new Object();
-        //
-        // if (pieces[x_coord + i][y_coord] != null && pieces[x_coord + i][y_coord].getPlayer() != piece.getPlayer())
-        // break;
-        // }
-        //
-        // // check left
-        // for (int i = 1; i <= moveDistance; i++) {
-        // if (x_coord - i < 0 || ((x_coord - i == 2 || x_coord - i == 3 || x_coord - i == 6 || x_coord - i == 7) && (y_coord == 4 || y_coord == 5))
-        // || (pieces[x_coord - i][y_coord] != null && pieces[x_coord - i][y_coord].getPlayer() == piece.getPlayer()))
-        // break;
-        //
-        // markedSquares[x_coord - i][y_coord] = new Object();
-        //
-        // if (pieces[x_coord - i][y_coord] != null && pieces[x_coord - i][y_coord].getPlayer() != piece.getPlayer())
-        // break;
-        // }
-    }
-
-    /**
-     * Clears all the highlighted squares
-     */
-    private void clearMarkedSquares() {
-        markedSquares = null;
-        markedSquares = new Object[10][10];
-    }
-
     private class BoardPanel_this_mouseAdapter extends java.awt.event.MouseAdapter {
         private GameStateController gameStateObject = GameStateController.getInstance();
 
         public void mouseClicked(MouseEvent e) {
             if (e.isAltDown() && e.isShiftDown() && e.isControlDown()) {
-                revealOpponent = !revealOpponent;
+                // revealOpponent = !revealOpponent;
                 repaint();
             }
 

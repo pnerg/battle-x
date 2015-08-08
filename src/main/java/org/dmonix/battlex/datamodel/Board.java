@@ -1,25 +1,27 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ *  Copyright 2015 Peter Nerg
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-
 package org.dmonix.battlex.datamodel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import java.util.stream.Stream.Builder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,26 +67,24 @@ public final class Board {
     public Board() {
         for (int y = 9; y >= 0; y--) {
             for (int x = 0; x < 10; x++) {
-                positions[x][y] = new EmptyPosition(SquareFactory.createAbsolute(x, y));
+                positions[x][y] = new EmptyPosition(Square.apply(x, y));
             }
         }
         // mark the left lake as invalid
-        positions[2][4] = new InvalidPosition(SquareFactory.createAbsolute(2, 4));
-        positions[2][5] = new InvalidPosition(SquareFactory.createAbsolute(2, 5));
-        positions[3][4] = new InvalidPosition(SquareFactory.createAbsolute(3, 4));
-        positions[3][5] = new InvalidPosition(SquareFactory.createAbsolute(3, 5));
+        positions[2][4] = new InvalidPosition(Square.apply(2, 4));
+        positions[2][5] = new InvalidPosition(Square.apply(2, 5));
+        positions[3][4] = new InvalidPosition(Square.apply(3, 4));
+        positions[3][5] = new InvalidPosition(Square.apply(3, 5));
 
         // mark the right lake as invalid
-        positions[6][4] = new InvalidPosition(SquareFactory.createAbsolute(6, 4));
-        positions[6][5] = new InvalidPosition(SquareFactory.createAbsolute(6, 5));
-        positions[7][4] = new InvalidPosition(SquareFactory.createAbsolute(7, 4));
-        positions[7][5] = new InvalidPosition(SquareFactory.createAbsolute(7, 5));
+        positions[6][4] = new InvalidPosition(Square.apply(6, 4));
+        positions[6][5] = new InvalidPosition(Square.apply(6, 5));
+        positions[7][4] = new InvalidPosition(Square.apply(7, 4));
+        positions[7][5] = new InvalidPosition(Square.apply(7, 5));
     }
 
     void clearAllPlayerPieces(int player) {
-        for (Piece piece : getPiecesForPlayer(player)) {
-            emptySquare(piece.getSquare());
-        }
+        getPiecesForPlayer(player).forEach(p -> emptySquare(p.getSquare()));
     }
 
     /**
@@ -95,12 +95,13 @@ public final class Board {
      * @return
      */
     public boolean canMoveTo(Piece piece, Square target) {
-        for (Square allowedSquare : getAllowedMoves(piece)) {
-            if (allowedSquare.equals(target)) {
-                return true;
-            }
-        }
-        return false;
+        return getAllowedMoves(piece).contains(target);
+        // for (Square allowedSquare : getAllowedMoves(piece)) {
+        // if (allowedSquare.equals(target)) {
+        // return true;
+        // }
+        // }
+        // return false;
     }
 
     public Piece getPiece(Square square) {
@@ -140,9 +141,41 @@ public final class Board {
         return position.containsPiece() ? position.getPiece().getPlayer() == player : false;
     }
 
+    public List<Square> getAllowedMoves2(Piece piece) {
+        // bombs and flags can't move at all.
+        final Square sq = piece.getSquare().getAbsolute();
+
+        // logger.debug("Possible positions for [{}] left:[{}], right:[{}], up:[{}], down:[{}]", piece, positionsLeft.size(), positionsRight.size(),
+        // positionsUp.size(), positionsDown.size());
+
+        Stream<Position> allowedMovesRight = getAllPositions().filter(pos -> sameYAlignment(pos, sq)).filter(pos -> pos.getSquare().getX() > sq.getX())
+                .filter(new AllowedMovesFilter(piece));
+        Stream<Position> allowedMovesLeft = getAllPositions().filter(pos -> sameYAlignment(pos, sq)).filter(pos -> pos.getSquare().getX() < sq.getX())
+                .filter(new AllowedMovesFilter(piece));
+        Stream<Position> allowedMovesUp = getAllPositions().filter(pos -> sameXAlignment(pos, sq)).filter(pos -> pos.getSquare().getY() > sq.getY())
+                .filter(new AllowedMovesFilter(piece));
+        Stream<Position> allowedMovesDown = getAllPositions().filter(pos -> sameXAlignment(pos, sq)).filter(pos -> pos.getSquare().getY() < sq.getY())
+                .filter(new AllowedMovesFilter(piece));
+
+        logger.debug("Allowed positions for [{}] left:[{}], right:[{}], up:[{}], down:[{}]", piece, allowedMovesLeft.collect(Collectors.toList()).size(),
+                allowedMovesRight.collect(Collectors.toList()).size(), allowedMovesUp.collect(Collectors.toList()).size(),
+                allowedMovesDown.collect(Collectors.toList()).size());
+
+        Stream<Position> concat = Stream.of(allowedMovesRight, allowedMovesLeft, allowedMovesUp, allowedMovesDown).flatMap(x -> x);
+
+        return concat.map(pos -> pos.getSquare()).collect(Collectors.toList());
+    }
+
+    private static boolean sameXAlignment(Position pos, Square sq) {
+        return pos.getSquare().getX() == sq.getX();
+    }
+
+    private static boolean sameYAlignment(Position pos, Square sq) {
+        return pos.getSquare().getY() == sq.getY();
+    }
+
     // TODO implement
     public List<Square> getAllowedMoves(Piece piece) {
-        // bombs and flags can't move at all.
         List<Position> positionsRight = getAllPositionsRight(piece);
         List<Position> positionsLeft = getAllPositionsLeft(piece);
         List<Position> positionsUp = getAllPositionsAbove(piece);
@@ -169,7 +202,7 @@ public final class Board {
 
     /**
      * Get all the possible positions to the <tt>left</tt> of the provided piece.<br>
-     * This includes all positions, even those not valid/water and occupied positions.
+     * This includes all positions, even those not valid (water and occupied) positions.
      * 
      * @param piece
      * @return
@@ -186,7 +219,7 @@ public final class Board {
 
     /**
      * Get all the possible positions to the <tt>right</tt> of the provided piece.<br>
-     * This includes all positions, even those not valid/water and occupied positions.
+     * This includes all positions, even those not valid (water and occupied) positions.
      * 
      * @param piece
      * @return
@@ -203,7 +236,7 @@ public final class Board {
 
     /**
      * Get all the possible positions to the <tt>up</tt> of the provided piece.<br>
-     * This includes all positions, even those not valid/water and occupied positions.
+     * This includes all positions, even those not valid (water and occupied) positions.
      * 
      * @param piece
      * @return
@@ -220,7 +253,7 @@ public final class Board {
 
     /**
      * Get all the possible positions to the <tt>down</tt> of the provided piece.<br>
-     * This includes all positions, even those not valid/water and occupied positions.
+     * This includes all positions, even those not valid (water and occupied) positions.
      * 
      * @param piece
      * @return
@@ -236,46 +269,245 @@ public final class Board {
     }
 
     private List<Square> getAllowedMoves(List<Position> possibleMoves, Piece piece) {
-        int moveDistance = piece.getMoveDistance();
-        if (moveDistance == 0) {
-            return new ArrayList<>();
-        }
-        int player = piece.getPlayer();
-
-        List<Square> allowedMoves = new ArrayList<>();
-        int moveCounter = 0;
-        for (Position position : possibleMoves) {
-            moveCounter++;
-            Square square2BeChecked = position.getSquare();
-            // invalid/water found, break
-            if (!position.isValid()) {
-                logger.debug("checking position [{}], was invalid", square2BeChecked);
-                break;
-            }
-
-            // non-empty square
-            // not possible to move further
-            if (position.containsPiece()) {
-                logger.debug("checking position [{}], contained [{}]", square2BeChecked, position.getPiece());
-                // non-empty square containing opponent piece
-                // allowed to move there, if it's own piece then not allowed to move there
-                if (position.getPiece().getPlayer() != player) {
-                    allowedMoves.add(square2BeChecked);
-                }
-                break;
-            }
-
-            // empty square, allowed to move there
-            logger.debug("checking position [{}], was empty", square2BeChecked);
-            allowedMoves.add(square2BeChecked);
-
-            // we've walked as far as this piece can move
-            if (moveCounter >= moveDistance) {
-                break;
-            }
-        }
-        return allowedMoves;
+        // return possibleMoves.stream().filter(pos -> withinDistance(piece, pos)).filter(pos -> pos.isValid())
+        // .filter(p -> p.isEmpty() | p.getPiece().getPlayer() != player).map(p -> p.getSquare()).collect(Collectors.toList());
+        return possibleMoves.stream().filter(new AllowedMovesFilter(piece)).map(pos -> pos.getSquare()).collect(Collectors.toList());
     }
+
+    private Stream<Position> getAllPositions() {
+        Builder<Position> b = Stream.builder();
+        for (int y = 9; y >= 0; y--) {
+            for (int x = 0; x < 10; x++) {
+                b.add(positions[x][y]);
+            }
+        }
+        return b.build();
+    }
+
+    private static final class AllowedMovesFilter implements Predicate<Position> {
+
+        private final Piece piece;
+        /** Used to mark if we've found a piece (own or opponent) on the path we're checking. */
+        private boolean foundObstacleInPath = false;
+
+        private AllowedMovesFilter(Piece piece) {
+            this.piece = piece;
+        }
+
+        /**
+         * Check if the provided position contains an obstacle (illegal or non-empty position )
+         * 
+         * @param pos
+         */
+        private boolean checkForObstacle(Position pos) {
+            if (foundObstacleInPath) {
+                return true;
+            }
+            if (!pos.isValid()) {
+                foundObstacleInPath = true;
+                return false;
+            } else if (!pos.isEmpty()) {
+                foundObstacleInPath = true;
+                return false;
+            }
+            return false;
+        }
+
+        /**
+         * If the position is within reach for the piece we're checking.
+         * 
+         * @param pos
+         * @return
+         */
+        private boolean withinDistance(Position pos) {
+            Square sq1 = pos.getSquare();
+            Square sq2 = piece.getSquare();
+            int distance;
+            // same x-axis
+            if (sq1.getX() == sq2.getX()) {
+                distance = Math.abs(sq1.getY() - sq2.getY());
+            }
+            // same y-axis
+            else if (sq1.getY() == sq2.getY()) {
+                distance = Math.abs(sq1.getX() - sq2.getX());
+            }
+            // not in the same alignment therefore cannot be reached
+            else {
+                distance = Integer.MAX_VALUE;
+            }
+
+            return distance <= piece.getMoveDistance();
+        }
+
+        /**
+         * Check for not same square as the piece/position we're checking
+         * 
+         * @param pos
+         * @return
+         */
+        private boolean notSameSquare(Position pos) {
+            return !pos.getSquare().getAbsolute().equals(piece.getSquare().getAbsolute());
+        }
+
+        /**
+         * Either empty square or occupied by opponent piece
+         * 
+         * @param pos
+         * @return
+         */
+        private boolean notOwnPiece(Position pos) {
+            return pos.getPiece().getPlayer() != piece.getPlayer();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.function.Predicate#test(java.lang.Object)
+         */
+        @Override
+        public boolean test(Position pos) {
+            boolean result = !checkForObstacle(pos) && notSameSquare(pos) && pos.isValid() && withinDistance(pos) && (pos.isEmpty() || notOwnPiece(pos));
+            logger.debug("Checking position [{}] [{}]", pos.getSquare(), result);
+            return result;
+        }
+    }
+
+    private static final class AllowedMovesFilter2 implements Predicate<Position> {
+
+        private final Piece piece;
+        /** Used to mark if we've found a piece (own or opponent) on the path we're checking. */
+        private boolean foundObstacleInPath = false;
+
+        private AllowedMovesFilter2(Piece piece) {
+            this.piece = piece;
+        }
+
+        /**
+         * Check if the provided position contains an obstacle (illegal or non-empty position )
+         * 
+         * @param pos
+         */
+        private boolean checkForObstacle(Position pos) {
+            if (foundObstacleInPath) {
+                return true;
+            }
+            if (!pos.isValid()) {
+                foundObstacleInPath = true;
+                return false;
+            } else if (!pos.isEmpty()) {
+                foundObstacleInPath = true;
+                return false;
+            }
+            return false;
+        }
+
+        private boolean isInLineOfSight(Position pos) {
+            Square sq1 = pos.getSquare();
+            Square sq2 = piece.getSquare();
+            if (sq1.getX() == sq2.getX()) {
+
+            } else if (sq1.getY() == sq2.getY()) {
+
+            }
+            return false;
+        }
+
+        /**
+         * If the position is within reach for the piece we're checking.
+         * 
+         * @param pos
+         * @return
+         */
+        private boolean isWithinDistance(Position pos) {
+            Square sq1 = pos.getSquare();
+            Square sq2 = piece.getSquare();
+            int distance = Integer.MAX_VALUE;
+            // same x-axis
+            if (sq1.getX() == sq2.getX()) {
+                distance = Math.abs(sq1.getY() - sq2.getY());
+            }
+            // same y-axis
+            else if (sq1.getY() == sq2.getY()) {
+                distance = Math.abs(sq1.getX() - sq2.getX());
+            }
+
+            return distance <= piece.getMoveDistance();
+        }
+
+        /**
+         * Check for not same square as the piece/position we're checking
+         * 
+         * @param pos
+         * @return
+         */
+        private boolean notSameSquare(Position pos) {
+            return !pos.getSquare().getAbsolute().equals(piece.getSquare().getAbsolute());
+        }
+
+        /**
+         * Either empty square or occupied by opponent piece
+         * 
+         * @param pos
+         * @return
+         */
+        private boolean notOwnPiece(Position pos) {
+            return pos.getPiece().getPlayer() != piece.getPlayer();
+        }
+
+        /*
+         * (non-Javadoc)
+         * 
+         * @see java.util.function.Predicate#test(java.lang.Object)
+         */
+        @Override
+        public boolean test(Position pos) {
+            boolean result = isInLineOfSight(pos) && isWithinDistance(pos) && notSameSquare(pos) && pos.isValid() && (pos.isEmpty() || notOwnPiece(pos));
+            logger.debug("Checking position [{}] [{}]", pos.getSquare(), result);
+            return result;
+        }
+    }
+
+    // private List<Square> getAllowedMoves2(List<Position> possibleMoves, Piece piece) {
+    // int moveDistance = piece.getMoveDistance();
+    // if (moveDistance == 0) {
+    // return new ArrayList<>();
+    // }
+    // int player = piece.getPlayer();
+    //
+    // List<Square> allowedMoves = new ArrayList<>();
+    // int moveCounter = 0;
+    // for (Position position : possibleMoves) {
+    // moveCounter++;
+    // Square square2BeChecked = position.getSquare();
+    // // invalid/water found, break
+    // if (!position.isValid()) {
+    // logger.debug("checking position [{}], was invalid", square2BeChecked);
+    // break;
+    // }
+    //
+    // // non-empty square
+    // // not possible to move further
+    // if (position.containsPiece()) {
+    // logger.debug("checking position [{}], contained [{}]", square2BeChecked, position.getPiece());
+    // // non-empty square containing opponent piece
+    // // allowed to move there, if it's own piece then not allowed to move there
+    // if (position.getPiece().getPlayer() != player) {
+    // allowedMoves.add(square2BeChecked);
+    // }
+    // break;
+    // }
+    //
+    // // empty square, allowed to move there
+    // logger.debug("checking position [{}], was empty", square2BeChecked);
+    // allowedMoves.add(square2BeChecked);
+    //
+    // // we've walked as far as this piece can move
+    // if (moveCounter >= moveDistance) {
+    // break;
+    // }
+    // }
+    // return allowedMoves;
+    // }
 
     /**
      * Move a piece.
@@ -284,8 +516,6 @@ public final class Board {
      * @param defender
      */
     public int movePiece(final Piece attacker, Square target) {
-        // final int x_coord_defender = target.getAbsolute().getX();
-        // final int y_coord_defender = target.getAbsolute().getY();
         final Square squareDefender = target.getAbsolute();
         final Square squareAttacker = attacker.getSquare();
 
@@ -341,7 +571,7 @@ public final class Board {
             if (position.containsPiece()) {
                 pieceString = position.getPiece().toString();
             }
-            logger.debug("Marking square [{}] containing [{}] as empty", abs, pieceString);
+            logger.debug("Emptying square [{}] containing [{}]", abs, pieceString);
         }
         positions[abs.getX()][abs.getY()] = new EmptyPosition(abs);
     }
@@ -360,13 +590,7 @@ public final class Board {
     }
 
     public List<Piece> getPiecesForPlayer(int player) {
-        List<Piece> pieceList = new ArrayList<>();
-        for (Piece piece : getPieces()) {
-            if (piece.getPlayer() == player) {
-                pieceList.add(piece);
-            }
-        }
-        return pieceList;
+        return getPieces().stream().filter(p -> p.getPlayer() == player).collect(Collectors.toList());
     }
 
     /**
@@ -377,14 +601,7 @@ public final class Board {
      * @return
      */
     public boolean checkIfPlayerCanMove(int checkPlayer) {
-        // get all pieces
-        for (Piece piece : getPieces()) {
-            // any piece for the player that can move counts
-            if (piece.getPlayer() == checkPlayer && canPieceMove(piece)) {
-                return true;
-            }
-        }
-        return false;
+        return getPiecesForPlayer(checkPlayer).stream().anyMatch(p -> canPieceMove(p));
     }
 
     /**
@@ -411,20 +628,16 @@ public final class Board {
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
         // loop on the row, starting from the highest
-        for (int y = 9; y >= 0; y--) {
+        for (int i = 9; i >= 0; i--) {
             // loop on the column starting from left
+            final int y = i;
             sb.append(y).append(" ");
-            for (int x = 0; x < 10; x++) {
-                Position position = positions[x][y];
-                sb.append(position).append(" ");
-            }
+            IntStream.rangeClosed(0, 9).forEach(x -> sb.append(positions[x][y]).append(" "));
             sb.append("\n");
         }
         // print the X-coord system
         sb.append("   ");
-        for (int i = 0; i < 10; i++) {
-            sb.append(i).append("   ");
-        }
+        IntStream.rangeClosed(0, 9).forEach(i -> sb.append(i).append("   "));
         sb.append("\n");
         return sb.toString();
     }
@@ -559,7 +772,7 @@ public final class Board {
 
         @Override
         public Square getSquare() {
-            return square;
+            return square.getAbsolute();
         }
 
         @Override
@@ -604,7 +817,7 @@ public final class Board {
 
         @Override
         public Square getSquare() {
-            return square;
+            return square.getAbsolute();
         }
 
         @Override
@@ -648,7 +861,7 @@ public final class Board {
 
         @Override
         public Square getSquare() {
-            return piece.getSquare();
+            return piece.getSquare().getAbsolute();
         }
 
         @Override

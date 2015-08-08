@@ -5,12 +5,27 @@
 // Generated on: 2015.02.22 at 10:21:27 AM CET 
 //
 
-
+/**
+ *  Copyright 2015 Peter Nerg
+ *
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
 package org.dmonix.battlex.resources;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlAttribute;
@@ -18,11 +33,12 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
 
-
 /**
- * <p>Java class for anonymous complex type.
+ * <p>
+ * Java class for anonymous complex type.
  * 
- * <p>The following schema fragment specifies the expected content contained within this class.
+ * <p>
+ * The following schema fragment specifies the expected content contained within this class.
  * 
  * <pre>
  * &lt;complexType>
@@ -65,9 +81,7 @@ import javax.xml.bind.annotation.XmlType;
  * 
  */
 @XmlAccessorType(XmlAccessType.FIELD)
-@XmlType(name = "", propOrder = {
-    "opponent"
-})
+@XmlType(name = "", propOrder = { "opponent" })
 @XmlRootElement(name = "opponents")
 public class Opponents {
 
@@ -77,21 +91,19 @@ public class Opponents {
      * Gets the value of the opponent property.
      * 
      * <p>
-     * This accessor method returns a reference to the live list,
-     * not a snapshot. Therefore any modification you make to the
-     * returned list will be present inside the JAXB object.
-     * This is why there is not a <CODE>set</CODE> method for the opponent property.
+     * This accessor method returns a reference to the live list, not a snapshot. Therefore any modification you make to the returned list will be present
+     * inside the JAXB object. This is why there is not a <CODE>set</CODE> method for the opponent property.
      * 
      * <p>
      * For example, to add a new item, do as follows:
+     * 
      * <pre>
-     *    getOpponent().add(newItem);
+     * getOpponent().add(newItem);
      * </pre>
      * 
      * 
      * <p>
-     * Objects of the following type(s) are allowed in the list
-     * {@link Opponents.Opponent }
+     * Objects of the following type(s) are allowed in the list {@link Opponents.Opponent }
      * 
      * 
      */
@@ -102,11 +114,12 @@ public class Opponents {
         return this.opponent;
     }
 
-
     /**
-     * <p>Java class for anonymous complex type.
+     * <p>
+     * Java class for anonymous complex type.
      * 
-     * <p>The following schema fragment specifies the expected content contained within this class.
+     * <p>
+     * The following schema fragment specifies the expected content contained within this class.
      * 
      * <pre>
      * &lt;complexType>
@@ -139,12 +152,7 @@ public class Opponents {
      * 
      */
     @XmlAccessorType(XmlAccessType.FIELD)
-    @XmlType(name = "", propOrder = {
-        "description",
-        "host",
-        "port",
-        "proxy"
-    })
+    @XmlType(name = "", propOrder = { "description", "host", "port", "proxy" })
     public static class Opponent {
 
         @XmlElement(required = true, defaultValue = "")
@@ -161,10 +169,8 @@ public class Opponents {
         /**
          * Gets the value of the description property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public String getDescription() {
             return description;
@@ -174,9 +180,8 @@ public class Opponents {
          * Sets the value of the description property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setDescription(String value) {
             this.description = value;
@@ -185,10 +190,8 @@ public class Opponents {
         /**
          * Gets the value of the host property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public String getHost() {
             return host;
@@ -198,9 +201,8 @@ public class Opponents {
          * Sets the value of the host property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setHost(String value) {
             this.host = value;
@@ -209,10 +211,8 @@ public class Opponents {
         /**
          * Gets the value of the port property.
          * 
-         * @return
-         *     possible object is
-         *     {@link BigInteger }
-         *     
+         * @return possible object is {@link BigInteger }
+         * 
          */
         public BigInteger getPort() {
             return port;
@@ -222,9 +222,8 @@ public class Opponents {
          * Sets the value of the port property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link BigInteger }
-         *     
+         *            allowed object is {@link BigInteger }
+         * 
          */
         public void setPort(BigInteger value) {
             this.port = value;
@@ -233,10 +232,8 @@ public class Opponents {
         /**
          * Gets the value of the proxy property.
          * 
-         * @return
-         *     possible object is
-         *     {@link Opponents.Opponent.Proxy }
-         *     
+         * @return possible object is {@link Opponents.Opponent.Proxy }
+         * 
          */
         public Opponents.Opponent.Proxy getProxy() {
             return proxy;
@@ -246,9 +243,8 @@ public class Opponents {
          * Sets the value of the proxy property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link Opponents.Opponent.Proxy }
-         *     
+         *            allowed object is {@link Opponents.Opponent.Proxy }
+         * 
          */
         public void setProxy(Opponents.Opponent.Proxy value) {
             this.proxy = value;
@@ -257,10 +253,8 @@ public class Opponents {
         /**
          * Gets the value of the name property.
          * 
-         * @return
-         *     possible object is
-         *     {@link String }
-         *     
+         * @return possible object is {@link String }
+         * 
          */
         public String getName() {
             return name;
@@ -270,19 +264,19 @@ public class Opponents {
          * Sets the value of the name property.
          * 
          * @param value
-         *     allowed object is
-         *     {@link String }
-         *     
+         *            allowed object is {@link String }
+         * 
          */
         public void setName(String value) {
             this.name = value;
         }
 
-
         /**
-         * <p>Java class for anonymous complex type.
+         * <p>
+         * Java class for anonymous complex type.
          * 
-         * <p>The following schema fragment specifies the expected content contained within this class.
+         * <p>
+         * The following schema fragment specifies the expected content contained within this class.
          * 
          * <pre>
          * &lt;complexType>
@@ -301,10 +295,7 @@ public class Opponents {
          * 
          */
         @XmlAccessorType(XmlAccessType.FIELD)
-        @XmlType(name = "", propOrder = {
-            "proxyHost",
-            "proxyPort"
-        })
+        @XmlType(name = "", propOrder = { "proxyHost", "proxyPort" })
         public static class Proxy {
 
             @XmlElement(required = true)
@@ -317,10 +308,8 @@ public class Opponents {
             /**
              * Gets the value of the proxyHost property.
              * 
-             * @return
-             *     possible object is
-             *     {@link String }
-             *     
+             * @return possible object is {@link String }
+             * 
              */
             public String getProxyHost() {
                 return proxyHost;
@@ -330,9 +319,8 @@ public class Opponents {
              * Sets the value of the proxyHost property.
              * 
              * @param value
-             *     allowed object is
-             *     {@link String }
-             *     
+             *            allowed object is {@link String }
+             * 
              */
             public void setProxyHost(String value) {
                 this.proxyHost = value;
@@ -341,10 +329,8 @@ public class Opponents {
             /**
              * Gets the value of the proxyPort property.
              * 
-             * @return
-             *     possible object is
-             *     {@link BigInteger }
-             *     
+             * @return possible object is {@link BigInteger }
+             * 
              */
             public BigInteger getProxyPort() {
                 return proxyPort;
@@ -354,9 +340,8 @@ public class Opponents {
              * Sets the value of the proxyPort property.
              * 
              * @param value
-             *     allowed object is
-             *     {@link BigInteger }
-             *     
+             *            allowed object is {@link BigInteger }
+             * 
              */
             public void setProxyPort(BigInteger value) {
                 this.proxyPort = value;
@@ -365,10 +350,8 @@ public class Opponents {
             /**
              * Gets the value of the useProxy property.
              * 
-             * @return
-             *     possible object is
-             *     {@link Boolean }
-             *     
+             * @return possible object is {@link Boolean }
+             * 
              */
             public boolean isUseProxy() {
                 if (useProxy == null) {
@@ -382,9 +365,8 @@ public class Opponents {
              * Sets the value of the useProxy property.
              * 
              * @param value
-             *     allowed object is
-             *     {@link Boolean }
-             *     
+             *            allowed object is {@link Boolean }
+             * 
              */
             public void setUseProxy(Boolean value) {
                 this.useProxy = value;

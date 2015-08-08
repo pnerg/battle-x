@@ -1,21 +1,18 @@
 /**
- * Licensed to the Apache Software Foundation (ASF) under one
- * or more contributor license agreements.  See the NOTICE file
- * distributed with this work for additional information
- * regarding copyright ownership.  The ASF licenses this file
- * to you under the Apache License, Version 2.0 (the
- * "License"); you may not use this file except in compliance
- * with the License.  You may obtain a copy of the License at
+ *  Copyright 2015 Peter Nerg
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ *  Licensed under the Apache License, Version 2.0 (the "License");
+ *  you may not use this file except in compliance with the License.
+ *  You may obtain a copy of the License at
  *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
  */
-
 package org.dmonix.battlex.datamodel;
 
 import java.util.List;
@@ -93,7 +90,7 @@ public class TestBoard extends BaseAssert {
     }
 
     private void addPiece(int player, String type, int x, int y) {
-        board.addPiece(new Piece(player, type, SquareFactory.createAbsolute(x, y)));
+        board.addPiece(new Piece(player, type, Square.apply(x, y)));
         if (player == 1) {
             pieceCountP1++;
         } else {
@@ -149,40 +146,40 @@ public class TestBoard extends BaseAssert {
 
     @Test
     public void getPiece_x0y0() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(0, 0));
+        Piece piece = board.getPiece(Square.apply(0, 0));
         assertNotNull(piece);
         assertEquals(PieceData.PIECE_FLAG_TYPE, piece.getType());
         assertEquals(1, piece.getPlayer());
-        assertEquals(SquareFactory.createAbsolute(0, 0), piece.getSquare());
+        assertEquals(Square.apply(0, 0), piece.getSquare());
     }
 
     @Test
     public void getPiece_x9y9() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(9, 9));
+        Piece piece = board.getPiece(Square.apply(9, 9));
         assertNotNull(piece);
         assertEquals(PieceData.PIECE_FLAG_TYPE, piece.getType());
         assertEquals(2, piece.getPlayer());
-        assertEquals(SquareFactory.createAbsolute(9, 9), piece.getSquare());
+        assertEquals(Square.apply(9, 9), piece.getSquare());
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void getPiece_x4y4_emptySquare() {
-        board.getPiece(SquareFactory.createAbsolute(4, 4));
+        board.getPiece(Square.apply(4, 4));
     }
 
     @Test(expected = UnsupportedOperationException.class)
     public void getPiece_x3y4_illegalSquare() {
-        board.getPiece(SquareFactory.createAbsolute(3, 4));
+        board.getPiece(Square.apply(3, 4));
     }
 
     @Test
     public void isEmpty_x4y2_nonEmpty() {
-        assertFalse(board.isEmpty(SquareFactory.createAbsolute(4, 2)));
+        assertFalse(board.isEmpty(Square.apply(4, 2)));
     }
 
     @Test
     public void isEmpty_x4y4_emptySquare() {
-        assertTrue(board.isEmpty(SquareFactory.createAbsolute(4, 3)));
+        assertTrue(board.isEmpty(Square.apply(4, 3)));
     }
 
     /**
@@ -190,8 +187,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x4y2_x4y3() {
-        Square originalPosition = SquareFactory.createAbsolute(4, 2);
-        Square movedPosition = SquareFactory.createAbsolute(4, 3);
+        Square originalPosition = Square.apply(4, 2);
+        Square movedPosition = Square.apply(4, 3);
         assertMove(originalPosition, movedPosition, Board.RESULT_MOVE_NO_BATTLE);
     }
 
@@ -200,8 +197,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x5y4_x5y5() {
-        Square originalPosition = SquareFactory.createAbsolute(5, 4);
-        Square movedPosition = SquareFactory.createAbsolute(5, 5);
+        Square originalPosition = Square.apply(5, 4);
+        Square movedPosition = Square.apply(5, 5);
         assertMove(originalPosition, movedPosition, Board.RESULT_WIN);
     }
 
@@ -210,8 +207,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x2y7_x3y7() {
-        Square originalPosition = SquareFactory.createAbsolute(2, 7);
-        Square movedPosition = SquareFactory.createAbsolute(3, 7);
+        Square originalPosition = Square.apply(2, 7);
+        Square movedPosition = Square.apply(3, 7);
         assertMove(originalPosition, movedPosition, Board.RESULT_LOOSE);
     }
 
@@ -220,8 +217,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x2y7_x2y8() {
-        Square originalPosition = SquareFactory.createAbsolute(2, 7);
-        Square movedPosition = SquareFactory.createAbsolute(2, 8);
+        Square originalPosition = Square.apply(2, 7);
+        Square movedPosition = Square.apply(2, 8);
         assertMove(originalPosition, movedPosition, Board.RESULT_WIN);
     }
 
@@ -230,8 +227,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x2y8_x2y7() {
-        Square originalPosition = SquareFactory.createAbsolute(2, 8);
-        Square movedPosition = SquareFactory.createAbsolute(2, 7);
+        Square originalPosition = Square.apply(2, 8);
+        Square movedPosition = Square.apply(2, 7);
         assertMove(originalPosition, movedPosition, Board.RESULT_WIN);
     }
 
@@ -240,8 +237,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x2y8_x1y8() {
-        Square originalPosition = SquareFactory.createAbsolute(2, 8);
-        Square movedPosition = SquareFactory.createAbsolute(1, 8);
+        Square originalPosition = Square.apply(2, 8);
+        Square movedPosition = Square.apply(1, 8);
         assertMove(originalPosition, movedPosition, Board.RESULT_LOOSE);
     }
 
@@ -250,8 +247,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x9y7_x9y8() {
-        Square originalPosition = SquareFactory.createAbsolute(9, 7);
-        Square movedPosition = SquareFactory.createAbsolute(9, 8);
+        Square originalPosition = Square.apply(9, 7);
+        Square movedPosition = Square.apply(9, 8);
 
         assertMove(originalPosition, movedPosition, Board.RESULT_WIN);
     }
@@ -261,8 +258,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void move_x9y7_x8y7() {
-        Square originalPosition = SquareFactory.createAbsolute(9, 7);
-        Square movedPosition = SquareFactory.createAbsolute(8, 7);
+        Square originalPosition = Square.apply(9, 7);
+        Square movedPosition = Square.apply(8, 7);
 
         assertMove(originalPosition, movedPosition, Board.RESULT_DRAW);
     }
@@ -273,18 +270,32 @@ public class TestBoard extends BaseAssert {
     @Test
     public void move_x9y7_x9y8_x9y9() {
         move_x9y7_x9y8();
-        Square originalPosition = SquareFactory.createAbsolute(9, 8);
-        Square movedPosition = SquareFactory.createAbsolute(9, 9);
+        Square originalPosition = Square.apply(9, 8);
+        Square movedPosition = Square.apply(9, 9);
 
         assertMove(originalPosition, movedPosition, Board.RESULT_WIN_GAME);
     }
 
     /**
-     * Flag
+     * Flag<br>
+     * 0 in any direction
      */
     @Test
     public void getAllowedMoves_x0y0() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(0, 0));
+        Piece piece = board.getPiece(Square.apply(0, 0));
+        List<Square> allowedMoves = board.getAllowedMoves(piece);
+        assertNotNull(allowedMoves);
+        assertEquals(0, allowedMoves.size());
+        // assertEquals(0, board.getAllowedMoves2(piece).size());
+    }
+
+    /**
+     * Bomb<br>
+     * 0 in any direction
+     */
+    @Test
+    public void getAllowedMoves_x1y0() {
+        Piece piece = board.getPiece(Square.apply(1, 0));
         List<Square> allowedMoves = board.getAllowedMoves(piece);
         assertNotNull(allowedMoves);
         assertEquals(0, allowedMoves.size());
@@ -299,10 +310,12 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void getAllowedMoves_x4y2() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(4, 2));
+        System.out.println(board);
+        Piece piece = board.getPiece(Square.apply(4, 2));
         List<Square> allowedMoves = board.getAllowedMoves(piece);
         assertNotNull(allowedMoves);
         assertEquals(16, allowedMoves.size());
+        // assertEquals(16, board.getAllowedMoves2(piece).size());
     }
 
     /**
@@ -314,7 +327,7 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void getAllowedMoves_x2y0() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(2, 0));
+        Piece piece = board.getPiece(Square.apply(2, 0));
         List<Square> allowedMoves = board.getAllowedMoves(piece);
         assertNotNull(allowedMoves);
         assertEquals(10, allowedMoves.size());
@@ -329,7 +342,7 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void getAllowedMoves_x3y6() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(3, 6));
+        Piece piece = board.getPiece(Square.apply(3, 6));
         List<Square> allowedMoves = board.getAllowedMoves(piece);
         assertNotNull(allowedMoves);
         assertEquals(3, allowedMoves.size());
@@ -344,7 +357,8 @@ public class TestBoard extends BaseAssert {
      */
     @Test
     public void getAllowedMoves_x5y5() {
-        Piece piece = board.getPiece(SquareFactory.createAbsolute(5, 5));
+        System.out.println(board);
+        Piece piece = board.getPiece(Square.apply(5, 5));
         List<Square> allowedMoves = board.getAllowedMoves(piece);
         assertNotNull(allowedMoves);
         assertEquals(2, allowedMoves.size());
@@ -394,7 +408,7 @@ public class TestBoard extends BaseAssert {
         assertFalse("Unexpected empty square @ [" + position + "]", board.isEmpty(position));
         Piece piece = board.getPiece(position);
         assertNotNull("Expected valid piece @ [" + position + "]", piece);
-        assertEquals("Expected piece @ [" + position + "]", expectedType, piece.getType());
-        assertEquals("Expected piece @ [" + position + "]", expectedPlayer, piece.getPlayer());
+        assertEquals("Expected piece type @ [" + position + "]", expectedType, piece.getType());
+        assertEquals("Expected piece for player @ [" + position + "]", expectedPlayer, piece.getPlayer());
     }
 }
