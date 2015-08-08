@@ -22,6 +22,7 @@ import java.util.EventListener;
 /**
  * @author Peter Nerg
  */
+@FunctionalInterface
 public interface GameStateChangeListener extends EventListener {
     void stateChanged(int oldState, int newState);
 }

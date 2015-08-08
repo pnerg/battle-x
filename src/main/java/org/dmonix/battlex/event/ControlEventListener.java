@@ -22,6 +22,7 @@ import java.util.EventListener;
 /**
  * @author Peter Nerg
  */
+@FunctionalInterface
 public interface ControlEventListener extends EventListener {
 
     void controlEvent(ControlEventObject ceo);

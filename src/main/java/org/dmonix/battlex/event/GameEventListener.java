@@ -22,6 +22,7 @@ import java.util.EventListener;
 /**
  * @author Peter Nerg
  */
+@FunctionalInterface
 public interface GameEventListener extends EventListener {
 
     void gameEvent(GameEventObject geo);

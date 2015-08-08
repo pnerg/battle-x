@@ -21,7 +21,6 @@ import java.io.Serializable;
 
 import org.dmonix.battlex.datamodel.PieceData;
 import org.dmonix.battlex.datamodel.Square;
-import org.dmonix.battlex.datamodel.SquareFactory;
 
 /**
  * @author Peter Nerg
@@ -42,7 +41,7 @@ public final class GameEventObject implements Serializable {
 
     public GameEventObject(String type, Square newCoord) {
         // TODO is this used? Kind of ugly with -1 coord values? Create non-valid square type?
-        this(type, SquareFactory.createAbsolute(-1, -1), newCoord);
+        this(type, Square.apply(-1, -1), newCoord);
     }
 
     private GameEventObject(String type, Square oldCoord, Square newCoord) {
