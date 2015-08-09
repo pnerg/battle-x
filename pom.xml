@@ -7,26 +7,32 @@
 	<name>Battle-X</name>
 	<version>1.0-SNAPSHOT</version>
 	<packaging>jar</packaging>
-	<description>A variant of the classic Stratego </description>
+	<description>A variant of the classic Stratego</description>
 	<organization>
-		<name>DMoniX.org</name>
+		<name>dmonix.org</name>
 	</organization>
 	<issueManagement>
-		<system>bitbucket jira</system>
-		<url>https://bitbucket.org/peter_nerg/battle-x/issues</url>
+		<system>github</system>
+		<url>https://github.com/pnerg/battle-x/issues</url>
 	</issueManagement>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<plugin.maven-surefire-plugin.configuration.parallel />
-		<plugin.maven-surefire-plugin.configuration.threadCount />
-	</properties>
 
+	<licenses>
+		<license>
+			<name>The Apache License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
 	<developers>
 		<developer>
 			<name>Peter Nerg</name>
-			<email>peter.nerg@gmail.com</email>
 		</developer>
 	</developers>
+	<scm>
+		<connection>scm:git:git@github.com:pnerg/battle-x.git</connection>
+		<developerConnection>scm:git:git@github.com:pnerg/battle-x.git</developerConnection>
+		<url>git@github.com:pnerg/battle-x.git</url>
+		<tag>HEAD</tag>
+	</scm>
 
 	<!-- ========================================== = The DEPENDENCIES section 
 		========================================== -->
@@ -37,7 +43,6 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.5</version>
 		</dependency>
-
 
 		<dependency>
 			<groupId>org.dmonix</groupId>
@@ -52,7 +57,7 @@
 			<version>1.0</version>
 			<scope>compile</scope>
 		</dependency>
-		
+
 		<dependency>
 			<groupId>ch.qos.logback</groupId>
 			<artifactId>logback-classic</artifactId>
