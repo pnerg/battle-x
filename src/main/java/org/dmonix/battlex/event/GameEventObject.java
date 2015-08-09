@@ -44,8 +44,8 @@ public final class GameEventObject implements Serializable {
 
     private GameEventObject(String type, Square oldCoord, Square newCoord) {
         this.type = type;
-        this.oldCoord = oldCoord.getAbsolute();
-        this.newCoord = newCoord.getAbsolute();
+        this.oldCoord = oldCoord.absolute();
+        this.newCoord = newCoord.absolute();
     }
 
     public String getType() {

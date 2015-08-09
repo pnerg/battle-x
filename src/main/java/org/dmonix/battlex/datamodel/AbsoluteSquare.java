@@ -32,7 +32,7 @@ class AbsoluteSquare extends AbstractSquare {
      * @see org.dmonix.battlex.datamodel.Square#getAbsolute()
      */
     @Override
-    public Square getAbsolute() {
+    public Square absolute() {
         return this;
     }
 
@@ -42,7 +42,7 @@ class AbsoluteSquare extends AbstractSquare {
      * @see org.dmonix.battlex.datamodel.Square#getRelative(int)
      */
     @Override
-    public Square getRelative(int player) {
-        return player == 1 ? new PlayerOneRelativeSquare(getX(), 9 - getY()) : new PlayerTwoRelativeSquare(9 - getX(), getY());
+    public Square relative(int player) {
+        return player == 1 ? new PlayerOneRelativeSquare(x(), 9 - y()) : new PlayerTwoRelativeSquare(9 - x(), y());
     }
 }

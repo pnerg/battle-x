@@ -261,8 +261,8 @@ public class BoardPanel extends JPanel implements GameEventListener {
         if (currentPiece != null && gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN)) {
             g2.setComposite(alphaComposite);
             for (Square square : board.getAllowedMoves(currentPiece)) {
-                Square relative = square.getRelative(player);
-                paintSquare(g2, relative.getX(), relative.getY());
+                Square relative = square.relative(player);
+                paintSquare(g2, relative.x(), relative.y());
             }
             g2.setComposite(originalComposite);
         }
@@ -295,9 +295,9 @@ public class BoardPanel extends JPanel implements GameEventListener {
         Image scaledImage;
 
         for (Piece piece : board.getPieces()) {
-            Square relativePieceSquare = piece.getSquare().getRelative(player);
-            int x = relativePieceSquare.getX();
-            int y = relativePieceSquare.getY();
+            Square relativePieceSquare = piece.getSquare().relative(player);
+            int x = relativePieceSquare.x();
+            int y = relativePieceSquare.y();
             if (piece.getPlayer() == player)
                 scaledImage = Resources.getImage(player, piece.getType());
             else
@@ -426,10 +426,10 @@ public class BoardPanel extends JPanel implements GameEventListener {
 
     private void gameSetupClick(MouseEvent e) {
         // find the point for the click
-        Square clickedSquare = getClickedSquare(e).getRelative(player);
+        Square clickedSquare = getClickedSquare(e).relative(player);
 
         // only allowed to place piece on the 4 lines closest to the player
-        if (clickedSquare.getY() < 6) {
+        if (clickedSquare.y() < 6) {
             return;
         }
 

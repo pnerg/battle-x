@@ -27,28 +27,28 @@ public class TestSquare extends BaseAssert {
     @Test
     public void absoluteSquare_getAbsolute() {
         Square square = Square.apply(0, 0);
-        Square absolute = square.getAbsolute();
+        Square absolute = square.absolute();
         assertEquals(square, absolute);
-        assertEquals(square.getX(), absolute.getX());
-        assertEquals(square.getY(), absolute.getY());
+        assertEquals(square.x(), absolute.x());
+        assertEquals(square.y(), absolute.y());
     }
 
     @Test
     public void absoluteSquare_getRelative1_0_0() {
         Square square = Square.apply(0, 0);
-        Square relative = square.getRelative(1);
+        Square relative = square.relative(1);
         assertNotSame(square, relative);
-        assertEquals(0, relative.getX());
-        assertEquals(9, relative.getY());
+        assertEquals(0, relative.x());
+        assertEquals(9, relative.y());
     }
 
     @Test
     public void absoluteSquare_getRelative1_2_3() {
         Square square = Square.apply(2, 3);
-        Square relative = square.getRelative(1);
+        Square relative = square.relative(1);
         assertNotSame(square, relative);
-        assertEquals(2, relative.getX());
-        assertEquals(6, relative.getY());
+        assertEquals(2, relative.x());
+        assertEquals(6, relative.y());
     }
 
     @Test
@@ -56,10 +56,10 @@ public class TestSquare extends BaseAssert {
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 Square square = Square.apply(x, y);
-                Square relative = square.getRelative(1);
+                Square relative = square.relative(1);
                 assertNotSame(square, relative);
-                assertEquals(x, relative.getX());
-                assertEquals(9 - y, relative.getY());
+                assertEquals(x, relative.x());
+                assertEquals(9 - y, relative.y());
             }
         }
     }
@@ -67,19 +67,19 @@ public class TestSquare extends BaseAssert {
     @Test
     public void absoluteSquare_getRelative2_0_0() {
         Square square = Square.apply(0, 0);
-        Square relative = square.getRelative(2);
+        Square relative = square.relative(2);
         assertNotSame(square, relative);
-        assertEquals(9, relative.getX());
-        assertEquals(0, relative.getY());
+        assertEquals(9, relative.x());
+        assertEquals(0, relative.y());
     }
 
     @Test
     public void absoluteSquare_getRelative2_2_3() {
         Square square = Square.apply(2, 3);
-        Square relative = square.getRelative(2);
+        Square relative = square.relative(2);
         assertNotSame(square, relative);
-        assertEquals(7, relative.getX());
-        assertEquals(3, relative.getY());
+        assertEquals(7, relative.x());
+        assertEquals(3, relative.y());
     }
 
     @Test
@@ -87,10 +87,10 @@ public class TestSquare extends BaseAssert {
         for (int y = 0; y < 10; y++) {
             for (int x = 0; x < 10; x++) {
                 Square square = Square.apply(x, y);
-                Square relative = square.getRelative(2);
+                Square relative = square.relative(2);
                 assertNotSame(square, relative);
-                assertEquals(9 - x, relative.getX());
-                assertEquals(y, relative.getY());
+                assertEquals(9 - x, relative.x());
+                assertEquals(y, relative.y());
             }
         }
     }
@@ -98,54 +98,54 @@ public class TestSquare extends BaseAssert {
     @Test
     public void playerOneRelativeSquare_getAbsolute() {
         Square square = Square.apply(1, 0, 9);
-        Square absolute = square.getAbsolute();
+        Square absolute = square.absolute();
         assertNotSame(square, absolute);
-        assertEquals(0, absolute.getX());
-        assertEquals(0, absolute.getY());
+        assertEquals(0, absolute.x());
+        assertEquals(0, absolute.y());
     }
 
     @Test
     public void playerOneRelativeSquare_getRelative1() {
         Square square = Square.apply(1, 0, 0);
-        Square relative = square.getRelative(1);
+        Square relative = square.relative(1);
         assertEquals(square, relative);
-        assertEquals(square.getX(), relative.getX());
-        assertEquals(square.getY(), relative.getY());
+        assertEquals(square.x(), relative.x());
+        assertEquals(square.y(), relative.y());
     }
 
     @Test
     public void playerOneRelativeSquare_getRelative2() {
         Square square = Square.apply(1, 0, 0);
-        Square relative = square.getRelative(2);
+        Square relative = square.relative(2);
         assertNotSame(square, relative);
-        assertEquals(9, relative.getX());
-        assertEquals(9, relative.getY());
+        assertEquals(9, relative.x());
+        assertEquals(9, relative.y());
     }
 
     @Test
     public void playerTwoRelativeSquare_getAbsolute() {
         Square square = Square.apply(2, 9, 0);
-        Square absolute = square.getAbsolute();
+        Square absolute = square.absolute();
         assertNotSame(square, absolute);
-        assertEquals(0, absolute.getX());
-        assertEquals(0, absolute.getY());
+        assertEquals(0, absolute.x());
+        assertEquals(0, absolute.y());
     }
 
     @Test
     public void playerTwoRelativeSquare_getRelative2() {
         Square square = Square.apply(2, 0, 0);
-        Square relative = square.getRelative(2);
+        Square relative = square.relative(2);
         assertEquals(square, relative);
-        assertEquals(square.getX(), relative.getX());
-        assertEquals(square.getY(), relative.getY());
+        assertEquals(square.x(), relative.x());
+        assertEquals(square.y(), relative.y());
     }
 
     @Test
     public void playerTwoRelativeSquare_getRelative1() {
         Square square = Square.apply(2, 0, 0);
-        Square relative = square.getRelative(1);
+        Square relative = square.relative(1);
         assertNotSame(square, relative);
-        assertEquals(9, relative.getX());
-        assertEquals(9, relative.getY());
+        assertEquals(9, relative.x());
+        assertEquals(9, relative.y());
     }
 }

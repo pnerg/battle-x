@@ -64,21 +64,21 @@ public interface Square extends Serializable {
         return player == 1 ? new PlayerOneRelativeSquare(x, y) : new PlayerTwoRelativeSquare(x, y);
     }
 
-    Square getAbsolute();
+    Square absolute();
 
-    Square getRelative(int player);
+    Square relative(int player);
 
     /**
      * Get the X coordinate.
      * 
      * @return
      */
-    int getX();
+    int x();
 
     /**
      * Get the Y coordinate.
      * 
      * @return
      */
-    int getY();
+    int y();
 }

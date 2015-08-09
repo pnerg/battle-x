@@ -29,7 +29,7 @@ public final class Piece {
     public Piece(int player, String type, Square square) {
         this.player = player;
         this.type = type;
-        this.square = square.getAbsolute();
+        this.square = square.absolute();
     }
 
     /**
@@ -47,14 +47,14 @@ public final class Piece {
      * @return
      */
     public Square getSquare() {
-        return square.getAbsolute();
+        return square.absolute();
     }
 
     /**
      * Set the location of the piece
      */
     public void setLocation(Square square) {
-        this.square = square.getAbsolute();
+        this.square = square.absolute();
     }
 
     public int getPieceStrength() {
@@ -78,7 +78,7 @@ public final class Piece {
         StringBuffer sb = new StringBuffer();
         Square pos = getSquare();
         sb.append("Player = " + player);
-        sb.append(":Position = [" + pos.getX() + "][" + pos.getY() + "]");
+        sb.append(":Position = [" + pos.x() + "][" + pos.y() + "]");
         sb.append(":Type = " + type);
         return sb.toString();
     }

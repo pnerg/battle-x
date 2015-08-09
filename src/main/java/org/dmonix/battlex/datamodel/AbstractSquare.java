@@ -36,7 +36,7 @@ abstract class AbstractSquare implements Square {
      * @see org.dmonix.battlex.datamodel.Square#getX()
      */
     @Override
-    public final int getX() {
+    public final int x() {
         return x;
     }
 
@@ -46,7 +46,7 @@ abstract class AbstractSquare implements Square {
      * @see org.dmonix.battlex.datamodel.Square#getY()
      */
     @Override
-    public final int getY() {
+    public final int y() {
         return y;
     }
 

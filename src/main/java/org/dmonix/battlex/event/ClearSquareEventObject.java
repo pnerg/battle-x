@@ -32,7 +32,7 @@ public class ClearSquareEventObject implements Serializable {
     private final Square square;
 
     public ClearSquareEventObject(Square square) {
-        this.square = square.getAbsolute();
+        this.square = square.absolute();
     }
 
     /**
