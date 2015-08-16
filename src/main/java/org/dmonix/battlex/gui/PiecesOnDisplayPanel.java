@@ -35,6 +35,7 @@ import javax.swing.border.TitledBorder;
 
 import org.dmonix.battlex.Battlex;
 import org.dmonix.battlex.datamodel.PieceData;
+import org.dmonix.battlex.datamodel.Player;
 import org.dmonix.battlex.event.ControlEvents;
 import org.dmonix.battlex.event.GameStateController;
 import org.dmonix.battlex.event.GameStates;
@@ -88,7 +89,7 @@ public class PiecesOnDisplayPanel extends JPanel {
     private JButton btnSave = new JButton(ImageLoaderUtil.getImageIcon(ImageLoaderUtil.PATH_TOOLBARBUTTONGRAPHICS_GENERAL, "Save24.gif"));
     private JButton btnLoad = new JButton(ImageLoaderUtil.getImageIcon(ImageLoaderUtil.PATH_TOOLBARBUTTONGRAPHICS_GENERAL, "Open24.gif"));
 
-    public PiecesOnDisplayPanel(int player) {
+    public PiecesOnDisplayPanel(Player player) {
         try {
             btnOk.setEnabled(false);
             lblType0Icon = new LabelTypeIcon(player, PieceData.PIECE_BOMB_TYPE);
@@ -352,7 +353,7 @@ public class PiecesOnDisplayPanel extends JPanel {
         private static final long serialVersionUID = 1292383031384135798L;
         private String type;
 
-        private LabelTypeIcon(int player, String type) {
+        private LabelTypeIcon(Player player, String type) {
             super(Resources.getIcon(player, type, 35));
             this.type = type;
             super.addMouseListener(mouseAdapter);

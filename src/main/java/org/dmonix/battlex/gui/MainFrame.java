@@ -39,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.dmonix.battlex.Battlex;
+import org.dmonix.battlex.datamodel.Player;
 import org.dmonix.battlex.event.ControlEventListener;
 import org.dmonix.battlex.event.ControlEventObject;
 import org.dmonix.battlex.event.ControlEvents;
@@ -74,7 +75,7 @@ public class MainFrame extends JFrame {
     private GameEventListener gameEventListener = new GameEventListener();
     private EventCommunicator eventCommunicator;
     private GameStateController gameStateObject = GameStateController.getInstance();
-    private int player;
+    private Player player;
 
     private GridBagLayout gridBagLayoutFrame = new GridBagLayout();
     private GridBagLayout gridBagLayoutStatus = new GridBagLayout();
@@ -85,8 +86,8 @@ public class MainFrame extends JFrame {
     private BoardPanel boardPanel = new BoardPanel();
     private JPanel panelStatus = new JPanel();
     private JLabel lblStatus = new JLabel();
-    private PiecesOnDisplayPanel piecesOnDisplayPanelPlayer1 = new PiecesOnDisplayPanel(1);
-    private PiecesOnDisplayPanel piecesOnDisplayPanelPlayer2 = new PiecesOnDisplayPanel(2);
+    private PiecesOnDisplayPanel piecesOnDisplayPanelPlayerRed = new PiecesOnDisplayPanel(Player.PlayerRed);
+    private PiecesOnDisplayPanel piecesOnDisplayPanelPlayerBlue = new PiecesOnDisplayPanel(Player.PlayerBlue);
 
     private JMenu menuHelp = new JMenu();
     private JMenuItem menuItemHelp = new JMenuItem();
@@ -120,10 +121,10 @@ public class MainFrame extends JFrame {
             super.setIconImage(ImageIO.read(MainFrame.class.getResource("/images/battlex-bullet.gif")));
             gameStateObject.addStateChangeListener(gameEventListener);
             boardPanel.setOwner(this);
-            piecesOnDisplayPanelPlayer1.setOwner(this);
-            piecesOnDisplayPanelPlayer2.setOwner(this);
-            piecesOnDisplayPanelPlayer1.setVisible(false);
-            piecesOnDisplayPanelPlayer2.setVisible(false);
+            piecesOnDisplayPanelPlayerRed.setOwner(this);
+            piecesOnDisplayPanelPlayerBlue.setOwner(this);
+            piecesOnDisplayPanelPlayerRed.setVisible(false);
+            piecesOnDisplayPanelPlayerBlue.setVisible(false);
             setOpponentMenuItems();
             this.setVisible(true);
         } catch (Exception e) {
@@ -136,7 +137,7 @@ public class MainFrame extends JFrame {
      * 
      * @return
      */
-    public int getCurrentPlayer() {
+    public Player getCurrentPlayer() {
         return this.player;
     }
 
@@ -151,38 +152,35 @@ public class MainFrame extends JFrame {
     public void setBoardCursor(Cursor cursor) {
         this.boardPanel.setCursor(cursor);
         this.panelStatus.setCursor(cursor);
-        this.piecesOnDisplayPanelPlayer1.setCursor(cursor);
-        this.piecesOnDisplayPanelPlayer2.setCursor(cursor);
+        this.piecesOnDisplayPanelPlayerRed.setCursor(cursor);
+        this.piecesOnDisplayPanelPlayerBlue.setCursor(cursor);
     }
 
-    public String getSelectedSetupPiece(int player) {
-        if (player == 1)
-            return piecesOnDisplayPanelPlayer1.getSelectedPieceType();
-        else
-            return piecesOnDisplayPanelPlayer2.getSelectedPieceType();
+    public String getSelectedSetupPiece(Player player) {
+        return player.isPlayerRed() ? piecesOnDisplayPanelPlayerRed.getSelectedPieceType() : piecesOnDisplayPanelPlayerBlue.getSelectedPieceType();
     }
 
     public void sendEvent(ControlEventObject ceo) {
         this.eventCommunicator.sendEvent(ceo);
     }
 
-    public void addPiece(int player, String type) {
-        if (player == 1)
-            piecesOnDisplayPanelPlayer1.addPiece(type);
+    public void addPiece(Player player, String type) {
+        if (player.isPlayerRed())
+            piecesOnDisplayPanelPlayerRed.addPiece(type);
         else
-            piecesOnDisplayPanelPlayer2.addPiece(type);
+            piecesOnDisplayPanelPlayerBlue.addPiece(type);
     }
 
-    public void subtractPiece(int player, String type) {
-        if (player == 1)
-            piecesOnDisplayPanelPlayer1.subtractPiece(type);
+    public void subtractPiece(Player player, String type) {
+        if (player.isPlayerRed())
+            piecesOnDisplayPanelPlayerRed.subtractPiece(type);
         else
-            piecesOnDisplayPanelPlayer2.subtractPiece(type);
+            piecesOnDisplayPanelPlayerBlue.subtractPiece(type);
     }
 
     public void connectToOpponent(String host, int port, boolean useProxy, String proxy, int proxyPort) {
         try {
-            this.player = 2;
+            this.player = Player.PlayerBlue;
             if (useProxy)
                 NetUtil.setProxy(proxy, "" + proxyPort);
 
@@ -226,11 +224,11 @@ public class MainFrame extends JFrame {
         menuItemNewGame.setText("New game");
         menuItemNewGame.addActionListener(new MainFrame_menuItemNewGame_actionAdapter());
         menuConnectTo.setText("Connect to");
-        piecesOnDisplayPanelPlayer1.setMinimumSize(new Dimension(90, 75));
-        piecesOnDisplayPanelPlayer1.setPreferredSize(new Dimension(90, 75));
-        piecesOnDisplayPanelPlayer2.setMinimumSize(new Dimension(90, 75));
-        piecesOnDisplayPanelPlayer2.setPreferredSize(new Dimension(90, 75));
-        piecesOnDisplayPanelPlayer1.setRequestFocusEnabled(true);
+        piecesOnDisplayPanelPlayerRed.setMinimumSize(new Dimension(90, 75));
+        piecesOnDisplayPanelPlayerRed.setPreferredSize(new Dimension(90, 75));
+        piecesOnDisplayPanelPlayerBlue.setMinimumSize(new Dimension(90, 75));
+        piecesOnDisplayPanelPlayerBlue.setPreferredSize(new Dimension(90, 75));
+        piecesOnDisplayPanelPlayerRed.setRequestFocusEnabled(true);
         menuItemPreferences.setText("Preferences");
         menuItemPreferences.addActionListener(new MainFrame_menuItemPreferences_actionAdapter());
         menuItemDisconnect.setText("Disconnect");
@@ -252,9 +250,9 @@ public class MainFrame extends JFrame {
         panelStatus.add(progressBar, new GridBagConstraints(3, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHEAST, GridBagConstraints.NONE,
                 new Insets(5, 5, 0, 5), 0, 0));
 
-        this.getContentPane().add(piecesOnDisplayPanelPlayer1,
+        this.getContentPane().add(piecesOnDisplayPanelPlayerRed,
                 new GridBagConstraints(0, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(6, 6, 0, 0), 0, 0));
-        this.getContentPane().add(piecesOnDisplayPanelPlayer2,
+        this.getContentPane().add(piecesOnDisplayPanelPlayerBlue,
                 new GridBagConstraints(1, 0, 1, 1, 0.0, 0.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(6, 5, 0, 5), 0, 0));
         this.getContentPane().add(boardPanel,
                 new GridBagConstraints(2, 0, 1, 1, 0.0, 1.0, GridBagConstraints.NORTHWEST, GridBagConstraints.BOTH, new Insets(0, 0, 0, 0), 0, 0));
@@ -266,7 +264,7 @@ public class MainFrame extends JFrame {
 
     public void menuItemNewGame_actionPerformed(ActionEvent e) {
         try {
-            this.player = 1;
+            this.player = Player.PlayerRed;
             eventCommunicator = new EventCommunicator(Integer.parseInt(configuration.getPreference(Configuration.PREF_SERVERPORT)));
             eventCommunicator.addEventListener(controlListener);
             gameStateObject.setState(GameStates.STATE_CONNECTING);
@@ -385,8 +383,8 @@ public class MainFrame extends JFrame {
         this.setBoardCursor(Cursor.getDefaultCursor());
         this.progressBar.stopRolling();
         this.lblStatus.setText("Disconnected");
-        this.piecesOnDisplayPanelPlayer1.setVisible(false);
-        this.piecesOnDisplayPanelPlayer2.setVisible(false);
+        this.piecesOnDisplayPanelPlayerRed.setVisible(false);
+        this.piecesOnDisplayPanelPlayerBlue.setVisible(false);
 
         menuConnectTo.setEnabled(true);
         menuItemNewGame.setEnabled(true);
@@ -452,8 +450,8 @@ public class MainFrame extends JFrame {
                     setBoardCursor(Cursor.getDefaultCursor());
                     progressBar.stopRolling();
                     lblStatus.setText("Disconnected");
-                    piecesOnDisplayPanelPlayer1.setVisible(false);
-                    piecesOnDisplayPanelPlayer2.setVisible(false);
+                    piecesOnDisplayPanelPlayerRed.setVisible(false);
+                    piecesOnDisplayPanelPlayerBlue.setVisible(false);
 
                     menuConnectTo.setEnabled(true);
                     menuItemNewGame.setEnabled(true);
@@ -501,12 +499,12 @@ public class MainFrame extends JFrame {
                 setBoardCursor(Cursor.getDefaultCursor());
                 boardPanel.newGame(player, eventCommunicator);
 
-                if (player == 1) {
-                    piecesOnDisplayPanelPlayer1.setVisible(true);
-                    piecesOnDisplayPanelPlayer1.showButtons();
+                if (player.isPlayerRed()) {
+                    piecesOnDisplayPanelPlayerRed.setVisible(true);
+                    piecesOnDisplayPanelPlayerRed.showButtons();
                 } else {
-                    piecesOnDisplayPanelPlayer2.setVisible(true);
-                    piecesOnDisplayPanelPlayer2.showButtons();
+                    piecesOnDisplayPanelPlayerBlue.setVisible(true);
+                    piecesOnDisplayPanelPlayerBlue.showButtons();
                 }
                 setSize(WIDTH_BOARD + WIDTH_PIECESONDISPLAY, 704);
                 validate();
@@ -536,14 +534,14 @@ public class MainFrame extends JFrame {
                 lblStatus.setText("Connected");
                 setBoardCursor(Cursor.getDefaultCursor());
 
-                piecesOnDisplayPanelPlayer1.resetLabels();
-                piecesOnDisplayPanelPlayer2.resetLabels();
-                piecesOnDisplayPanelPlayer1.setVisible(true);
-                piecesOnDisplayPanelPlayer2.setVisible(true);
+                piecesOnDisplayPanelPlayerRed.resetLabels();
+                piecesOnDisplayPanelPlayerBlue.resetLabels();
+                piecesOnDisplayPanelPlayerRed.setVisible(true);
+                piecesOnDisplayPanelPlayerBlue.setVisible(true);
                 setSize(WIDTH_BOARD + WIDTH_PIECESONDISPLAY * 2, 704);
                 validate();
 
-                if (player == 1)
+                if (player.isPlayerRed())
                     gameStateObject.setState(GameStates.STATE_IN_GAME_PLAYER_TURN);
                 else
                     gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);

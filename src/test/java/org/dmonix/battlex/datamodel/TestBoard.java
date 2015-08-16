@@ -15,6 +15,9 @@
  */
 package org.dmonix.battlex.datamodel;
 
+import static org.dmonix.battlex.datamodel.Player.PlayerBlue;
+import static org.dmonix.battlex.datamodel.Player.PlayerRed;
+
 import java.util.List;
 
 import org.dmonix.battlex.BaseAssert;
@@ -65,33 +68,33 @@ public class TestBoard extends BaseAssert {
     private int pieceCountP2 = 0;
 
     public TestBoard() {
-        addPiece(1, PieceData.PIECE_FLAG_TYPE, 0, 0);
-        addPiece(1, PieceData.PIECE_BOMB_TYPE, 1, 0);
-        addPiece(1, PieceData.PIECE_SCOUT_TYPE, 2, 0);
-        addPiece(1, PieceData.PIECE_CAPTAIN_TYPE, 1, 8);
-        addPiece(1, PieceData.PIECE_BOMB_TYPE, 0, 1);
-        addPiece(1, PieceData.PIECE_BOMB_TYPE, 1, 1);
-        addPiece(1, PieceData.PIECE_SCOUT_TYPE, 4, 2);
-        addPiece(1, PieceData.PIECE_COLONEL_TYPE, 5, 4);
-        addPiece(1, PieceData.PIECE_MINER_TYPE, 3, 6);
-        addPiece(1, PieceData.PIECE_MARSHAL_TYPE, 2, 7);
-        addPiece(1, PieceData.PIECE_MINER_TYPE, 9, 7);
+        addPiece(PlayerRed, PieceData.PIECE_FLAG_TYPE, 0, 0);
+        addPiece(PlayerRed, PieceData.PIECE_BOMB_TYPE, 1, 0);
+        addPiece(PlayerRed, PieceData.PIECE_SCOUT_TYPE, 2, 0);
+        addPiece(PlayerRed, PieceData.PIECE_CAPTAIN_TYPE, 1, 8);
+        addPiece(PlayerRed, PieceData.PIECE_BOMB_TYPE, 0, 1);
+        addPiece(PlayerRed, PieceData.PIECE_BOMB_TYPE, 1, 1);
+        addPiece(PlayerRed, PieceData.PIECE_SCOUT_TYPE, 4, 2);
+        addPiece(PlayerRed, PieceData.PIECE_COLONEL_TYPE, 5, 4);
+        addPiece(PlayerRed, PieceData.PIECE_MINER_TYPE, 3, 6);
+        addPiece(PlayerRed, PieceData.PIECE_MARSHAL_TYPE, 2, 7);
+        addPiece(PlayerRed, PieceData.PIECE_MINER_TYPE, 9, 7);
 
-        addPiece(2, PieceData.PIECE_SPY_TYPE, 2, 8);
-        addPiece(2, PieceData.PIECE_FLAG_TYPE, 9, 9);
-        addPiece(2, PieceData.PIECE_BOMB_TYPE, 8, 9);
-        addPiece(2, PieceData.PIECE_MINER_TYPE, 8, 7);
-        addPiece(2, PieceData.PIECE_BOMB_TYPE, 9, 8);
-        addPiece(2, PieceData.PIECE_BOMB_TYPE, 8, 8);
-        addPiece(2, PieceData.PIECE_BOMB_TYPE, 3, 7);
-        addPiece(2, PieceData.PIECE_GENERAL_TYPE, 4, 7);
-        addPiece(2, PieceData.PIECE_SCOUT_TYPE, 5, 5);
-        addPiece(2, PieceData.PIECE_CAPTAIN_TYPE, 5, 6);
+        addPiece(PlayerBlue, PieceData.PIECE_SPY_TYPE, 2, 8);
+        addPiece(PlayerBlue, PieceData.PIECE_FLAG_TYPE, 9, 9);
+        addPiece(PlayerBlue, PieceData.PIECE_BOMB_TYPE, 8, 9);
+        addPiece(PlayerBlue, PieceData.PIECE_MINER_TYPE, 8, 7);
+        addPiece(PlayerBlue, PieceData.PIECE_BOMB_TYPE, 9, 8);
+        addPiece(PlayerBlue, PieceData.PIECE_BOMB_TYPE, 8, 8);
+        addPiece(PlayerBlue, PieceData.PIECE_BOMB_TYPE, 3, 7);
+        addPiece(PlayerBlue, PieceData.PIECE_GENERAL_TYPE, 4, 7);
+        addPiece(PlayerBlue, PieceData.PIECE_SCOUT_TYPE, 5, 5);
+        addPiece(PlayerBlue, PieceData.PIECE_CAPTAIN_TYPE, 5, 6);
     }
 
-    private void addPiece(int player, String type, int x, int y) {
+    private void addPiece(Player player, String type, int x, int y) {
         board.addPiece(new Piece(player, type, Square.apply(x, y)));
-        if (player == 1) {
+        if (player.isPlayerRed()) {
             pieceCountP1++;
         } else {
             pieceCountP2++;
@@ -113,34 +116,34 @@ public class TestBoard extends BaseAssert {
 
     @Test
     public void getPiecesForPlayer_P1() {
-        List<Piece> pieces = board.getPiecesForPlayer(1);
+        List<Piece> pieces = board.getPiecesForPlayer(PlayerRed);
         assertNotNull(pieces);
         assertEquals(pieceCountP1, pieces.size());
     }
 
     @Test
     public void getPiecesForPlayer_P2() {
-        List<Piece> pieces = board.getPiecesForPlayer(2);
+        List<Piece> pieces = board.getPiecesForPlayer(PlayerBlue);
         assertNotNull(pieces);
         assertEquals(pieceCountP2, pieces.size());
     }
 
     @Test
     public void clearAllPlayerPieces_p1() {
-        board.clearAllPlayerPieces(1);
-        assertEquals(0, board.getPiecesForPlayer(1).size());
+        board.clearAllPlayerPieces(PlayerRed);
+        assertEquals(0, board.getPiecesForPlayer(PlayerRed).size());
     }
 
     @Test
     public void clearAllPlayerPieces_p2() {
-        board.clearAllPlayerPieces(2);
-        assertEquals(0, board.getPiecesForPlayer(2).size());
+        board.clearAllPlayerPieces(PlayerBlue);
+        assertEquals(0, board.getPiecesForPlayer(PlayerBlue).size());
     }
 
     @Test
     public void clearAllPlayerPieces_all() {
-        board.clearAllPlayerPieces(1);
-        board.clearAllPlayerPieces(2);
+        board.clearAllPlayerPieces(PlayerRed);
+        board.clearAllPlayerPieces(PlayerBlue);
         assertEquals(0, board.getPieces().size());
     }
 
@@ -149,7 +152,7 @@ public class TestBoard extends BaseAssert {
         Piece piece = board.getPiece(Square.apply(0, 0));
         assertNotNull(piece);
         assertEquals(PieceData.PIECE_FLAG_TYPE, piece.getType());
-        assertEquals(1, piece.getPlayer());
+        assertEquals(PlayerRed, piece.getPlayer());
         assertEquals(Square.apply(0, 0), piece.getSquare());
     }
 
@@ -158,7 +161,7 @@ public class TestBoard extends BaseAssert {
         Piece piece = board.getPiece(Square.apply(9, 9));
         assertNotNull(piece);
         assertEquals(PieceData.PIECE_FLAG_TYPE, piece.getType());
-        assertEquals(2, piece.getPlayer());
+        assertEquals(PlayerBlue, piece.getPlayer());
         assertEquals(Square.apply(9, 9), piece.getSquare());
     }
 
@@ -404,7 +407,7 @@ public class TestBoard extends BaseAssert {
      * @param expectedType
      * @param expectedPlayer
      */
-    public void assertPieceAtPosition(Square position, String expectedType, int expectedPlayer) {
+    public void assertPieceAtPosition(Square position, String expectedType, Player expectedPlayer) {
         assertFalse("Unexpected empty square @ [" + position + "]", board.isEmpty(position));
         Piece piece = board.getPiece(position);
         assertNotNull("Expected valid piece @ [" + position + "]", piece);

@@ -15,9 +15,10 @@
  */
 package org.dmonix.battlex.resources;
 
+import static javascalautils.TryCompanion.Try;
+
 import java.awt.Image;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,6 +26,7 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 
 import org.dmonix.battlex.datamodel.PieceData;
+import org.dmonix.battlex.datamodel.Player;
 
 /**
  * @author Peter Nerg
@@ -34,8 +36,8 @@ public final class Resources {
     private static final Map<String, Image> player1Images = new HashMap<>();
     private static final Map<String, Image> player2Images = new HashMap<>();
     static {
-        preLoadPlayerImages(1, player1Images);
-        preLoadPlayerImages(2, player2Images);
+        preLoadPlayerImages(Player.PlayerRed, player1Images);
+        preLoadPlayerImages(Player.PlayerBlue, player2Images);
     }
 
     /**
@@ -44,27 +46,23 @@ public final class Resources {
     private Resources() {
     };
 
-    public static ImageIcon getIcon(int player, String type, int scale) {
+    public static ImageIcon getIcon(Player player, String type, int scale) {
         return new ImageIcon(loadImage(player, type, scale));
     }
 
-    public static BufferedImage getBackgroundImage(int player) {
-        try {
-            return ImageIO.read(Resources.class.getResource("/images/player" + player + "/map_large.jpg"));
-        } catch (IOException ex) {
-            return null;
-        }
+    public static BufferedImage getBackgroundImage(Player player) {
+        return Try(() -> ImageIO.read(Resources.class.getResource("/images/player" + player.asInt() + "/map_large.jpg"))).orNull();
     }
 
-    public static Image getImage(int player, String type) {
-        if (player == 1) {
+    public static Image getImage(Player player, String type) {
+        if (player.isPlayerRed()) {
             return player1Images.get(type);
         } else {
             return player2Images.get(type);
         }
     }
 
-    private static void preLoadPlayerImages(int player, Map<String, Image> images) {
+    private static void preLoadPlayerImages(Player player, Map<String, Image> images) {
         int defaultHeight = 40;
         images.put(PieceData.PIECE_EMPTY_TYPE, loadImage(player, PieceData.PIECE_EMPTY_TYPE, defaultHeight));
         images.put(PieceData.PIECE_BOMB_TYPE, loadImage(player, PieceData.PIECE_BOMB_TYPE, defaultHeight));
@@ -81,8 +79,8 @@ public final class Resources {
         images.put(PieceData.PIECE_FLAG_TYPE, loadImage(player, PieceData.PIECE_FLAG_TYPE, defaultHeight));
     }
 
-    private static Image loadImage(int player, String type, int scale) {
-        Image image = new ImageIcon(Resources.class.getResource("/images/player" + player + "/piece-" + type + ".gif")).getImage();
+    private static Image loadImage(Player player, String type, int scale) {
+        Image image = new ImageIcon(Resources.class.getResource("/images/player" + player.asInt() + "/piece-" + type + ".gif")).getImage();
         return image.getScaledInstance(-1, scale, Image.SCALE_SMOOTH);
     }
 }

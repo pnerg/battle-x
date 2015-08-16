@@ -15,6 +15,7 @@
  */
 package org.dmonix.battlex.datamodel;
 
+
 /**
  * @author Peter Nerg
  * 
@@ -42,7 +43,7 @@ class AbsoluteSquare extends AbstractSquare {
      * @see org.dmonix.battlex.datamodel.Square#getRelative(int)
      */
     @Override
-    public Square relative(int player) {
-        return player == 1 ? new PlayerRedRelativeSquare(x(), 9 - y()) : new PlayerBlueRelativeSquare(9 - x(), y());
+    public Square relative(Player player) {
+        return player.isPlayerRed() ? new PlayerRedRelativeSquare(x(), 9 - y()) : new PlayerBlueRelativeSquare(9 - x(), y());
     }
 }

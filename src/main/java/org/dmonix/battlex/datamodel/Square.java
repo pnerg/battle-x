@@ -60,13 +60,13 @@ public interface Square extends Serializable {
      * @param y
      * @return
      */
-    static Square apply(int player, int x, int y) {
-        return player == 1 ? new PlayerRedRelativeSquare(x, y) : new PlayerBlueRelativeSquare(x, y);
+    static Square apply(Player player, int x, int y) {
+        return player.isPlayerRed() ? new PlayerRedRelativeSquare(x, y) : new PlayerBlueRelativeSquare(x, y);
     }
 
     Square absolute();
 
-    Square relative(int player);
+    Square relative(Player player);
 
     /**
      * Get the X coordinate.

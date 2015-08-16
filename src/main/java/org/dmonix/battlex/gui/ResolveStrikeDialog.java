@@ -27,6 +27,7 @@ import javax.swing.JFrame;
 import javax.swing.JLabel;
 
 import org.dmonix.battlex.Battlex;
+import org.dmonix.battlex.datamodel.Player;
 import org.dmonix.battlex.resources.Resources;
 
 /**
@@ -52,7 +53,7 @@ public class ResolveStrikeDialog extends JDialog {
         setVisible(false);
     }
 
-    public static void showStrikeResult(JFrame owner, String text, int attacker, String attackerType, int defender, String defenderType) {
+    public static void showStrikeResult(JFrame owner, String text, Player attacker, String attackerType, Player defender, String defenderType) {
         if (dialog == null)
             dialog = new ResolveStrikeDialog();
 

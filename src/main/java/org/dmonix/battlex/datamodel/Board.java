@@ -83,7 +83,7 @@ public final class Board {
         positions[7][5] = new InvalidPosition(Square.apply(7, 5));
     }
 
-    void clearAllPlayerPieces(int player) {
+    void clearAllPlayerPieces(Player player) {
         getPiecesForPlayer(player).forEach(p -> emptySquare(p.getSquare()));
     }
 
@@ -135,10 +135,10 @@ public final class Board {
      * @param square
      * @return
      */
-    public boolean isPlayerPiece(int player, Square square) {
+    public boolean isPlayerPiece(Player player, Square square) {
         Square abs = square.absolute();
         Position position = positions[abs.x()][abs.y()];
-        return position.containsPiece() ? position.getPiece().getPlayer() == player : false;
+        return position.containsPiece() ? position.getPiece().getPlayer().equals(player) : false;
     }
 
     public List<Square> getAllowedMoves2(Piece piece) {
@@ -589,8 +589,8 @@ public final class Board {
         return pieceList;
     }
 
-    public List<Piece> getPiecesForPlayer(int player) {
-        return getPieces().stream().filter(p -> p.getPlayer() == player).collect(Collectors.toList());
+    public List<Piece> getPiecesForPlayer(Player player) {
+        return getPieces().stream().filter(p -> p.getPlayer().equals(player)).collect(Collectors.toList());
     }
 
     /**
@@ -600,7 +600,7 @@ public final class Board {
      *            the player to check
      * @return
      */
-    public boolean checkIfPlayerCanMove(int checkPlayer) {
+    public boolean checkIfPlayerCanMove(Player checkPlayer) {
         return getPiecesForPlayer(checkPlayer).stream().anyMatch(p -> canPieceMove(p));
     }
 
@@ -866,7 +866,7 @@ public final class Board {
 
         @Override
         public String toString() {
-            return piece.getType().substring(0, 2) + piece.getPlayer();
+            return piece.getType().substring(0, 2) + (piece.getPlayer().isPlayerRed() ? 1 : 2);
         }
     }
 

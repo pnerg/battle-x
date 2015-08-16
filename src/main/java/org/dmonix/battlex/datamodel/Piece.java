@@ -20,13 +20,13 @@ package org.dmonix.battlex.datamodel;
  * @version 1.0
  */
 public final class Piece {
-    private final int player;
+    private final Player player;
     private final String type;
 
     /** The location of the piece on the board */
     private Square square;
 
-    public Piece(int player, String type, Square square) {
+    public Piece(Player player, String type, Square square) {
         this.player = player;
         this.type = type;
         this.square = square.absolute();
@@ -66,7 +66,7 @@ public final class Piece {
      * 
      * @return
      */
-    public int getPlayer() {
+    public Player getPlayer() {
         return player;
     }
 
