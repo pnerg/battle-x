@@ -107,7 +107,7 @@ public class PiecesOnDisplayPanel extends JPanel {
 
             jbInit();
 
-            titledBorder.setTitle("Player " + player);
+            titledBorder.setTitle("Player " + player.asInt());
             pieceImageLabels.put(PieceData.PIECE_BOMB_TYPE, lblType0Icon);
             pieceImageLabels.put(PieceData.PIECE_MARSHAL_TYPE, lblType1Icon);
             pieceImageLabels.put(PieceData.PIECE_GENERAL_TYPE, lblType2Icon);
