@@ -43,6 +43,6 @@ class AbsoluteSquare extends AbstractSquare {
      */
     @Override
     public Square relative(int player) {
-        return player == 1 ? new PlayerOneRelativeSquare(x(), 9 - y()) : new PlayerTwoRelativeSquare(9 - x(), y());
+        return player == 1 ? new PlayerRedRelativeSquare(x(), 9 - y()) : new PlayerBlueRelativeSquare(9 - x(), y());
     }
 }

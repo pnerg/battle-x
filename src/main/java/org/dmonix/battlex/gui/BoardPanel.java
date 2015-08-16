@@ -125,12 +125,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
          */
         else if (gameStateObject.inState(GameStates.STATE_GAME_SETUP) || gameStateObject.inState(GameStates.STATE_SETUP_WAIT_OPPONENT_SETUP)) {
             if (geo.getType() != PieceData.PIECE_NO_PIECE) {
-                int otherPlayer;
-                if (player == 1) {
-                    otherPlayer = 2;
-                } else {
-                    otherPlayer = 1;
-                }
+                int otherPlayer = player == 1 ? 2 : 1;
                 board.addPiece(new Piece(otherPlayer, geo.getType(), geo.getNewCoord()));
             } else {
                 board.emptySquare(geo.getNewCoord());

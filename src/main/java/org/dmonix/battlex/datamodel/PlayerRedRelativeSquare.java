@@ -19,10 +19,10 @@ package org.dmonix.battlex.datamodel;
  * @author Peter Nerg
  * 
  */
-class PlayerTwoRelativeSquare extends AbstractSquare {
-    private static final long serialVersionUID = 332513439159455944L;
+class PlayerRedRelativeSquare extends AbstractSquare {
+    private static final long serialVersionUID = -762946745863895275L;
 
-    PlayerTwoRelativeSquare(int x, int y) {
+    PlayerRedRelativeSquare(int x, int y) {
         super(x, y);
     }
 
@@ -33,7 +33,7 @@ class PlayerTwoRelativeSquare extends AbstractSquare {
      */
     @Override
     public Square absolute() {
-        return new AbsoluteSquare(9 - x(), y());
+        return new AbsoluteSquare(x(), 9 - y());
     }
 
     /*
@@ -43,7 +43,7 @@ class PlayerTwoRelativeSquare extends AbstractSquare {
      */
     @Override
     public Square relative(int player) {
-        return player == 2 ? this : absolute().relative(1);
+        return player == 1 ? this : absolute().relative(2);
     }
 
 }

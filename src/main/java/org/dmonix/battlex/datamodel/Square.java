@@ -61,7 +61,7 @@ public interface Square extends Serializable {
      * @return
      */
     static Square apply(int player, int x, int y) {
-        return player == 1 ? new PlayerOneRelativeSquare(x, y) : new PlayerTwoRelativeSquare(x, y);
+        return player == 1 ? new PlayerRedRelativeSquare(x, y) : new PlayerBlueRelativeSquare(x, y);
     }
 
     Square absolute();
