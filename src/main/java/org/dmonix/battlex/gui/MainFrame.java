@@ -39,6 +39,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import org.dmonix.battlex.Battlex;
+import org.dmonix.battlex.datamodel.Board;
 import org.dmonix.battlex.datamodel.Player;
 import org.dmonix.battlex.event.ControlEventListener;
 import org.dmonix.battlex.event.ControlEventObject;
@@ -162,6 +163,14 @@ public class MainFrame extends JFrame {
 
     public void sendEvent(ControlEventObject ceo) {
         this.eventCommunicator.sendEvent(ceo);
+    }
+
+    public Board getBoard() {
+        return boardPanel.getBoard();
+    }
+
+    public EventCommunicator getEventCommunicator() {
+        return eventCommunicator;
     }
 
     public void addPiece(Player player, String type) {

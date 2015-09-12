@@ -295,7 +295,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
         Image scaledImage;
 
         for (Piece piece : board.getPieces()) {
-            Square relativePieceSquare = piece.getSquare().relative(player);
+            Square relativePieceSquare = piece.location().relative(player);
             int x = relativePieceSquare.x();
             int y = relativePieceSquare.y();
             if (piece.getPlayer() == player)
@@ -371,7 +371,7 @@ public class BoardPanel extends JPanel implements GameEventListener {
             return;
         }
 
-        eventCommunicator.sendEvent(new GameEventObject(currentPiece.getSquare(), clickedSquare));
+        eventCommunicator.sendEvent(new GameEventObject(currentPiece.location(), clickedSquare));
 
         movePiece(currentPiece, clickedSquare);
         gameStateObject.setState(GameStates.STATE_IN_GAME_OPPONENT_TURN);
@@ -584,6 +584,13 @@ public class BoardPanel extends JPanel implements GameEventListener {
             else if (gameStateObject.inState(GameStates.STATE_IN_GAME_PLAYER_TURN))
                 inGameClick(e);
         }
+    }
+
+    /**
+     * @return
+     */
+    public Board getBoard() {
+        return board;
     }
 
 }

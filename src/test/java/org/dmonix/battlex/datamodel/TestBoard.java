@@ -153,7 +153,7 @@ public class TestBoard extends BaseAssert {
         assertNotNull(piece);
         assertEquals(PieceData.PIECE_FLAG_TYPE, piece.getType());
         assertEquals(PlayerRed, piece.getPlayer());
-        assertEquals(Square.apply(0, 0), piece.getSquare());
+        assertEquals(Square.apply(0, 0), piece.location());
     }
 
     @Test
@@ -162,7 +162,7 @@ public class TestBoard extends BaseAssert {
         assertNotNull(piece);
         assertEquals(PieceData.PIECE_FLAG_TYPE, piece.getType());
         assertEquals(PlayerBlue, piece.getPlayer());
-        assertEquals(Square.apply(9, 9), piece.getSquare());
+        assertEquals(Square.apply(9, 9), piece.location());
     }
 
     @Test(expected = UnsupportedOperationException.class)

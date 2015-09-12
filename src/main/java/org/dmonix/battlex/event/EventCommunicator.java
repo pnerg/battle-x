@@ -148,9 +148,7 @@ public class EventCommunicator implements Runnable {
      *            the event
      */
     public void fireEvent(ControlEventObject event) {
-        for (ControlEventListener listener : ctrlEventListeners) {
-            listener.controlEvent(event);
-        }
+        ctrlEventListeners.stream().forEach(l -> l.controlEvent(event));
     }
 
     /**
@@ -160,9 +158,7 @@ public class EventCommunicator implements Runnable {
      *            the event
      */
     public void fireEvent(GameEventObject event) {
-        for (GameEventListener listener : gameEventListeners) {
-            listener.gameEvent(event);
-        }
+        gameEventListeners.stream().forEach(l -> l.gameEvent(event));
     }
 
     /**
@@ -207,20 +203,4 @@ public class EventCommunicator implements Runnable {
             logger.warn("Failed to send event object", ex);
         }
     }
-    /**
-     * General send method.
-     * 
-     * @param obj
-     * @param url
-     * @param port
-     * @throws IOException
-     */
-    // private void send(Object obj, String url, int port) throws IOException
-    // {
-    // ObjectOutputStream ostream = new
-    // ObjectOutputStream(socket.getOutputStream());
-    // ostream.writeObject(obj);
-    // ostream.flush();
-    // ostream.close();
-    // }
 }

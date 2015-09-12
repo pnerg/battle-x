@@ -84,7 +84,7 @@ public final class Board {
     }
 
     void clearAllPlayerPieces(Player player) {
-        getPiecesForPlayer(player).forEach(p -> emptySquare(p.getSquare()));
+        getPiecesForPlayer(player).forEach(p -> emptySquare(p.location()));
     }
 
     /**
@@ -110,17 +110,17 @@ public final class Board {
     }
 
     public void addPiece(Piece piece) {
-        if (!isEmpty(piece.getSquare())) {
-            throw new IllegalArgumentException("Cannot add piece [" + piece + "] to non-empty square [" + piece.getSquare() + "]");
+        if (!isEmpty(piece.location())) {
+            throw new IllegalArgumentException("Cannot add piece [" + piece + "] to non-empty square [" + piece.location() + "]");
         }
 
         logger.debug("Adding piece to board [{}]", piece);
-        Square absolute = piece.getSquare();
+        Square absolute = piece.location();
         positions[absolute.x()][absolute.y()] = new PiecePosition(piece);
     }
 
     public void removePiece(Piece piece) {
-        emptySquare(piece.getSquare());
+        emptySquare(piece.location());
     }
 
     public boolean isEmpty(Square square) {
@@ -143,7 +143,7 @@ public final class Board {
 
     public List<Square> getAllowedMoves2(Piece piece) {
         // bombs and flags can't move at all.
-        final Square sq = piece.getSquare().absolute();
+        final Square sq = piece.location().absolute();
 
         // logger.debug("Possible positions for [{}] left:[{}], right:[{}], up:[{}], down:[{}]", piece, positionsLeft.size(), positionsRight.size(),
         // positionsUp.size(), positionsDown.size());
@@ -209,8 +209,8 @@ public final class Board {
      */
     private List<Position> getAllPositionsLeft(Piece piece) {
         List<Position> possiblePositions = new ArrayList<>();
-        int xPos = piece.getSquare().absolute().x();
-        int yPos = piece.getSquare().absolute().y();
+        int xPos = piece.location().absolute().x();
+        int yPos = piece.location().absolute().y();
         for (int x = xPos - 1; x >= 0; x--) {
             possiblePositions.add(positions[x][yPos]);
         }
@@ -226,8 +226,8 @@ public final class Board {
      */
     private List<Position> getAllPositionsRight(Piece piece) {
         List<Position> possiblePositions = new ArrayList<>();
-        int xPos = piece.getSquare().absolute().x();
-        int yPos = piece.getSquare().absolute().y();
+        int xPos = piece.location().absolute().x();
+        int yPos = piece.location().absolute().y();
         for (int x = xPos + 1; x < 10; x++) {
             possiblePositions.add(positions[x][yPos]);
         }
@@ -243,8 +243,8 @@ public final class Board {
      */
     private List<Position> getAllPositionsAbove(Piece piece) {
         List<Position> possiblePositions = new ArrayList<>();
-        int xPos = piece.getSquare().absolute().x();
-        int yPos = piece.getSquare().absolute().y();
+        int xPos = piece.location().absolute().x();
+        int yPos = piece.location().absolute().y();
         for (int y = yPos + 1; y < 10; y++) {
             possiblePositions.add(positions[xPos][y]);
         }
@@ -260,8 +260,8 @@ public final class Board {
      */
     private List<Position> getAllPositionsBelow(Piece piece) {
         List<Position> possiblePositions = new ArrayList<>();
-        int xPos = piece.getSquare().absolute().x();
-        int yPos = piece.getSquare().absolute().y();
+        int xPos = piece.location().absolute().x();
+        int yPos = piece.location().absolute().y();
         for (int y = yPos - 1; y >= 0; y--) {
             possiblePositions.add(positions[xPos][y]);
         }
@@ -321,7 +321,7 @@ public final class Board {
          */
         private boolean withinDistance(Position pos) {
             Square sq1 = pos.getSquare();
-            Square sq2 = piece.getSquare();
+            Square sq2 = piece.location();
             int distance;
             // same x-axis
             if (sq1.x() == sq2.x()) {
@@ -346,7 +346,7 @@ public final class Board {
          * @return
          */
         private boolean notSameSquare(Position pos) {
-            return !pos.getSquare().absolute().equals(piece.getSquare().absolute());
+            return !pos.getSquare().absolute().equals(piece.location().absolute());
         }
 
         /**
@@ -403,7 +403,7 @@ public final class Board {
 
         private boolean isInLineOfSight(Position pos) {
             Square sq1 = pos.getSquare();
-            Square sq2 = piece.getSquare();
+            Square sq2 = piece.location();
             if (sq1.x() == sq2.x()) {
 
             } else if (sq1.y() == sq2.y()) {
@@ -420,7 +420,7 @@ public final class Board {
          */
         private boolean isWithinDistance(Position pos) {
             Square sq1 = pos.getSquare();
-            Square sq2 = piece.getSquare();
+            Square sq2 = piece.location();
             int distance = Integer.MAX_VALUE;
             // same x-axis
             if (sq1.x() == sq2.x()) {
@@ -441,7 +441,7 @@ public final class Board {
          * @return
          */
         private boolean notSameSquare(Position pos) {
-            return !pos.getSquare().absolute().equals(piece.getSquare().absolute());
+            return !pos.getSquare().absolute().equals(piece.location().absolute());
         }
 
         /**
@@ -517,7 +517,7 @@ public final class Board {
      */
     public int movePiece(final Piece attacker, Square target) {
         final Square squareDefender = target.absolute();
-        final Square squareAttacker = attacker.getSquare();
+        final Square squareAttacker = attacker.location();
 
         logger.debug("Resolve movement [{}] to x[{}]", attacker, target);
 
@@ -861,7 +861,7 @@ public final class Board {
 
         @Override
         public Square getSquare() {
-            return piece.getSquare().absolute();
+            return piece.location().absolute();
         }
 
         @Override

@@ -46,7 +46,7 @@ public final class Piece {
      * 
      * @return
      */
-    public Square getSquare() {
+    public Square location() {
         return square.absolute();
     }
 
@@ -76,7 +76,7 @@ public final class Piece {
 
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        Square pos = getSquare();
+        Square pos = location();
         sb.append("Player = " + player);
         sb.append(":Position = [" + pos.x() + "][" + pos.y() + "]");
         sb.append(":Type = " + type);
